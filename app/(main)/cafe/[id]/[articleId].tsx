@@ -260,7 +260,9 @@ export default function ArticleScreen() {
       {/* if options est vide don't show section */}
       {options.length > 0 && (showOptions())}
 
+     
       <View style={{ borderBottomWidth: 3, borderColor: COLORS.lightGray, paddingHorizontal: 16 }}>
+         {/* a remove pour la 1.0
         <View style={{ marginBlock: 20, gap: 8 }}>
           <Text style={[TYPOGRAPHY.heading.small.bold]}>Instructions</Text>
           <Text
@@ -282,6 +284,7 @@ export default function ArticleScreen() {
           numberOfLines={20}
           onChangeText={() => {}}
         ></TextInput>
+        */}
         <View style={{ marginBottom: 44, marginTop: 32, flexDirection: "row", alignItems: "center", gap: 32}}>
           <Counter
           count={quantity}

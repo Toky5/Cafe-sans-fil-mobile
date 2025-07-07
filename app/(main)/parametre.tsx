@@ -196,12 +196,6 @@ export default function ParametreScreen() {
       onPress:() => setOrdersModalVisible(true),
     },
     {
-      icon: <Bell size={26} strokeWidth={2.5} color={COLORS.black} />,
-      title: "Mes notifications",
-      subtitle: "Configurez vos préférences de notification.",
-      onPress: () => console.log("Notifications pressed"),
-    },
-    {
       icon: <Settings2 size={26} strokeWidth={2.5} color={COLORS.black} />,
       title: "Mes préférences",
       subtitle: "Gérez et personnalisez vos préférences.",
@@ -391,10 +385,16 @@ export default function ParametreScreen() {
           </Text>
           <View style={styles.socialIcons}>
             <TouchableOpacity style={styles.socialButton}>
-              <FontAwesome6 name="discord" size={24} color="white" />
+              <FontAwesome6 name="discord" size={24} color="black" onPress={() => 
+              navigation.push("https://discord.gg/DvJWz9hwWF")}/>
             </TouchableOpacity>
             <TouchableOpacity style={styles.socialButton}>
-              <AntDesign name="instagram" size={24} color="white" />
+              <AntDesign name="github" size={24} color="black" onPress={() => 
+              navigation.push("https://github.com/CADUM-UdeM")}/>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.socialButton} onPress={() => 
+              navigation.push("https://cadum.aediroum.ca")}>
+              <FontAwesome name="globe" size={24} color="black" />
             </TouchableOpacity>
           </View>
         </View>
