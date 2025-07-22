@@ -16,7 +16,7 @@ import COLORS from "@/constants/Colors";
 import SPACING from "@/constants/Spacing";
 import { useModal } from "../layouts/GlobalModal";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import MapModalLayout from "../layouts/MapModalLayout";
 
 type SelectLocalisationProps = {
@@ -37,28 +37,67 @@ export default function SelectLocalisation({
   const [locationLoaded, setLocationLoaded] = useState("");
   const [selectedCoords, setSelectedCoords] = useState<{latitude: number; longitude: number}>();
   const [newLocation, setNewLocation] = useState(""); // Add this line to store selected location name
+  
+  // Use refs to store immediate values
+  const currentSelectionRef = useRef<{location: string, coords: {latitude: number, longitude: number}} | null>(null);
 
-  useEffect(() => {}, [localisation]);
+  // Reset internal state when currentLocalisation changes from parent
+  useEffect(() => {
+    if (currentLocalisation && !isCurrentLocalisationModified) {
+      setLocationLoaded(currentLocalisation);
+      setisCurrentLocalisationModified(true);
+    }
+  }, [currentLocalisation, isCurrentLocalisationModified]);
 
   const modalContext = useModal();
   const openModal = modalContext ? modalContext.openModal : () => {};
   const closeModal = modalContext ? modalContext.closeModal : () => {};
 
   function handleMarkerPress(pressedLocation: string, lat: number, lng: number) {
+    console.log("handleMarkerPress called with:", pressedLocation, lat, lng);
+    const coords = {latitude: lat, longitude: lng};
+    
+    // Store immediately in ref
+    currentSelectionRef.current = {
+      location: pressedLocation,
+      coords: coords
+    };
+    
+    // Also update state
     setLocalisation(pressedLocation);
-    setNewLocation(pressedLocation); // Set newLocation when marker is pressed
-    setSelectedCoords({latitude: lat, longitude: lng});
+    setNewLocation(pressedLocation);
+    setSelectedCoords(coords);
+    
+    console.log("Stored in ref:", currentSelectionRef.current);
   }
 
   function handleApplyFilter() {
-    setLocationLoaded(newLocation);
-    setLocalisation("");
-    setisCurrentLocalisationModified(true);
+    console.log("handleApplyFilter called");
+    console.log("State values:", { newLocation, selectedCoords });
+    console.log("Ref values:", currentSelectionRef.current);
     
-    // Call the parent callback with the new location info
-    if(onLocationChange && selectedCoords) {
-      console.log("Updating location to:", newLocation, selectedCoords);
-      onLocationChange(newLocation, selectedCoords);
+    // Use ref values if available, otherwise fall back to state
+    const locationToUse = currentSelectionRef.current?.location || newLocation;
+    const coordsToUse = currentSelectionRef.current?.coords || selectedCoords;
+    
+    console.log("Using values:", { locationToUse, coordsToUse });
+    
+    // Only proceed if we have both location and coordinates
+    if (locationToUse && coordsToUse) {
+      setLocationLoaded(locationToUse);
+      setLocalisation("");
+      setisCurrentLocalisationModified(true);
+      
+      // Call the parent callback with the new location info
+      if(onLocationChange) {
+        console.log("Calling onLocationChange with:", locationToUse, coordsToUse);
+        onLocationChange(locationToUse, coordsToUse);
+      }
+      
+      // Clear the ref after use
+      currentSelectionRef.current = null;
+    } else {
+      console.log("Missing location or coordinates");
     }
     
     closeModal();
@@ -66,6 +105,7 @@ export default function SelectLocalisation({
 
   function handleResetFilter() {
     setisCurrentLocalisationModified(false);
+    setLocationLoaded("");
     closeModal();
   }
 
@@ -100,7 +140,7 @@ export default function SelectLocalisation({
         style={[TYPOGRAPHY.body.normal.semiBold, styles.localisationText]}
         testID="localisation-text"
       >
-        {isCurrentLocalisationModified ? locationLoaded : currentLocalisation}
+        {currentLocalisation}
       </Text>
       <ChevronDown
         width={SPACING.lg}

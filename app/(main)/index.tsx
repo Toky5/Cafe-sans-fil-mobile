@@ -90,26 +90,24 @@ export default function HomeScreen() {
 
   // Add this useEffect to ensure locations are re-sorted when selectedLocation changes
   useEffect(() => {
-    if (selectedLocation && originalData) {
+    if (selectedLocation && originalData && location) {
       console.log("Selected location changed, re-sorting cafes");
       const sortedCafes = sortByDistance(
-        { coords: selectedLocation.coords } as Location.LocationObject, 
-        originalData
+        location as Location.LocationObject, 
+        originalData,
+        selectedLocation.coords
       );
       setClosest(sortedCafes);
     }
-  }, [selectedLocation]); // Only depend on selectedLocation
+  }, [selectedLocation, originalData, location]);
 
   /**
-   * This function returns the closest cafe based on the user's current location
-   * or selected location.
+   * This function returns the closest cafe based on the provided coordinates.
    */
-  function sortByDistance(current: Location.LocationObject, cafes: Cafe[]): Cafe[] | undefined {
+  function sortByDistance(current: Location.LocationObject, cafes: Cafe[], customCoords?: { latitude: number, longitude: number }): Cafe[] | undefined {
     if (current && cafes) {
-      // If we have a selected location, use that instead of the device location
-      const useCoords = selectedLocation
-        ? selectedLocation.coords
-        : { latitude: current.coords.latitude, longitude: current.coords.longitude };
+      // Use custom coordinates if provided, otherwise use device location
+      const useCoords = customCoords || { latitude: current.coords.latitude, longitude: current.coords.longitude };
 
       let cafeDistances = cafes.map(cafe => {
         if (cafe.location.geometry) {
@@ -131,13 +129,22 @@ export default function HomeScreen() {
   const handleLocationChange = (pavilionName: string, coords: { latitude: number, longitude: number }) => {
     console.log("Location change handler called with:", pavilionName, coords);
 
-    setSelectedLocation({
+    const newSelectedLocation = {
       name: pavilionName,
       coords: coords
-    });
+    };
 
-    // The re-sorting will happen in the useEffect instead of here
-    // This prevents race conditions with state updates
+    setSelectedLocation(newSelectedLocation);
+
+    // Immediately update closest cafes with the new coordinates
+    if (originalData && location) {
+      const sortedCafes = sortByDistance(
+        location as Location.LocationObject, 
+        originalData,
+        coords
+      );
+      setClosest(sortedCafes);
+    }
   };
 
   
@@ -332,7 +339,7 @@ export default function HomeScreen() {
             {/* User Location and Search */}
             <View style={styles.locationAndSearchContainer}>
               <SelectLocalisation
-                currentLocalisation={selectedLocation ? selectedLocation.name : closest ? closest[0].location.pavillon : ""}
+                currentLocalisation={selectedLocation ? selectedLocation.name : (closest && closest.length > 0) ? closest[0].location.pavillon : ""}
                 location={location as Location.LocationObject}
                 onLocationChange={handleLocationChange}
               />
