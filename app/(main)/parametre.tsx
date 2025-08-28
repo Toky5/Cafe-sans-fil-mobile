@@ -61,7 +61,7 @@ export default function ParametreScreen() {
       image: 'https://placehold.jp/150x150.png',
       title: 'Commande #XXX',
       content: 'Trucs que t\'as acheté',
-      restaurant: 'Jean Brilliant',
+      restaurant: 'Jean Brillant',
       price: '$20.00',
     },
     {
