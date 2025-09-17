@@ -13,7 +13,7 @@
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "This app uses the location to find cafes near you."
       },
-      "bundleIdentifier": "com.jxlxl.cafe-sans-fil"
+      "bundleIdentifier": "com.cadum.cafe-sans-fil"
     },
     "android": {
       "adaptiveIcon": {

@@ -28,7 +28,7 @@
         <key>CFBundleURLSchemes</key>
         <array>
           <string>myapp</string>
-          <string>com.jxlxl.cafe-sans-fil</string>
+          <string>com.cadum.cafe-sans-fil</string>
         </array>
       </dict>
     </array>
