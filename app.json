@@ -12,7 +12,8 @@
       "supportsTablet": true,
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "This app uses the location to find cafes near you."
-      }
+      },
+      "bundleIdentifier": "com.jxlxl.cafe-sans-fil"
     },
     "android": {
       "adaptiveIcon": {
