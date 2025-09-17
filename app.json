@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Café sans-fil",
-    "slug": "Café sans-fil",
+    "slug": "cafe-sans-fil",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "logo.png",
@@ -11,8 +11,8 @@
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
-            "NSLocationWhenInUseUsageDescription": "This app uses the location to find cafes near you."
-        }
+        "NSLocationWhenInUseUsageDescription": "This app uses the location to find cafes near you."
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -35,7 +35,9 @@
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
-      ]
+      ],
+      "expo-font",
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true
