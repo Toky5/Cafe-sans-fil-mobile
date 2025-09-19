@@ -21,6 +21,8 @@ import {
   Settings2,
   HelpCircle,
   Info,
+  Eye,
+  EyeOff,
 } from "lucide-react-native";
 import COLORS from "@/constants/Colors";
 import SPACING from "@/constants/Spacing";
@@ -164,7 +166,7 @@ export default function ParametreScreen() {
       ])
     ).start();
   }, []);
-
+  const [showPassword, setShowPassword] = useState(false);
   const fetchOrders = async () => {
 
     const token = await getToken();
@@ -314,13 +316,35 @@ export default function ParametreScreen() {
                 <Text style={[{alignSelf:'center',padding:20, fontWeight:500}]}>Modifier votre photo de profil</Text>
                 <TextInput style={styles.input } placeholder="Modifier votre Nom" placeholderTextColor="grey" />
                 <TextInput style={styles.input} placeholder="Modifier votre Email" placeholderTextColor="grey" />
-                <TextInput style={styles.input} placeholder="Modifier votre Mot de passe" secureTextEntry placeholderTextColor="grey"/>
-                <TouchableOpacity style={[styles.btn, { backgroundColor: 'red' }]} onPress={() => { deletethisaccount()}}>
-                  <Text style={{ color: 'white', textAlign: 'center', padding: 10, fontSize:20, fontWeight:500 }}>Supprimer votre compte</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={[styles.btn, { backgroundColor: 'White', borderWidth: 1, }]} onPress={async () => { logoutfromthis() }}>
-                <Text style={{ color: 'black', textAlign: 'center', padding: 10, fontSize:20, fontWeight:500 }}>Se Déconnecter</Text>
-                </TouchableOpacity>
+                
+                <View style={styles.passwordContainer}>
+                  <TextInput 
+                    style={styles.passwordInput} 
+                    placeholder="Modifier votre Mot de passe" 
+                    secureTextEntry={!showPassword} 
+                    placeholderTextColor="grey"
+                  />
+                  <TouchableOpacity 
+                    style={styles.passwordToggle}
+                    onPress={() => setShowPassword(!showPassword)}
+                  >
+                    {!showPassword ? (
+                      <EyeOff size={20} color="#666" />
+                    ) : (
+                      <Eye size={20} color="#666" />
+                    )}
+                  </TouchableOpacity>
+                </View>
+                
+                <View style={styles.buttonContainer}>
+                  <TouchableOpacity style={styles.deleteButton} onPress={() => { deletethisaccount()}}>
+                    <Text style={styles.deleteButtonText}>Supprimer votre compte</Text>
+                  </TouchableOpacity>
+                  
+                  <TouchableOpacity style={styles.logoutButton} onPress={async () => { logoutfromthis() }}>
+                    <Text style={styles.logoutButtonText}>Se Déconnecter</Text>
+                  </TouchableOpacity>
+                </View>
               </View>
             </View>
           </View>
@@ -599,12 +623,11 @@ const styles = StyleSheet.create({
     lineHeight: 24,
   },
   input: {
-    height: 40,
-    borderColor: 'gray',
-    borderWidth: 1,
+    height: 45,
+    backgroundColor: '#f0f0f0',
     marginBottom: 12,
     paddingHorizontal: 8,
-    borderRadius: 4,
+    borderRadius: 10,
   },
   profilePicture: {
     width: 100,
@@ -769,5 +792,70 @@ versionText: {
 copyrightText: {
   fontSize: 12,
   color: '#999',
+},
+buttonContainer: {
+  marginTop: 20,
+  gap: 12,
+},
+deleteButton: {
+  backgroundColor: '#FF4444',
+  borderRadius: 12,
+  paddingVertical: 14,
+  paddingHorizontal: 24,
+  shadowColor: '#FF4444',
+  shadowOffset: {
+    width: 0,
+    height: 2,
+  },
+  shadowOpacity: 0.25,
+  shadowRadius: 4,
+  elevation: 4,
+},
+deleteButtonText: {
+  color: 'white',
+  textAlign: 'center',
+  fontSize: 16,
+  fontWeight: '600',
+},
+logoutButton: {
+  backgroundColor: 'white',
+  borderRadius: 12,
+  paddingVertical: 14,
+  paddingHorizontal: 24,
+  borderWidth: 1.5,
+  borderColor: '#E0E0E0',
+  shadowColor: '#000',
+  shadowOffset: {
+    width: 0,
+    height: 1,
+  },
+  shadowOpacity: 0.1,
+  shadowRadius: 2,
+  elevation: 2,
+},
+logoutButtonText: {
+  color: '#333',
+  textAlign: 'center',
+  fontSize: 16,
+  fontWeight: '600',
+},
+passwordContainer: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  backgroundColor: '#f0f0f0',
+  borderRadius: 10,
+  marginBottom: 12,
+  paddingHorizontal: 8,
+  height: 45,
+},
+passwordInput: {
+  flex: 1,
+  height: '100%',
+  color: '#000',
+},
+passwordToggle: {
+  padding: 4,
+  justifyContent: 'center',
+  alignItems: 'center',
 },
 });
