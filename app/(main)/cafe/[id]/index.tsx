@@ -286,7 +286,8 @@ function filterMenu(filter?: string, menuData?: any): Item[] {
     method : translationPaymentMethod(method), minimum })) : [];
 
 console.log(paymentDetails);
-  
+    const [heart, toggleHeart] = useState(false);
+    
 
   if(isLoading){
     return(
@@ -320,13 +321,19 @@ console.log(paymentDetails);
             style={styles.cafeHeaderIconButtons}
           />
             <View style={styles.cafeHeaderButtonsRight}>
-            <IconButton Icon={Search} style={styles.cafeHeaderIconButtons} />
+            <IconButton Icon={Search} style={styles.cafeHeaderIconButtons} onPress={() => console.log("search")}/>
             <IconButton 
               Icon={Locate} 
               style={styles.cafeHeaderIconButtons} 
               onPress={() => cafe?.location && openLocation(cafe.location.geometry.coordinates)} 
             />
-            <IconButton Icon={Heart} style={styles.cafeHeaderIconButtons} />
+            <IconButton 
+              Icon={Heart} 
+              style={styles.cafeHeaderIconButtons} 
+              iconColor={heart ? COLORS.status.red : COLORS.black}
+              fill={heart ? COLORS.status.red : "none"}
+              onPress={() => toggleHeart(!heart)}
+            />
             </View>
         </View>
 
@@ -390,7 +397,7 @@ console.log(paymentDetails);
               <Tooltip
                 key={`${method}-${minimum}`}
                 label={`${method}`}
-                showChevron={true }
+                showChevron={false }
                 color="white"
                 description={`Minimum: ${minimum}`}
                 Icon={CreditCard}
