@@ -28,6 +28,10 @@ import * as hash from "object-hash";
 import { fetchPannier } from "@/scripts/pannier";
 
 export default function ArticleScreen() {
+
+
+const [error, setError] = useState<string | null>(null);
+
   const { id, articleId } = useLocalSearchParams();
   console.log("Café Id", id);
   const [reload, setReload] = useState(false);
@@ -53,28 +57,50 @@ export default function ArticleScreen() {
   useFocusEffect(
     useCallback(() => {
       setSelectedIndex(null);
+      setQuantity(1);
     },[])
   )
 
   useEffect(() => {
+    // Reset states when articleId changes
+    setLoading(true);
+    setError(null);
+    setMenuItem({});
+    
     scrollViewRef.current?.scrollTo({ x: 0, y: 0, animated: true });
+    
     const fetchMenuItem = async () =>{
       try {
         console.log(`test cafe slug ${id}`);
         console.log(`article slug ${articleId}`);
+        
+        if (!id || !articleId) {
+          throw new Error('Missing cafe ID or article ID');
+        }
+        
         const response = await fetch(`https://cafesansfil-api-r0kj.onrender.com/api/cafes/${id}/menu/items/${articleId}`);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
         const json = await response.json();
         //console.log(json.image_url);
         //console.log(typeof(id));
         setMenuItem(json);
       } catch (error) {
           console.error('Fetch error:', error);
+          setError(error instanceof Error ? error.message : 'Failed to fetch menu item');
       } finally{
         setLoading(false);
       }
     }
-    fetchMenuItem();
-  }, [articleId]);
+    
+    // Add a small delay to prevent rapid API calls
+    const timeoutId = setTimeout(fetchMenuItem, 100);
+    
+    return () => clearTimeout(timeoutId);
+  }, [articleId, id]);
   
   
   // tableau des options fetch du api
@@ -157,13 +183,17 @@ export default function ArticleScreen() {
       </View >
       <View style={{ flexDirection: "row", gap: 12, marginBottom: 24 }}>
         <FlatList data={options} renderItem={({item, index}) => (
+          
           <Button onPress={()=> setSelectedIndex(prev => (prev === index ? null : index))} 
           style={{ backgroundColor : selectedIndex === index ? COLORS.black : COLORS.lightGray, paddingHorizontal: 12, paddingVertical: 12, borderRadius: 10, flex: 1,}}>
-            <Text style={[TYPOGRAPHY.body.normal.semiBold, { textAlign: "center", color: selectedIndex === index ? COLORS.white : COLORS.subtuleDark, }]}>{item.value} (+${item.fee})</Text>
+            <Text style={[TYPOGRAPHY.body.normal.semiBold, { textAlign: "center", color: selectedIndex === index ? COLORS.white : COLORS.subtuleDark, }]}>
+              {item.value}{item.fee != 0 && ` (+$${formatPrice(item.fee)})`}
+            </Text>
           </Button> )}
           keyExtractor={(item, index) => index.toString()}
           horizontal
-          ItemSeparatorComponent={() => <View style={{ width: SPACING["md"] }} />} // padding
+          ItemSeparatorComponent={() => <View style={{ width: SPACING["md"] }} />} 
+          // padding
           // style={{paddingHorizontal: SPACING["sm"], paddingBottom: SPACING["md"]}}
         />
       </View> 
@@ -190,7 +220,7 @@ export default function ArticleScreen() {
         <View style={styles.cafeHeaderButtons}>
           <IconButton
             Icon={ArrowLeft}
-            onPress={() => /\d/.test(id as string)? router.push("/pannier"):router.push(`/cafe/${id}`)}
+            onPress={() => router.replace(`/cafe/${id}`)}
             style={styles.cafeHeaderIconButtons}
           />
           <View style={styles.cafeHeaderButtonsRight}>
@@ -209,25 +239,38 @@ export default function ArticleScreen() {
         </View>
       </View>
       <View style={{ paddingHorizontal: 16 }}>
-        <View
-          style={{
-            flexDirection: "row",
-            gap: 12,
-            marginTop: 28,
-            marginBottom: 10,
-          }}
-        >
-          <Text style={TYPOGRAPHY.heading.medium.bold}>{loading? "is loading": menuItem.name}</Text>
-          
-        </View>
-        <Text
-          style={[
-            TYPOGRAPHY.body.large.base,
-            { color: COLORS.subtuleDark, lineHeight: 21 },
-          ]}
-        >
-          {loading ? "": menuItem.description}
-        </Text>
+        {error ? (
+          <View style={{ marginTop: 28, padding: 16, backgroundColor: '#FFE6E6', borderRadius: 8, marginBottom: 20 }}>
+            <Text style={[TYPOGRAPHY.body.normal.semiBold, { color: '#D32F2F', marginBottom: 8 }]}>
+              Erreur de chargement
+            </Text>
+            <Text style={[TYPOGRAPHY.body.small.base, { color: '#D32F2F' }]}>
+              {error}
+            </Text>
+          </View>
+        ) : (
+          <>
+            <View
+              style={{
+                flexDirection: "row",
+                gap: 12,
+                marginTop: 28,
+                marginBottom: 10,
+              }}
+            >
+              <Text style={TYPOGRAPHY.heading.medium.bold}>{loading? "Chargement...": menuItem.name}</Text>
+              
+            </View>
+            <Text
+              style={[
+                TYPOGRAPHY.body.large.base,
+                { color: COLORS.subtuleDark, lineHeight: 21 },
+              ]}
+            >
+              {loading ? "": menuItem.description}
+            </Text>
+          </>
+        )}
       </View>
       
 {/*
