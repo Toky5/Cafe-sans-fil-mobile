@@ -36,7 +36,10 @@ import {
   ScrollView,
   FlatList,
   Linking,
-  ActivityIndicator
+  ActivityIndicator,
+  Animated,
+  TextInput,
+  Dimensions
 } from "react-native";
 import { Cafe, Category, Item } from "@/constants/types/GET_cafe";
 import { allCafe } from '@/constants/types/GET_list_cafe';
@@ -288,6 +291,27 @@ function filterMenu(filter?: string, menuData?: any): Item[] {
 console.log(paymentDetails);
     const [heart, toggleHeart] = useState(false);
     
+    // Search bar animation states
+    const [isSearchExpanded, setIsSearchExpanded] = useState(false);
+    const [searchText, setSearchText] = useState("");
+    const searchWidth = useState(new Animated.Value(0))[0];
+    const { width: screenWidth } = Dimensions.get('window');
+    
+    const toggleSearch = () => {
+      const isExpanding = !isSearchExpanded;
+      setIsSearchExpanded(isExpanding);
+      
+      Animated.timing(searchWidth, {
+        toValue: isExpanding ? screenWidth - 32 : 0, // Full width minus padding (16px on each side)
+        duration: 300,
+        useNativeDriver: false,
+      }).start();
+      
+      if (!isExpanding) {
+        setSearchText(""); // Clear search text when closing
+      }
+    };
+    
 
   if(isLoading){
     return(
@@ -315,18 +339,47 @@ console.log(paymentDetails);
           source={isLoading ? require("@/assets/images/placeholder/image2xl.png") : {uri: cafe?.banner_url}}
         />
         <View style={styles.cafeHeaderButtons}>
-          <IconButton
-            Icon={ArrowLeft}
-            onPress={() => router.back()}
-            style={styles.cafeHeaderIconButtons}
-          />
-            <View style={styles.cafeHeaderButtonsRight}>
-            <IconButton Icon={Search} style={styles.cafeHeaderIconButtons} onPress={() => console.log("search")}/>
-            <IconButton 
-              Icon={Locate} 
-              style={styles.cafeHeaderIconButtons} 
-              onPress={() => cafe?.location && openLocation(cafe.location.geometry.coordinates)} 
+          {!isSearchExpanded && (
+            <IconButton
+              Icon={ArrowLeft}
+              onPress={() => router.back()}
+              style={styles.cafeHeaderIconButtons}
             />
+          )}
+            <View style={styles.cafeHeaderButtonsRight}>
+            {/* Animated Search Bar */}
+            <Animated.View style={[styles.searchContainer, { width: searchWidth }]}>
+              {isSearchExpanded && (
+                <TextInput
+                  style={styles.searchInput}
+                  placeholder="Rechercher..."
+                  value={searchText}
+                  onChangeText={setSearchText}
+                  autoFocus={true}
+                  placeholderTextColor={COLORS.subtuleDark}
+                  onBlur={() => {
+                    // Close search bar when focus is lost
+                    toggleSearch();
+                  }}
+                />
+              )}
+            </Animated.View>
+            
+            {!isSearchExpanded && (
+              <IconButton 
+                Icon={Search} 
+                style={styles.cafeHeaderIconButtons} 
+                onPress={toggleSearch}
+              />
+            )}
+            {!isSearchExpanded && (
+              <IconButton 
+                Icon={Locate} 
+                style={styles.cafeHeaderIconButtons} 
+                onPress={() => cafe?.location && openLocation(cafe.location.geometry.coordinates)} 
+              />
+            )}
+            {/*
             <IconButton 
               Icon={Heart} 
               style={styles.cafeHeaderIconButtons} 
@@ -334,11 +387,12 @@ console.log(paymentDetails);
               fill={heart ? COLORS.status.red : "none"}
               onPress={() => toggleHeart(!heart)}
             />
+            */}
             </View>
         </View>
 
         <View style={styles.cafeHeaderOpenStatus}>
-          <Tooltip label={"Ouvert"} showChevron={true} status={cafe?.is_open ? "green" : "red"} />
+          <Tooltip label={"Ouvert"} showChevron={false} status={cafe?.is_open ? "green" : "red"} />
         </View>
       </View>
 
@@ -593,6 +647,21 @@ const styles = StyleSheet.create({
   },
   cafeHeaderIconButtons: {
     backgroundColor: "white",
+  },
+  searchContainer: {
+    backgroundColor: "white",
+    borderRadius: 25,
+    height: 40,
+    marginRight: 8,
+    overflow: "hidden",
+  },
+  searchInput: {
+    flex: 1,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    fontSize: 16,
+    color: COLORS.black,
+    backgroundColor: "transparent",
   },
   cafeHeaderOpenStatus: {
     position: "absolute",
