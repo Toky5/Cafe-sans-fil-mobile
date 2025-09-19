@@ -96,76 +96,95 @@ export default function ArticleCard({
   style,
 }: ArticleCardProps) {
   return (
-    <View style={[style, {width: "40%"}]}>
-        <Pressable
-          onPress={() => router.push(`/cafe/${cafeSlug}/${slug}`)}
-          style={{ width: cardDimensions[size].width }}
-          testID="button"
-        >
-          <>
-            <View style={styles.wrapper}>
-              <Image
-                source={image ? { uri: image } : cardDimensions[size].image}
-                width={cardDimensions[size].width}
-                height={cardDimensions[size].height}
-                style={[{ borderRadius: SPACING["sm"] }]}
-                testID="image"
-              />
-              <Text
-                style={[TYPOGRAPHY.body.small.bold, styles.rating]}
-                testID="icon-button"
-              >
-                <Circle
-                  width={12}
-                  height={12}
-                  strokeWidth={1}
-                  color={
-                    status === "In Stock"
-                      ? COLORS.status.green
-                      : status === "Almost Out"
-                      ? COLORS.status.orange
-                      : COLORS.status.red
-                  }
-                  fill={
-                    status === "In Stock"
-                      ? COLORS.status.green
-                      : status === "Almost Out"
-                      ? COLORS.status.orange
-                      : COLORS.status.red
-                  }
-                  testID="tooltip-icon"
-                />
-              </Text>
-            </View>
-            <View style={styles.caption}>
-              <View style={styles.articleInfo}>
-              <View style={styles.articleInfoHeader}>
-                <Text style={[TYPOGRAPHY.body.large.semiBold]}>{name}</Text>
-              </View>
-              {calories && (
-                <Text
-                style={[
-                  TYPOGRAPHY.body.small.base,
-                  styles.articleInfocalories,
-                ]}
-                >
-                {calories} Calories
-                </Text>
-              )}
-              </View>
-              <View style={styles.priceContainer}>
-              <Text style={[TYPOGRAPHY.body.large.semiBold, styles.priceText]}>
-                {formatPrice(price)}
-              </Text>
-              </View>
-            </View>
-          </>
-        </Pressable>
-    </View>
+    <Pressable
+      onPress={() => router.push(`/cafe/${cafeSlug}/${slug}`)}
+      style={[styles.menuItemCard, style]}
+    >
+      <Image 
+        source={image ? { uri: image } : cardDimensions[size].image}
+        style={styles.menuItemImage}
+        resizeMode="cover"
+      />
+      <View style={styles.menuItemContent}>
+        <Text style={styles.menuItemTitle}>{name}</Text>
+        <Text style={styles.menuItemDescription}>
+          {calories || "Délicieux plat préparé avec soin et des ingrédients frais."}
+        </Text>
+        <Text style={styles.menuItemPrice}>{formatPrice(price)}</Text>
+        <View style={styles.statusIndicator}>
+          <Circle
+            width={8}
+            height={8}
+            strokeWidth={0}
+            fill={
+              status === "In Stock"
+                ? COLORS.status.green
+                : status === "Almost Out"
+                ? COLORS.status.orange
+                : COLORS.status.red
+            }
+          />
+          <Text style={styles.statusText}>{status}</Text>
+        </View>
+      </View>
+    </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
+  // Horizontal Menu Card Styles
+  menuItemCard: {
+    backgroundColor: COLORS.white,
+    borderRadius: 12,
+    flexDirection: 'row',
+    overflow: 'hidden',
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    height: 180,
+  },
+  menuItemImage: {
+    width: '60%',
+    height: 180,
+  },
+  menuItemContent: {
+    flex: 1,
+    padding: SPACING["md"],
+    justifyContent: 'space-between',
+  },
+  menuItemTitle: {
+    ...TYPOGRAPHY.heading.small.bold,
+    color: COLORS.black,
+    marginBottom: SPACING["xs"],
+  },
+  menuItemDescription: {
+    ...TYPOGRAPHY.body.small.base,
+    color: COLORS.subtuleDark,
+    lineHeight: 18,
+    marginBottom: SPACING["sm"],
+    flex: 1,
+  },
+  menuItemPrice: {
+    ...TYPOGRAPHY.body.large.semiBold,
+    color: COLORS.black,
+    marginBottom: SPACING["xs"],
+  },
+  statusIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  statusText: {
+    ...TYPOGRAPHY.body.small.base,
+    color: COLORS.subtuleDark,
+    fontSize: 12,
+  },
+  // Legacy styles (keeping for backward compatibility)
   caption: {
     justifyContent: "space-between",
     marginTop: SPACING["lg"],
@@ -200,15 +219,14 @@ const styles = StyleSheet.create({
     top: SPACING.sm,
   },
   wrapper: {
-    shadowColor: "#000",                       // Black shadow
-    shadowOffset: { width: 5, height: 5 },     // Offset shadow towards bottom-right 
-    shadowOpacity: 0.25,                        // Half opaque
-    shadowRadius: 5,                          // Smoothness of the shadow
-
+    shadowColor: "#000",
+    shadowOffset: { width: 5, height: 5 },
+    shadowOpacity: 0.25,
+    shadowRadius: 5,
     elevation: 3, 
   },
   priceText: {
-    color: COLORS.black, // Example style, adjust as needed
+    color: COLORS.black,
     fontSize: 16,
   },
 });

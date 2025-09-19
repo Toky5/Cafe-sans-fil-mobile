@@ -47,6 +47,7 @@ export default function ArticleScreen() {
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1); // nombre d'article à mettre dans le panier
   const [selectedIndex, setSelectedIndex] = useState<Number |null>(null); // option button
+  const [heart, toggleHeart] = useState(false); // heart toggle state
 
   // reset les options à non sélectionnée
   useFocusEffect(
@@ -189,11 +190,17 @@ export default function ArticleScreen() {
         <View style={styles.cafeHeaderButtons}>
           <IconButton
             Icon={ArrowLeft}
-            onPress={() => /\d/.test(id)? router.push("/pannier"):router.push(`/cafe/${id}`)}
+            onPress={() => /\d/.test(id as string)? router.push("/pannier"):router.push(`/cafe/${id}`)}
             style={styles.cafeHeaderIconButtons}
           />
           <View style={styles.cafeHeaderButtonsRight}>
-            <IconButton Icon={Heart} style={styles.cafeHeaderIconButtons} />
+            <IconButton 
+              Icon={Heart} 
+              style={styles.cafeHeaderIconButtons}
+              iconColor={heart ? COLORS.status.red : COLORS.black}
+              fill={heart ? COLORS.status.red : "none"}
+              onPress={() => toggleHeart(!heart)}
+            />
           </View>
         </View>
 
@@ -211,9 +218,7 @@ export default function ArticleScreen() {
           }}
         >
           <Text style={TYPOGRAPHY.heading.medium.bold}>{loading? "is loading": menuItem.name}</Text>
-          <Text style={[TYPOGRAPHY.heading.medium.bold, { color: "#656565" }]}>
-            {loading? "is loading" : `$${formatPrice(menuItem.price)}`}
-          </Text>
+          
         </View>
         <Text
           style={[
@@ -303,7 +308,7 @@ export default function ArticleScreen() {
         }}>
           Tendances actuelles
         </Text>
-      
+        
 
     </ScrollView>
     </KeyboardAvoidingView>
@@ -326,18 +331,14 @@ const styles = StyleSheet.create({
   },
   cafeBackgroundImage: {
     width: "100%",  // Fill width
-    height: 250,    // Fixed height, adjust as needed
-    borderBottomLeftRadius: SPACING["7xl"],
-    borderBottomRightRadius: SPACING["7xl"],
-    borderTopLeftRadius: SPACING["7xl"],
-    borderTopRightRadius: SPACING["7xl"],
+    height: 250,    
   },
   cafeHeaderButtons: {
     position: "absolute",
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    width: 100,
+    width: "100%",
     paddingHorizontal: 16,
     marginTop: SPACING["9xl"],
   },

@@ -9,6 +9,7 @@ import COLORS from "@/constants/Colors";
 import SPACING from "@/constants/Spacing";
 import TYPOGRAPHY from "@/constants/Typography";
 import { Link, router, useLocalSearchParams } from "expo-router";
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import {
   ArrowLeft,
   CakeSlice,
@@ -129,6 +130,14 @@ export default function CafeScreen() {
   }, [id]);
   
   const [activeFilter, setActiveFilter] = useState("Tous");
+  const formatPrice = (price: string) => {
+  if (price.charAt(price.length - 2) == ".") {
+    return price + "0";
+  }
+  else{
+    return price
+  }
+}
 
   // filter the menu based on argument filter
 function filterMenu(filter?: string, menuData?: any): Item[] {
@@ -173,7 +182,7 @@ function filterMenu(filter?: string, menuData?: any): Item[] {
     };
     return methodTranslated.method || method;
   };
-  const openLocation = (location) => {
+  const openLocation = (location : any) => {
     console.log("Location: ", location);
     
     // Extract latitude and longitude from the location array
@@ -506,7 +515,7 @@ console.log(paymentDetails);
       {/* Menu */}
       <Text 
         style={{
-          marginVertical: SPACING["xl"], 
+          marginVertical: SPACING["md"], 
           marginHorizontal: SPACING["md"], 
           alignSelf: 'center',
           ...TYPOGRAPHY.heading.large.bold
@@ -515,67 +524,69 @@ console.log(paymentDetails);
 
 
       {/* Catégories */}
-      <View>
-          <Text 
-            style={{
-              marginHorizontal: SPACING["md"], 
-              ...TYPOGRAPHY.heading.small.bold
-            }}>
-            Filtres 
-          </Text>
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignContent: 'center', justifyContent: 'center', padding: 8 }}>
-            {cafe? [
-              ...cafe.menu.categories.map((item : Category) => (
-                <View 
-                  key={item.id} 
-                  style={{marginRight: SPACING["sm"], marginTop: SPACING["sm"]}}
-                >
-                  <Tooltip
-                    key={item.id}
-                    label={item.name}
-                    showChevron={false}
-                    color="white"
-                    textColor="black"
-                    status={activeFilter == item.name ? "black" : "white"}
-                    onPress={() => setItemList(filterMenu(item.name))}
-                  />
-                </View>
-              )),
-              <TouchableOpacity 
-                  key={"all"} 
-                  style={{marginRight: SPACING["sm"], marginTop: SPACING["sm"]}}
-                >
-                  <Tooltip
-                    label={"Tous"}
-                    showChevron={false}
-                    color="white"
-                    textColor="black"
-                    status={activeFilter == "Tous" ? "black" : "white"}
-                    onPress={() => setItemList(filterMenu())}
-                  />
-                </TouchableOpacity>
-            ]: []}
-          </View>
+      <View style={styles.filterSection}>
+        <ScrollView 
+          horizontal 
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.filterScrollContainer}
+          style={styles.filterScrollView}
+        >
+          {/* "Tous" filter */}
+          <TouchableOpacity 
+            style={[
+              styles.filterChip,
+              activeFilter === "Tous" ? styles.filterChipActive : styles.filterChipInactive
+            ]}
+            onPress={() => setItemList(filterMenu())}
+          >
+            <Text style={[
+              styles.filterChipText,
+              activeFilter === "Tous" ? styles.filterChipTextActive : styles.filterChipTextInactive
+            ]}>
+              Tous
+            </Text>
+          </TouchableOpacity>
 
-        </View>
+          {/* Category filters */}
+          {cafe?.menu.categories.map((item: Category) => (
+            <TouchableOpacity 
+              key={item.id}
+              style={[
+                styles.filterChip,
+                activeFilter === item.name ? styles.filterChipActive : styles.filterChipInactive
+              ]}
+              onPress={() => setItemList(filterMenu(item.name))}
+            >
+              <Text style={[
+                styles.filterChipText,
+                activeFilter === item.name ? styles.filterChipTextActive : styles.filterChipTextInactive
+              ]}>
+                {item.name}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      </View>
 
       {/* Menu */}
       <FlatList 
-      data={itemList? itemList : []}  
-      keyExtractor={item => item.id}
-      renderItem={({item}) => <ArticleCard
-                                cafeSlug={cafe?.slug}
-                                slug={item.id}
-                                name={item.name} 
-                                price={"$" + item.price} 
-                                status={item.in_stock? "In Stock" : "Out of Stock"}
-                                image={item.image_url}
-                                style={{alignItems: 'center', width: "45%", margin: SPACING["md"]}}
-                              />
-                              }
-      scrollEnabled={false}
-      style={{marginTop: SPACING['md']}}
-      numColumns={2}
+        data={itemList? itemList : []}  
+        keyExtractor={item => item.id}
+        renderItem={({item}) => (
+          <ArticleCard
+            cafeSlug={cafe?.slug}
+            slug={item.id}
+            name={item.name} 
+            price={"$" + item.price} 
+            status={item.in_stock? "In Stock" : "Out of Stock"}
+            image={item.image_url}
+            calories={item.description}
+            style={styles.articleCardWrapper}
+          />
+        )}
+        scrollEnabled={false}
+        style={styles.menuContainer}
+        ItemSeparatorComponent={() => <View style={{ height: SPACING["md"] }} />}
       />      
 
       {/* Cafés similaires */}
@@ -629,7 +640,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     width: "100%",
     paddingHorizontal: 16,
-    marginTop: SPACING["sm"],
+    marginTop: SPACING["xl"],
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
@@ -738,5 +749,60 @@ const styles = StyleSheet.create({
   },
   daySeparator: {
     width: 10,
+  },
+  filterSection: {
+  },
+  filterScrollView: {
+    flexGrow: 0,
+  },
+  filterScrollContainer: {
+    paddingHorizontal: SPACING["md"],
+    alignItems: 'center',
+  },
+  filterChip: {
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 25,
+    marginRight: 12,
+    minHeight: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    marginBottom: 4,
+  },
+  filterChipActive: {
+    backgroundColor: COLORS.black,
+    borderWidth: 0,
+  },
+  filterChipInactive: {
+    backgroundColor: COLORS.white,
+    borderWidth: 1,
+    borderColor: '#E5E5E5',
+  },
+  filterChipText: {
+    fontSize: 14,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  filterChipTextActive: {
+    color: COLORS.white,
+  },
+  filterChipTextInactive: {
+    color: COLORS.black,
+  },
+  // Custom Menu Item Styles
+  menuContainer: {
+    paddingHorizontal: SPACING["md"],
+    marginTop: SPACING["md"],
+  },
+  articleCardWrapper: {
+    marginHorizontal: 0,
   },
 });
