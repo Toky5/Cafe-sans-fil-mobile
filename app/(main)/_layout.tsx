@@ -2,7 +2,7 @@ import { Redirect, router, Tabs } from "expo-router";
 import TYPOGRAPHY from "@/constants/Typography";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import HeaderLayout from "@/components/layouts/HeaderLayout";
-import { Home, Settings, ShoppingBasket, UserRound} from "lucide-react-native";
+import { Home, Settings, ShoppingBasket, UserRound, Newspaper} from "lucide-react-native";
 import { Platform, View, ActivityIndicator } from "react-native";
 import { getInfoFromToken, getToken, getRefreshToken, clearTokens, updateToken } from "@/utils/tokenStorage";
 import { useEffect, useState } from "react";
@@ -105,9 +105,11 @@ export default function TabLayout() {
           animation: 'shift'
         }}
       />
+      
       <Tabs.Screen
         name="pannier"
         options={{
+          href: null,
           title: "Pannier",
           headerShown: false,
           tabBarIcon: ({ color }) => (
@@ -117,6 +119,17 @@ export default function TabLayout() {
           animation: 'shift'
         }}
       />
+      <Tabs.Screen
+        name="events"
+        options={{
+          title: "Évenements",
+          headerShown: false,
+          tabBarIcon: ({ color }) => <Newspaper size={28} color={color} />,
+          tabBarLabelStyle: TYPOGRAPHY.body.small.bold,
+          animation: 'shift'
+        }}
+      />
+      
       <Tabs.Screen
         name="parametre"
         options={{

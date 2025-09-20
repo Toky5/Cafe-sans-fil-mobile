@@ -77,7 +77,7 @@ export default function CafeCard({
   name,
   location,
   priceRange,
-  rating,
+  //rating,
   image,
   id,
   size = "medium",
@@ -107,6 +107,7 @@ export default function CafeCard({
           style={{borderRadius:10}}
           testID="image"
         />
+        {/*}
         <Text
           style={[
             TYPOGRAPHY.body.small.bold,
@@ -117,6 +118,7 @@ export default function CafeCard({
         >
           {rating}
         </Text>
+        */}
       </View>
       <View style={styles.caption}>
         <View style={styles.cafeInfo}>

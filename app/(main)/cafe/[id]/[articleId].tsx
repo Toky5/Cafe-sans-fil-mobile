@@ -116,6 +116,7 @@ const [error, setError] = useState<string | null>(null);
 
   const panierID = "12345";
   function addToCart(){
+    
     //get current list of items from cart
     let currCart = new Array();
     try{
@@ -333,15 +334,18 @@ const [error, setError] = useState<string | null>(null);
           onChangeText={() => {}}
         ></TextInput>
         */}
+        {/*
         <View style={{ marginBottom: 44, marginTop: 32, flexDirection: "row", alignItems: "center", gap: 32}}>
           <Counter
           count={quantity}
           setCount={setQuantity}></Counter>
           <Button onPress={() => addToCart()} style={{ flex: 1, width: "auto" }}>
-            Ajouter au panier ・ ${total /* menuItem.price * quantity /* + fees */}
+            Ajouter au panier ・ ${total /* menuItem.price * quantity /* + fees *
           </Button>
         </View>
+      */}
       </View>
+      
 
       <Text 
         style={{

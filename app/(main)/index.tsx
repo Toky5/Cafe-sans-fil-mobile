@@ -243,12 +243,14 @@ export default function HomeScreen() {
                   showChevron={false}
                   changeColorOnPress
                 />
+                {/*
                 <Tooltip
                   label="Commander en ligne"
                   onPress={() => setShowOnlyOrder(!showOnlyOrder)} // fonction qui va afficher les cafés où on peut order en ligne
                   showChevron={false}
                   changeColorOnPress
                 />
+                */}
               </CardScrollableLayout>
   
               <Text
@@ -264,7 +266,7 @@ export default function HomeScreen() {
                   image={item.banner_url}
                   location={item.location.pavillon}
                   priceRange="$$"
-                  rating={4.8}
+                  //rating={4.8}
                   status={item.is_open}
                   id={item.id}
                 />}
@@ -307,7 +309,7 @@ export default function HomeScreen() {
                               image={item.banner_url}
                               location={'L' + item.location.local.substring(1) || ""}
                               priceRange="$$"
-                              rating={4.8}
+                              //rating={4.8}
                               status={item.is_open}
                               id={item.id}
                             />
@@ -361,12 +363,15 @@ export default function HomeScreen() {
                 showChevron={false}
                 changeColorOnPress
               />
+              {/*
               <Tooltip
                 label="Commander en ligne"
                 onPress={() => setShowOnlyOrder(!showOnlyOrder)} // fonction qui va afficher les cafés où on peut order en ligne
                 showChevron={false}
                 changeColorOnPress
               />
+              */}
+              
             </CardScrollableLayout>
 
             <Text
@@ -382,7 +387,7 @@ export default function HomeScreen() {
                 image={item.banner_url}
                 location={item.location.pavillon}
                 priceRange="$$"
-                rating={4.8}
+                //rating={4.8}
                 status={item.is_open}
                 id={item.id}
               />}
@@ -411,7 +416,7 @@ export default function HomeScreen() {
                         image={item.banner_url}
                         location={item.location.pavillon}
                         priceRange="$$"
-                        rating={4.8}
+                        //rating={4.8}
                         status={item.is_open}
                         id={item.id}
                       /> }
@@ -453,7 +458,7 @@ export default function HomeScreen() {
                             image={item.banner_url}
                             location={'L' + item.location.local.substring(1) || ""}
                             priceRange="$$"
-                            rating={4.8}
+                            //rating={4.8}
                             status={item.is_open}
                             id={item.id}
                           />

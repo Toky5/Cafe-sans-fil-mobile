@@ -682,7 +682,7 @@ console.log(paymentDetails);
               image={item.banner_url}
               location={item.location.pavillon}
               priceRange="$$"
-              rating={4.8}
+              //rating={4.8}
               status={item.is_open}
               id={item.id}
             />

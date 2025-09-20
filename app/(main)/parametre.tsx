@@ -191,24 +191,28 @@ export default function ParametreScreen() {
   fetchOrders()
   // Menu items data with their respective icons and actions
   const menuItems: MenuItem[] = [
+    /*
     {
       icon: <Package size={26} strokeWidth={2.5} color={COLORS.black} />,
       title: "Mes commandes",
       subtitle: "Consultez vos commandes et transactions passées.",
       onPress:() => setOrdersModalVisible(true),
     },
+    */
     {
       icon: <Settings2 size={26} strokeWidth={2.5} color={COLORS.black} />,
       title: "Mes préférences",
       subtitle: "Gérez et personnalisez vos préférences.",
       onPress: () => console.log("Preferences pressed"),
     },
+    /*
     {
       icon: <HelpCircle size={26} strokeWidth={2.5} color={COLORS.black} />,
       title: "Aide et support",
       subtitle: "Obtenez de l'aide et contactez le support.",
       onPress: () => console.log("Support pressed"),
     },
+    */
     {
       icon: <Info size={26} strokeWidth={2.5} color={COLORS.black} />,
       title: "À propos",
