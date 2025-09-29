@@ -221,7 +221,7 @@ const [error, setError] = useState<string | null>(null);
         <View style={styles.cafeHeaderButtons}>
           <IconButton
             Icon={ArrowLeft}
-            onPress={() => router.replace(`/cafe/${id}`)}
+            onPress={() => {toggleHeart(false); router.replace(`/cafe/${id}`)}}
             style={styles.cafeHeaderIconButtons}
           />
           <View style={styles.cafeHeaderButtonsRight}>
@@ -236,7 +236,7 @@ const [error, setError] = useState<string | null>(null);
         </View>
 
         <View style={styles.cafeHeaderOpenStatus}>
-          <Tooltip label={"En Stock"} showChevron={false} status="green" />
+          <Tooltip label={menuItem.in_stock ? "En Stock" : "En Rupture"} showChevron={false} status={menuItem.in_stock ?  "green" : "red"} />
         </View>
       </View>
       <View style={{ paddingHorizontal: 16 }}>

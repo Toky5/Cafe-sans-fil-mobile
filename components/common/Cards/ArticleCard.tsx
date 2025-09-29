@@ -9,7 +9,7 @@ import SPACING from "@/constants/Spacing";
 import React from "react";
 
 type ArticleCardProps = {
-  status: "In Stock" | "Almost Out" | "Out of Stock";
+  status: "En Stock" | "Almost Out" | "En Rupture";
 
   /** The name of the article */
   name: string;
@@ -117,7 +117,7 @@ export default function ArticleCard({
             height={8}
             strokeWidth={0}
             fill={
-              status === "In Stock"
+              status === "En Stock"
                 ? COLORS.status.green
                 : status === "Almost Out"
                 ? COLORS.status.orange

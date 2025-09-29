@@ -654,7 +654,7 @@ console.log(paymentDetails);
             slug={item.id}
             name={item.name} 
             price={"$" + item.price} 
-            status={item.in_stock? "In Stock" : "Out of Stock"}
+            status={item.in_stock? "En Stock" : "En Rupture"}
             image={item.image_url}
             calories={item.description}
             style={styles.articleCardWrapper}
