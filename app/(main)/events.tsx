@@ -1,4 +1,4 @@
-import { View, Text, Touchable, TouchableOpacity, Modal, Platform, Linking, Alert } from 'react-native';
+import { View, Text, Touchable, TouchableOpacity, Modal, Platform, Linking, Alert, Image } from 'react-native';
 import React, { use, useEffect } from 'react';
 import ScrollableLayout from '@/components/layouts/ScrollableLayout';
 import SPACING from '@/constants/Spacing';
@@ -13,9 +13,12 @@ export default function EventsPage() {
   const [isRequestingData, setIsRequestingData] = React.useState(false);
 
   const [ListeCafes, setListeCafes] = React.useState<any>(null);
+  const [events, setEvents] = React.useState<any>(null);
+  const [isEventsLoading, setIsEventsLoading] = React.useState(true);
 
   const [isCafesLoading, setIsCafesLoading] = React.useState(true);
   const [modalData, setModalData] = React.useState<any>(null);
+  const [activeTab, setActiveTab] = React.useState<'events' | 'announcements'>('events');
 
   const [setCafeRegion, setSetCafeRegion] = React.useState<any>(null);
 
@@ -30,6 +33,12 @@ export default function EventsPage() {
   }
 
   const openMapNavigation = async (cafe: any) => {
+    // Check if cafe has valid coordinates
+    if (!cafe || !cafe.location || !cafe.location.geometry || !cafe.location.geometry.coordinates || cafe.location.geometry.coordinates.length < 2) {
+      Alert.alert('Erreur', 'Les coordonnées de ce café ne sont pas disponibles.');
+      return;
+    }
+
     const latitude = cafe.location.geometry.coordinates[1];
     const longitude = cafe.location.geometry.coordinates[0];
     const cafeName = cafe.name;
@@ -125,7 +134,7 @@ export default function EventsPage() {
 
   const updateCafeRegion = (cafeId: string) => {
     const cafe = getCafeById(cafeId);
-    if (cafe && cafe.location && cafe.location.geometry) {
+    if (cafe && cafe.location && cafe.location.geometry && cafe.location.geometry.coordinates && cafe.location.geometry.coordinates.length >= 2) {
       return {
         latitude: cafe.location.geometry.coordinates[1],
         longitude: cafe.location.geometry.coordinates[0],
@@ -133,7 +142,7 @@ export default function EventsPage() {
         longitudeDelta: 0.003,
       };
     }
-    // Default region if cafe not found
+    // Default region if cafe not found or coordinates are null
     return {
       latitude: 45.5017,
       longitude: -73.5673,
@@ -185,6 +194,25 @@ export default function EventsPage() {
       }
     };
 
+    // Fetch events
+    const fetchEvents = async () => {
+      try {
+        const response = await fetchWithTimeout('https://cafesansfil-api-r0kj.onrender.com/api/events/');
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        console.log('Events fetched:', data.items?.[0]);
+        setEvents(data);
+        setIsEventsLoading(false);
+      } catch (error) {
+        console.error('Error fetching events:', error);
+        setIsEventsLoading(false);
+        // Set empty data to prevent infinite loading
+        setEvents({ items: [] });
+      }
+    };
+
     // Fetch cafes
     const fetchCafes = async () => {
       try {
@@ -204,13 +232,78 @@ export default function EventsPage() {
       }
     };
 
-    // Execute both requests
-    Promise.all([fetchAnnouncements(), fetchCafes()])
+    // Execute all requests
+    Promise.all([fetchAnnouncements(), fetchEvents(), fetchCafes()])
       .finally(() => {
         setIsRequestingData(false);
       });
 
   }, []); // Empty dependency array to run only once
+
+  const displayEvent = (event: any) => {
+    return (
+      <TouchableOpacity key={event.id} onPress={() => {
+        openModalWithData(event);
+      }}>
+        <View style={{
+          backgroundColor: 'white',
+          borderRadius: 16,
+          padding: SPACING["lg"],
+          marginBottom: SPACING["md"],
+          shadowColor: "#000",
+          shadowOffset: {
+            width: 0,
+            height: 4,
+          },
+          shadowOpacity: 0.1,
+          shadowRadius: 8,
+          elevation: 4,
+          borderWidth: 1,
+          borderColor: '#F0F0F0'
+        }}>
+          {event.image_url && (
+            <Image 
+              source={{ uri: event.image_url }}
+              style={{
+                width: '100%',
+                height: 120,
+                borderRadius: 12,
+                marginBottom: SPACING["md"]
+              }}
+              resizeMode="cover"
+            />
+          )}
+          <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: SPACING["sm"]}}>
+            <Text style={{...TYPOGRAPHY.body.large.semiBold, flex: 1, marginRight: SPACING["sm"]}}>{event.name}</Text>
+            
+          </View>
+          <Text 
+            style={{...TYPOGRAPHY.body.normal.base, color: '#666', marginBottom: SPACING["sm"], lineHeight: 18}}
+            numberOfLines={2}
+          >
+            {event.description}
+          </Text>
+          <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
+            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+              <View style={{
+                width: 6,
+                height: 6,
+                borderRadius: 3,
+                backgroundColor: '#FF9800',
+                marginRight: SPACING["xs"]
+              }} />
+              <Text style={{...TYPOGRAPHY.body.small.base, color: '#666'}}>
+                {event.cafes && event.cafes.length > 0 ? event.cafes[0].name : 'Multiple Cafés'}
+              </Text>
+            </View>
+            <Text style={{...TYPOGRAPHY.body.small.base, color: '#999'}}>
+              {new Date(event.start_date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
+            </Text>
+          </View>
+        </View>
+      </TouchableOpacity>
+    )
+  }
 
   const displayAnnouncement = (announcement : any) => {
     return (
@@ -281,19 +374,75 @@ export default function EventsPage() {
     <HeaderLayout />
       <ScrollableLayout>
         <View>
-          <Text 
-            style={{
-              marginVertical: SPACING["xl"], 
-              marginHorizontal: SPACING["md"], 
-              ...TYPOGRAPHY.heading.small.bold
-            }}
-            >Évenements</Text>
+          
+
+          {/* Tab Buttons */}
+          <View style={{
+            flexDirection: 'row',
+            marginHorizontal: SPACING["md"],
+            marginBottom: SPACING["lg"],
+            marginTop: SPACING["md"],
+            backgroundColor: '#F8F9FA',
+            borderRadius: 12,
+            padding: 4
+          }}>
+            <TouchableOpacity
+              onPress={() => setActiveTab('events')}
+              style={{
+                flex: 1,
+                paddingVertical: SPACING["sm"],
+                paddingHorizontal: SPACING["md"],
+                borderRadius: 8,
+                backgroundColor: activeTab === 'events' ? '#fff' : 'transparent',
+                shadowColor: activeTab === 'events' ? '#000' : 'transparent',
+                shadowOffset: { width: 0, height: 1 },
+                shadowOpacity: activeTab === 'events' ? 0.1 : 0,
+                shadowRadius: 2,
+                elevation: activeTab === 'events' ? 2 : 0,
+              }}
+            >
+              <Text style={{
+                ...TYPOGRAPHY.body.normal.semiBold,
+                color: activeTab === 'events' ? '#333' : '#666',
+                textAlign: 'center'
+              }}>Événements</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => setActiveTab('announcements')}
+              style={{
+                flex: 1,
+                paddingVertical: SPACING["sm"],
+                paddingHorizontal: SPACING["md"],
+                borderRadius: 8,
+                backgroundColor: activeTab === 'announcements' ? '#fff' : 'transparent',
+                shadowColor: activeTab === 'announcements' ? '#000' : 'transparent',
+                shadowOffset: { width: 0, height: 1 },
+                shadowOpacity: activeTab === 'announcements' ? 0.1 : 0,
+                shadowRadius: 2,
+                elevation: activeTab === 'announcements' ? 2 : 0,
+              }}
+            >
+              <Text style={{
+                ...TYPOGRAPHY.body.normal.semiBold,
+                color: activeTab === 'announcements' ? '#333' : '#666',
+                textAlign: 'center'
+              }}>Annonces</Text>
+            </TouchableOpacity>
+          </View>
 
           <View style={{marginHorizontal: SPACING["md"]}}>
-            {isLoading ? (
-              <Text>Loading...</Text>
+            {activeTab === 'events' ? (
+              isEventsLoading ? (
+                <Text>Loading events...</Text>
+              ) : (
+                events && events.items && events.items.map((event: any) => displayEvent(event))
+              )
             ) : (
-              laliste && laliste.items && laliste.items.map((announcement: any) => displayAnnouncement(announcement))
+              isLoading ? (
+                <Text>Loading announcements...</Text>
+              ) : (
+                laliste && laliste.items && laliste.items.map((announcement: any) => displayAnnouncement(announcement))
+              )
             )}
             <Modal visible={showModal}
               animationType="slide"
@@ -323,7 +472,9 @@ export default function EventsPage() {
                     borderBottomWidth: 1,
                     borderBottomColor: '#F0F0F0'
                   }}>
-                    <Text style={{...TYPOGRAPHY.heading.small.bold}}>Détails de l'événement</Text>
+                    <Text style={{...TYPOGRAPHY.heading.small.bold}}>
+                      {modalData && modalData.name ? 'Détails de l\'événement' : 'Détails de l\'annonce'}
+                    </Text>
                     <TouchableOpacity 
                       onPress={() => setShowModal(false)} 
                       style={{
@@ -342,12 +493,16 @@ export default function EventsPage() {
                   {/* Modal Content */}
                   {modalData && (
                     <View style={{flex: 1, paddingHorizontal: SPACING["lg"]}}>
-                      {/* Title and Tags */}
+                      {/* Title and Tags/Location */}
                       <View style={{marginTop: SPACING["lg"]}}>
+                        
+                        
                         <Text style={{...TYPOGRAPHY.heading.medium.bold, marginBottom: SPACING["sm"], lineHeight: 28}}>
-                          {modalData.title}
+                          {modalData.name || modalData.title}
                         </Text>
-                        {modalData.tags && modalData.tags.length > 0 && (
+                        
+                        {/* Show tags for announcements or location for events */}
+                        {modalData.tags ? (
                           <View style={{flexDirection: 'row', flexWrap: 'wrap', marginBottom: SPACING["lg"]}}>
                             {modalData.tags.slice(0, 4).map((tag: string, index: number) => (
                               <View key={index} style={{
@@ -364,11 +519,131 @@ export default function EventsPage() {
                               </View>
                             ))}
                           </View>
+                        ) : modalData.location && (
+                          <View style={{marginBottom: SPACING["lg"]}}>
+                            <View style={{
+                              backgroundColor: '#E8F5E8',
+                              paddingHorizontal: SPACING["md"],
+                              paddingVertical: 8,
+                              borderRadius: 16,
+                              alignSelf: 'flex-start'
+                            }}>
+                              <Text style={{...TYPOGRAPHY.body.normal.medium, color: '#2E7D32'}}>
+                                📍 {modalData.location}
+                              </Text>
+                            </View>
+                          </View>
                         )}
                       </View>
 
                       {/* Event Info Cards */}
                       <View style={{marginBottom: SPACING["lg"]}}>
+                        {/* For announcements - show cafe */}
+                        {modalData.cafe_id && (
+                          <View style={{
+                            backgroundColor: '#F8F9FA',
+                            borderRadius: 12,
+                            padding: SPACING["md"],
+                            marginBottom: SPACING["sm"]
+                          }}>
+                            <View style={{flexDirection: 'row', alignItems: 'center', marginBottom: SPACING["xs"]}}>
+                              <View style={{
+                                width: 8,
+                                height: 8,
+                                borderRadius: 4,
+                                backgroundColor: '#4CAF50',
+                                marginRight: SPACING["sm"]
+                              }} />
+                              <Text style={{...TYPOGRAPHY.body.normal.semiBold, color: '#333'}}>Café</Text>
+                            </View>
+                            <Text style={{...TYPOGRAPHY.body.normal.base, color: '#666', marginBottom: SPACING["sm"]}}>
+                              {getCafeNameById(modalData.cafe_id)}
+                            </Text>
+                            
+                            {getCafeById(modalData.cafe_id) && (
+                              <MapView 
+                                style={{
+                                  width:'100%',
+                                  height:150,
+                                  borderRadius:10,
+                                  marginTop: SPACING["sm"]
+                                }} 
+                                initialRegion={updateCafeRegion(modalData.cafe_id)}
+                                scrollEnabled={false}
+                                zoomEnabled={false}
+                                rotateEnabled={false}
+                                pitchEnabled={false}
+                                onPress={() => openMapNavigation(getCafeById(modalData.cafe_id))}
+                              >
+                                <Marker
+                                  coordinate={{
+                                    latitude: getCafeById(modalData.cafe_id).location.geometry.coordinates[1] ,
+                                    longitude: getCafeById(modalData.cafe_id).location.geometry.coordinates[0] 
+                                  }}
+                                  title={getCafeNameById(modalData.cafe_id)}
+                                  description={getCafeById(modalData.cafe_id).location.pavillon}
+                                  onPress={() => openMapNavigation(getCafeById(modalData.cafe_id))}
+                                />
+                              </MapView>
+                            )}
+                          </View>
+                        )}
+
+                        {/* For events - show cafes */}
+                        {modalData.cafes && modalData.cafes.length > 0 && (
+                          <View style={{
+                            backgroundColor: '#F8F9FA',
+                            borderRadius: 12,
+                            padding: SPACING["md"],
+                            marginBottom: SPACING["sm"]
+                          }}>
+                            <View style={{flexDirection: 'row', alignItems: 'center', marginBottom: SPACING["xs"]}}>
+                              <View style={{
+                                width: 8,
+                                height: 8,
+                                borderRadius: 4,
+                                backgroundColor: '#FF9800',
+                                marginRight: SPACING["sm"]
+                              }} />
+                              <Text style={{...TYPOGRAPHY.body.normal.semiBold, color: '#333'}}>Cafés participants</Text>
+                            </View>
+                            {modalData.cafes.map((cafe: any, index: number) => (
+                              <Text key={index} style={{...TYPOGRAPHY.body.normal.base, color: '#666', marginBottom: 4}}>
+                                • {cafe.name}
+                              </Text>
+                            ))}
+                            
+                            {/* Show map for the first cafe in events */}
+                            {modalData.cafes[0] && getCafeById(modalData.cafes[0].id) && getCafeById(modalData.cafes[0].id).location?.geometry?.coordinates && (
+                              <MapView 
+                                style={{
+                                  width:'100%',
+                                  height:150,
+                                  borderRadius:10,
+                                  marginTop: SPACING["sm"]
+                                }} 
+                                initialRegion={updateCafeRegion(modalData.cafes[0].id)}
+                                scrollEnabled={false}
+                                zoomEnabled={false}
+                                rotateEnabled={false}
+                                pitchEnabled={false}
+                                onPress={() => openMapNavigation(getCafeById(modalData.cafes[0].id))}
+                              >
+                                <Marker
+                                  coordinate={{
+                                    latitude: getCafeById(modalData.cafes[0].id).location.geometry.coordinates[1],
+                                    longitude: getCafeById(modalData.cafes[0].id).location.geometry.coordinates[0]
+                                  }}
+                                  title={modalData.cafes[0].name}
+                                  description={getCafeById(modalData.cafes[0].id).location.pavillon}
+                                  onPress={() => openMapNavigation(getCafeById(modalData.cafes[0].id))}
+                                />
+                              </MapView>
+                            )}
+                          </View>
+                        )}
+
+                        {/* Date info */}
                         <View style={{
                           backgroundColor: '#F8F9FA',
                           borderRadius: 12,
@@ -380,70 +655,50 @@ export default function EventsPage() {
                               width: 8,
                               height: 8,
                               borderRadius: 4,
-                              backgroundColor: '#4CAF50',
+                              backgroundColor: '#2196F3',
                               marginRight: SPACING["sm"]
                             }} />
-                            <Text style={{...TYPOGRAPHY.body.normal.semiBold, color: '#333'}}>Café</Text>
+                            <Text style={{...TYPOGRAPHY.body.normal.semiBold, color: '#333'}}>
+                              {modalData.start_date ? 'Dates de l\'événement' : 'Date limite'}
+                            </Text>
                           </View>
-                          <Text style={{...TYPOGRAPHY.body.normal.base, color: '#666', marginBottom: SPACING["sm"]}}>
-                            {getCafeNameById(modalData.cafe_id)}
-                          </Text>
-                          
-                          {getCafeById(modalData.cafe_id) && (
-                            <MapView 
-                              style={{
-                                width:'100%',
-                                height:150,
-                                borderRadius:10,
-                                marginTop: SPACING["sm"]
-                              }} 
-                              initialRegion={updateCafeRegion(modalData.cafe_id)}
-                              scrollEnabled={false}
-                              zoomEnabled={false}
-                              rotateEnabled={false}
-                              pitchEnabled={false}
-                              onPress={() => openMapNavigation(getCafeById(modalData.cafe_id))}
-                            >
-                              <Marker
-                                coordinate={{
-                                  latitude: getCafeById(modalData.cafe_id).location.geometry.coordinates[1],
-                                  longitude: getCafeById(modalData.cafe_id).location.geometry.coordinates[0]
-                                }}
-                                title={getCafeNameById(modalData.cafe_id)}
-                                description={getCafeById(modalData.cafe_id).location.pavillon}
-                                onPress={() => openMapNavigation(getCafeById(modalData.cafe_id))}
-                              />
-                            </MapView>
+                          {modalData.start_date ? (
+                            <View>
+                              <Text style={{...TYPOGRAPHY.body.normal.base, color: '#666'}}>
+                                Début: {new Date(modalData.start_date).toLocaleDateString('fr-FR', { 
+                                  weekday: 'long',
+                                  year: 'numeric',
+                                  month: 'long',
+                                  day: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })}
+                              </Text>
+                              <Text style={{...TYPOGRAPHY.body.normal.base, color: '#666', marginTop: 4}}>
+                                Fin: {new Date(modalData.end_date).toLocaleDateString('fr-FR', { 
+                                  weekday: 'long',
+                                  year: 'numeric',
+                                  month: 'long',
+                                  day: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })}
+                              </Text>
+                            </View>
+                          ) : (
+                            <Text style={{...TYPOGRAPHY.body.normal.base, color: '#666'}}>
+                              {new Date(modalData.active_until).toLocaleDateString('fr-FR', { 
+                                weekday: 'long',
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric'
+                              })}
+                            </Text>
                           )}
                         </View>
 
-                        <View style={{
-                          backgroundColor: '#F8F9FA',
-                          borderRadius: 12,
-                          padding: SPACING["md"],
-                          marginBottom: SPACING["sm"]
-                        }}>
-                          <View style={{flexDirection: 'row', alignItems: 'center', marginBottom: SPACING["xs"]}}>
-                            <View style={{
-                              width: 8,
-                              height: 8,
-                              borderRadius: 4,
-                              backgroundColor: '#FF9800',
-                              marginRight: SPACING["sm"]
-                            }} />
-                            <Text style={{...TYPOGRAPHY.body.normal.semiBold, color: '#333'}}>Date limite</Text>
-                          </View>
-                          <Text style={{...TYPOGRAPHY.body.normal.base, color: '#666'}}>
-                            {new Date(modalData.active_until).toLocaleDateString('fr-FR', { 
-                              weekday: 'long',
-                              year: 'numeric',
-                              month: 'long',
-                              day: 'numeric'
-                            })}
-                          </Text>
-                        </View>
-
-                        {modalData.author && (
+                        {/* Creator/Author info */}
+                        {(modalData.creator || modalData.author) && (
                           <View style={{
                             backgroundColor: '#F8F9FA',
                             borderRadius: 12,
@@ -454,13 +709,18 @@ export default function EventsPage() {
                                 width: 8,
                                 height: 8,
                                 borderRadius: 4,
-                                backgroundColor: '#2196F3',
+                                backgroundColor: '#9C27B0',
                                 marginRight: SPACING["sm"]
                               }} />
-                              <Text style={{...TYPOGRAPHY.body.normal.semiBold, color: '#333'}}>Organisé par</Text>
+                              <Text style={{...TYPOGRAPHY.body.normal.semiBold, color: '#333'}}>
+                                {modalData.creator ? 'Créé par' : 'Organisé par'}
+                              </Text>
                             </View>
                             <Text style={{...TYPOGRAPHY.body.normal.base, color: '#666'}}>
-                              {modalData.author.first_name} {modalData.author.last_name}
+                              {modalData.creator ? 
+                                `${modalData.creator.first_name} ${modalData.creator.last_name}` :
+                                `${modalData.author.first_name} ${modalData.author.last_name}`
+                              }
                             </Text>
                           </View>
                         )}
@@ -472,7 +732,7 @@ export default function EventsPage() {
                           Description
                         </Text>
                         <Text style={{...TYPOGRAPHY.body.normal.base, color: '#666', lineHeight: 22}}>
-                          {modalData.content}
+                          {modalData.description || modalData.content}
                         </Text>
                       </View>
                     </View>

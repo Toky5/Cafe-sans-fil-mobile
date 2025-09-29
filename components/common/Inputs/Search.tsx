@@ -13,7 +13,7 @@ type SearchBarProps = {
 };
 
 export default function SearchBar({
-  placeholder = "Rechercher les cafés, les plats",
+  placeholder = "Rechercher les cafés, les locaux...",
   onSearch,
 }: SearchBarProps) {
   return (

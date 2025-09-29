@@ -2,7 +2,7 @@ import { Redirect, router, Tabs } from "expo-router";
 import TYPOGRAPHY from "@/constants/Typography";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import HeaderLayout from "@/components/layouts/HeaderLayout";
-import { Home, Settings, ShoppingBasket, UserRound, Newspaper} from "lucide-react-native";
+import { Home, Settings, ShoppingBasket, UserRound, Newspaper, UserRoundPen} from "lucide-react-native";
 import { Platform, View, ActivityIndicator } from "react-native";
 import { getInfoFromToken, getToken, getRefreshToken, clearTokens, updateToken } from "@/utils/tokenStorage";
 import { useEffect, useState } from "react";
@@ -122,7 +122,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="events"
         options={{
-          title: "Évenements",
+          title: "Communauté",
           headerShown: false,
           tabBarIcon: ({ color }) => <Newspaper size={28} color={color} />,
           tabBarLabelStyle: TYPOGRAPHY.body.small.bold,
@@ -135,7 +135,7 @@ export default function TabLayout() {
         options={{
           title: "Compte",
           headerShown: false,
-          tabBarIcon: ({ color }) => <UserRound size={28} color={color} />,
+          tabBarIcon: ({ color }) => <UserRoundPen size={28} color={color} />,
           tabBarLabelStyle: TYPOGRAPHY.body.small.bold,
           animation: 'shift'
         }}
