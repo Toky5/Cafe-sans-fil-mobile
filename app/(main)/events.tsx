@@ -50,12 +50,30 @@ export default function EventsPage() {
         console.error('Error opening maps:', error);
       }
     } else {
-      // iOS: Check if Google Maps is installed
-      const googleMapsUrl = `comgooglemaps://?daddr=${latitude},${longitude}&directionsmode=driving`;
+      // iOS: Check if Google Maps is installed using different URL schemes
+      const googleMapsNavigationUrl = `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`;
+      const googleMapsSimpleUrl = `comgooglemaps://`;
       const appleMapsUrl = `http://maps.apple.com/?daddr=${latitude},${longitude}&dirflg=d`;
       
       try {
-        const googleMapsInstalled = await Linking.canOpenURL(googleMapsUrl);
+        // Try multiple Google Maps URL schemes to ensure detection
+        let googleMapsInstalled = true;
+        
+        try {
+          googleMapsInstalled = await Linking.canOpenURL(googleMapsSimpleUrl);
+          console.log('Google Maps detection (simple):', googleMapsInstalled);
+        } catch (e) {
+          console.log('Google Maps simple URL check failed:', e);
+        }
+        
+        if (!googleMapsInstalled) {
+          try {
+            googleMapsInstalled = await Linking.canOpenURL(googleMapsNavigationUrl);
+            console.log('Google Maps detection (navigation):', googleMapsInstalled);
+          } catch (e) {
+            console.log('Google Maps navigation URL check failed:', e);
+          }
+        }
         
         if (googleMapsInstalled) {
           // Show choice between Apple Maps and Google Maps
@@ -65,11 +83,17 @@ export default function EventsPage() {
             [
               {
                 text: 'Apple Maps',
-                onPress: () => Linking.openURL(appleMapsUrl)
+                onPress: () => {
+                  console.log('Opening Apple Maps');
+                  Linking.openURL(appleMapsUrl);
+                }
               },
               {
                 text: 'Google Maps',
-                onPress: () => Linking.openURL(googleMapsUrl)
+                onPress: () => {
+                  console.log('Opening Google Maps');
+                  Linking.openURL(googleMapsNavigationUrl);
+                }
               },
               {
                 text: 'Annuler',
@@ -77,8 +101,10 @@ export default function EventsPage() {
               }
             ]
           );
-        } else {
+        }
+        else{
           // Only Apple Maps available
+          console.log('Google Maps not detected, opening Apple Maps');
           await Linking.openURL(appleMapsUrl);
         }
       } catch (error) {
@@ -103,8 +129,8 @@ export default function EventsPage() {
       return {
         latitude: cafe.location.geometry.coordinates[1],
         longitude: cafe.location.geometry.coordinates[0],
-        latitudeDelta: 0.01,
-        longitudeDelta: 0.01,
+        latitudeDelta: 0.003 ,
+        longitudeDelta: 0.003,
       };
     }
     // Default region if cafe not found
@@ -242,7 +268,7 @@ export default function EventsPage() {
               </Text>
             </View>
             <Text style={{...TYPOGRAPHY.body.small.base, color: '#999'}}>
-              {new Date(announcement.active_until).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
+              {new Date(announcement.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
             </Text>
           </View>
         </View>
@@ -297,16 +323,6 @@ export default function EventsPage() {
                     borderBottomWidth: 1,
                     borderBottomColor: '#F0F0F0'
                   }}>
-                    <View style={{
-                      width: 40,
-                      height: 4,
-                      backgroundColor: '#E0E0E0',
-                      borderRadius: 2,
-                      position: 'absolute',
-                      top: 8,
-                      left: '50%',
-                      marginLeft: -20
-                    }} />
                     <Text style={{...TYPOGRAPHY.heading.small.bold}}>Détails de l'événement</Text>
                     <TouchableOpacity 
                       onPress={() => setShowModal(false)} 
