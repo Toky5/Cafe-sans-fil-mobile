@@ -55,6 +55,7 @@ export default function ParametreScreen() {
   const [userFullName, setUserFullName] = React.useState<string>("");
   const [userProfilePicture, setUserProfilePicture] = React.useState<string | null>(null);
   const [isLoading, setIsLoading] = React.useState(true);
+  const [userEmail, setUserEmail] = React.useState<string>("");
   
 
   const orders = [
@@ -93,6 +94,7 @@ export default function ParametreScreen() {
             if (userInfo && userInfo.first_name && userInfo.last_name) {
               setUserFullName(`${userInfo.first_name} ${userInfo.last_name}`);
               setUserImage(userInfo.photo_url);
+              setUserEmail(userInfo.email);
             } else if (userInfo && userInfo.name) {
               // Fallback to name field if first_name/last_name aren't available
               setUserFullName(userInfo.name);
@@ -318,8 +320,8 @@ export default function ParametreScreen() {
                   <Image source={{ uri: userProfilePicture }} style={styles.profilePicture} />
                 </TouchableOpacity>
                 <Text style={[{alignSelf:'center',padding:20, fontWeight:500}]}>Modifier votre photo de profil</Text>
-                <TextInput style={styles.input } placeholder="Modifier votre Nom" placeholderTextColor="grey" />
-                <TextInput style={styles.input} placeholder="Modifier votre Email" placeholderTextColor="grey" />
+                <TextInput style={styles.input } placeholder="Modifier  Nom" placeholderTextColor="grey" defaultValue={userFullName} />
+                <TextInput style={styles.input} placeholder="Modifier votre Email" placeholderTextColor="grey" defaultValue={userEmail}/>
                 
                 <View style={styles.passwordContainer}>
                   <TextInput 
@@ -500,7 +502,7 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.sm,
     borderBottomWidth: 1,
     borderTopWidth: 1,
-    borderBottomColor: COLORS.lightGray,
+    borderBottomColor: '#F0F0F0',
     borderTopColor: COLORS.white,
     backgroundColor: COLORS.white,
     paddingTop: SPACING["8xl"], 
@@ -612,7 +614,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
+    borderBottomColor: '#F0F0F0'
   },
   modalTitle: {
     fontSize: 20,

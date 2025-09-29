@@ -5,6 +5,8 @@ import SPACING from '@/constants/Spacing';
 import TYPOGRAPHY from "@/constants/Typography";
 import HeaderLayout from '@/components/layouts/HeaderLayout';
 import MapView, { Marker } from 'react-native-maps';
+import AntDesign from '@expo/vector-icons/AntDesign'; 
+import COLORS from "@/constants/Colors";
 
 export default function EventsPage() {
 
@@ -481,12 +483,11 @@ export default function EventsPage() {
                         width: 32,
                         height: 32,
                         borderRadius: 16,
-                        backgroundColor: '#F5F5F5',
                         justifyContent: 'center',
                         alignItems: 'center'
                       }}
                     >
-                      <Text style={{...TYPOGRAPHY.body.large.semiBold, color: '#666'}}>×</Text>
+                      <AntDesign name="close" size={24} color={COLORS.black} />
                     </TouchableOpacity>
                   </View>
 
@@ -557,8 +558,9 @@ export default function EventsPage() {
                               <Text style={{...TYPOGRAPHY.body.normal.semiBold, color: '#333'}}>Café</Text>
                             </View>
                             <Text style={{...TYPOGRAPHY.body.normal.base, color: '#666', marginBottom: SPACING["sm"]}}>
-                              {getCafeNameById(modalData.cafe_id)}
+                              {getCafeNameById(modalData.cafe_id)}, {getCafeById(modalData.cafe_id) && getCafeById(modalData.cafe_id).location && getCafeById(modalData.cafe_id).location.pavillon ? getCafeById(modalData.cafe_id).location.pavillon : ''}
                             </Text>
+                            
                             
                             {getCafeById(modalData.cafe_id) && (
                               <MapView 
@@ -607,11 +609,14 @@ export default function EventsPage() {
                               }} />
                               <Text style={{...TYPOGRAPHY.body.normal.semiBold, color: '#333'}}>Cafés participants</Text>
                             </View>
-                            {modalData.cafes.map((cafe: any, index: number) => (
-                              <Text key={index} style={{...TYPOGRAPHY.body.normal.base, color: '#666', marginBottom: 4}}>
-                                • {cafe.name}
-                              </Text>
-                            ))}
+                            {modalData.cafes.map((cafe: any, index: number) => {
+                              const fullCafe = getCafeById(cafe.id);
+                              return (
+                                <Text key={index} style={{...TYPOGRAPHY.body.normal.base, color: '#666', marginBottom: 4}}>
+                                  • {cafe.name}, {fullCafe && fullCafe.location && fullCafe.location.pavillon ? fullCafe.location.pavillon : ''}
+                                </Text>
+                              );
+                            })}
                             
                             {/* Show map for the first cafe in events */}
                             {modalData.cafes[0] && getCafeById(modalData.cafes[0].id) && getCafeById(modalData.cafes[0].id).location?.geometry?.coordinates && (
