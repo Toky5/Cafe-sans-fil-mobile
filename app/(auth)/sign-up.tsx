@@ -137,7 +137,7 @@ export default function SignInScreen() {
   <Ionicons name="arrow-back" size={24} color="#000" />
 </TouchableOpacity>
     
-      <Image source={require("@/logo.png")} style={styles.logo}/>
+      <Image source={require("@/logoold.png")} style={styles.logo}/>
       <View style={styles.header}>
       <Text style={styles.textHeader}>
         Créez un compte

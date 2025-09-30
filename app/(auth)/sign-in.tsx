@@ -67,7 +67,7 @@ export default function SignInScreen() {
   >
       <ScrollView ref={scrollViewRef} showsVerticalScrollIndicator={false}
   keyboardShouldPersistTaps="handled" style={{  minHeight: "100%" }}>
-      <Image source={require("@/logo.png")} style={styles.logo}/>
+      <Image source={require("@/logoold.png")} style={styles.logo}/>
       <View style={styles.header}>
       <Text style={styles.textHeader}>
         Connectez-vous à votre compte
