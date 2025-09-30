@@ -1,4 +1,4 @@
-import { View, Text, Touchable, TouchableOpacity, Modal, Platform, Linking, Alert, Image } from 'react-native';
+import { View, Text, Touchable, TouchableOpacity, Modal, Platform, Linking, Alert, Image, StatusBar } from 'react-native';
 import React, { use, useEffect } from 'react';
 import ScrollableLayout from '@/components/layouts/ScrollableLayout';
 import SPACING from '@/constants/Spacing';
@@ -373,6 +373,7 @@ export default function EventsPage() {
 
   return (
     <>
+    <StatusBar />
     <HeaderLayout />
       <ScrollableLayout>
         <View>

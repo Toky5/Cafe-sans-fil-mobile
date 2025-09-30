@@ -90,8 +90,10 @@ export default function TabLayout() {
           header: () => <HeaderLayout />,
           tabBarIcon: ({ color }) => <Home size={28} color={color} />,
           tabBarLabelStyle: TYPOGRAPHY.body.small.bold,
-          animation: 'shift'
+          animation: 'shift',
+          sceneStyle: { backgroundColor: 'white' }  
         }}
+        
       />
       <Tabs.Screen
         name="favoris"

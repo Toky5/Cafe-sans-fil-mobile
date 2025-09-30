@@ -1,5 +1,5 @@
-import { View,  Text , FlatList} from 'react-native';
-import React, { useEffect } from 'react';
+import { View,  Text , FlatList, StatusBar} from 'react-native';
+import React, { useEffect ,} from 'react';
 import ScrollableLayout from '@/components/layouts/ScrollableLayout';
 import SPACING from '@/constants/Spacing';
 import TYPOGRAPHY from "@/constants/Typography";
@@ -76,6 +76,7 @@ export default function FavorisScreen() {
 
   return (
     <>
+    <StatusBar />
     <HeaderLayout />
       <ScrollableLayout>
         <View>
@@ -91,7 +92,7 @@ export default function FavorisScreen() {
         {cafeFavoris.length === 0 ? (
           <View style={{ marginHorizontal: SPACING["md"] }}>
             <Text style={{ ...TYPOGRAPHY.body.normal.base, color: '#666' }}>
-              Aucun café disponible pour le moment.
+              Ajoutez des cafés à vos favoris pour les retrouver ici !
             </Text>
           </View>
         ) : (
@@ -112,7 +113,7 @@ export default function FavorisScreen() {
             >Vos articles favoris</Text>
             <View style={{ marginHorizontal: SPACING["md"] }}>
             <Text style={{ ...TYPOGRAPHY.body.normal.base, color: '#666' }}>
-              Aucun article disponible pour le moment.
+              Ajoutez des articles à vos favoris pour les retrouver ici !
             </Text>
           </View>
         </View>

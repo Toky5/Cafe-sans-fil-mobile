@@ -1,6 +1,6 @@
 import Button from "@/components/common/Buttons/Button";
 import React from "react";
-import {Text, View, Image, TextInput, ScrollView, KeyboardAvoidingView, Platform, TouchableOpacity} from "react-native";
+import {Text, View, Image, TextInput, ScrollView, KeyboardAvoidingView, Platform,StatusBar,TouchableOpacity} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {useRouter} from "expo-router";
 import { Ionicons } from '@expo/vector-icons';
@@ -121,6 +121,7 @@ export default function SignInScreen() {
   return (
     
     <SafeAreaView >
+      <StatusBar />
       <KeyboardAvoidingView 
     behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     

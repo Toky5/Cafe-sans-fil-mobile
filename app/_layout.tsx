@@ -12,6 +12,8 @@ import { GlobalModalProvider } from '@/components/layouts/GlobalModal';
 import { type TokenCache } from '@/lib/token-cache';
 import * as SecureStore from 'expo-secure-store'
 
+import { StatusBar } from 'react-native';
+
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
@@ -71,11 +73,12 @@ export default function RootLayout() {
 
     return (
           <GlobalModalProvider>
+            <StatusBar />
             <Stack screenOptions={{ 
               gestureEnabled: false,
               contentStyle: { backgroundColor: COLORS.white },
             }}>
-              <Stack.Screen name='(main)' options={{ headerShown: false }}  />
+              <Stack.Screen name='(main)' options={{ headerShown: false}} />
               <Stack.Screen name='(onboarding)' options={{ headerShown: false}} />
               <Stack.Screen name='(auth)' options={{ headerShown: false}} />
             </Stack>

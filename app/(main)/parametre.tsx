@@ -10,6 +10,7 @@ import {
   Button,
   TextInput,
   ScrollView,
+  StatusBar
 } from "react-native";
 
 import React, { useState } from 'react'
@@ -242,6 +243,7 @@ export default function ParametreScreen() {
 
   return (
     <>
+    <StatusBar />
     {/* User Profile Section */}
     <TouchableOpacity style={styles.profileSection} onPress={() => setAccountModalVisible(true)}>
     <View style={styles.profileLeft}>

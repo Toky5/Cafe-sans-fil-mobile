@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Redirect, router } from "expo-router";
 import * as Location from "expo-location";
 import { Activity, Star, Vegan } from "lucide-react-native";
-import { View, StyleSheet, Image, Text, FlatList, SafeAreaView, ActivityIndicator, TouchableOpacity } from "react-native";
+import { View, StyleSheet,StatusBar, Image, Text, FlatList, SafeAreaView, ActivityIndicator, TouchableOpacity } from "react-native";
 
 import useLocation from "@/hooks/useLocation";
 import useOnForegroundBack from "@/hooks/useOnForegroundBack";
@@ -223,7 +223,9 @@ export default function HomeScreen() {
   }
   else {
     return (
+      
       <SafeAreaView>
+        <StatusBar />
         <ScrollableLayout>
           <>
             {/* User Location and Search */}
@@ -271,7 +273,7 @@ export default function HomeScreen() {
                 marginVertical: SPACING["sm"],
                 marginHorizontal: SPACING["sm"],
                 ...TYPOGRAPHY.heading.small.bold
-              }}>Tous les cafés
+              }}>{!searched ? "Tous les cafés" : `Résultats (${data.length})`}
             </Text>
             <FlatList data={filterCafes(data)} renderItem={({ item }) =>
               <CafeCard
