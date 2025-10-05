@@ -361,7 +361,7 @@ console.log(paymentDetails);
   }
 
   return (
-    <SafeAreaView style={{ backgroundColor: '#000', flex: 1 }}>
+    <SafeAreaView style={{ flex: 1 }}>
       {/* Sticky Header */}
       <Animated.View style={[
         styles.stickyHeader,
@@ -707,13 +707,13 @@ console.log(paymentDetails);
 const styles = StyleSheet.create({
   stickyHeader: {
     position: "absolute",
-    top: Platform.OS === 'ios' ? 37 : 0, // Position under status bar/notch
+    top: Platform.OS === 'ios' ? 0 : 0, // Position under status bar/notch
     left: 0,
     right: 0,
     zIndex: 1000,
-    paddingTop: Platform.OS === 'ios' ? 12 : 30,
+    paddingTop: Platform.OS === 'ios' ? "16%" : 30,
     paddingBottom: 12,
-    marginTop: Platform.OS === 'ios' ? 8 : 0, // Extra spacing for iOS notch area
+    
   },
   cafeBackgroundImage: {
     width: "100%",  // Fill width
@@ -760,6 +760,8 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     height: 40,
     overflow: "hidden",
+    marginLeft: -6,
+
   },
   searchInput: {
     flex: 1,
