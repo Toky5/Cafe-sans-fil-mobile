@@ -225,7 +225,7 @@ export default function HomeScreen() {
     return (
       
       <SafeAreaView>
-        <StatusBar />
+        <StatusBar   barStyle="dark-content"/>
         <ScrollableLayout>
           <>
             {/* User Location and Search */}

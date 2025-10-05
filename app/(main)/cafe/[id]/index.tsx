@@ -368,7 +368,7 @@ console.log(paymentDetails);
         {
           backgroundColor: headerBackgroundOpacity.interpolate({
             inputRange: [0, 1],
-            outputRange: ['transparent', 'rgba(255, 255, 255, 0.95)'],
+            outputRange: ['transparent', 'rgba(255, 255, 255, 1)'],
           }),
           borderBottomWidth: headerBackgroundOpacity.interpolate({
             inputRange: [0, 1],
@@ -762,6 +762,8 @@ const styles = StyleSheet.create({
     height: 40,
     overflow: "hidden",
     marginLeft: -6,
+    borderColor: '#E5E5E5',
+    borderWidth: 1,
 
   },
   searchInput: {
