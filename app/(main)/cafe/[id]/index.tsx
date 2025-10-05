@@ -689,6 +689,7 @@ console.log(paymentDetails);
           )}
           keyExtractor={(item) => item.id}
           horizontal
+          showsHorizontalScrollIndicator={false}
           ItemSeparatorComponent={() => <View style={{ width: SPACING["sm"] }} />}
           style={{
             paddingHorizontal: SPACING["sm"],

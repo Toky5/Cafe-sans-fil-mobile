@@ -347,15 +347,7 @@ const [error, setError] = useState<string | null>(null);
       </View>
       
 
-      <Text 
-        style={{
-          marginVertical: SPACING["xl"], 
-          marginHorizontal: SPACING["md"], 
-          ...TYPOGRAPHY.heading.small.bold
-        }}>
-          Tendances actuelles
-        </Text>
-        
+      
 
     </ScrollView>
     </KeyboardAvoidingView>

@@ -287,6 +287,7 @@ export default function HomeScreen() {
               />}
               keyExtractor={item => item.id}
               horizontal
+              showsHorizontalScrollIndicator={false}
               ItemSeparatorComponent={() => <View style={{ width: SPACING["md"] }} />}
               style={{
                 paddingHorizontal: SPACING["sm"],
@@ -358,6 +359,7 @@ export default function HomeScreen() {
                         )}
                         keyExtractor={item => item.id}
                         horizontal
+                        showsHorizontalScrollIndicator={false}
                         ItemSeparatorComponent={() => <View style={{ width: SPACING["md"] }} />}
                         style={{
                           paddingHorizontal: SPACING["sm"],
