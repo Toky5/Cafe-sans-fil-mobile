@@ -6,6 +6,8 @@ import TYPOGRAPHY from "@/constants/Typography";
 import HeaderLayout from '@/components/layouts/HeaderLayout';
 import { clearTokens, getInfoFromToken, getToken, deleteAccount} from "@/utils/tokenStorage";
 import CafeCard from "@/components/common/Cards/CafeCard";
+import ArticleCard from "@/components/common/Cards/ArticleCard";
+
 
 export default function FavorisScreen() {
 
@@ -44,6 +46,7 @@ export default function FavorisScreen() {
         const data = await response.json();
         console.log('Cafes fetched:', data.items?.[0]);
         setListeCafes(data);
+        setCafeFavoris(data.items?.slice(0, 3) || []);
         setIsCafesLoading(false);
       } catch (error) {
         console.error('Error fetching cafes:', error);
@@ -80,7 +83,7 @@ export default function FavorisScreen() {
     <HeaderLayout />
       <ScrollableLayout>
         <View>
-          <Text 
+          <Text  
             style={{
               marginVertical: SPACING["xl"], 
               marginHorizontal: SPACING["md"], 
@@ -89,17 +92,38 @@ export default function FavorisScreen() {
             >Vos cafés favoris</Text>
         </View>
 
+
+        
+
         {cafeFavoris.length === 0 ? (
           <View style={{ marginHorizontal: SPACING["md"] }}>
             <Text style={{ ...TYPOGRAPHY.body.normal.base, color: '#666' }}>
               Ajoutez des cafés à vos favoris pour les retrouver ici !
             </Text>
           </View>
-        ) : (
+        ) : !isCafesLoading && (
          <View style={{ marginHorizontal: SPACING["md"] }}>
-            <Text style={{ ...TYPOGRAPHY.body.normal.base, color: '#666' }}>
-              À implémenter
-            </Text>
+           <FlatList
+            data={cafeFavoris}
+            renderItem={({ item }) => {
+              const cafe = getCafeById(item.id);
+              return cafe ? <CafeCard 
+              name={cafe.name}
+              image={cafe.banner_url}
+                location={cafe.location.pavillon}
+                priceRange="$$"
+                //rating={4.8}
+                status={cafe.is_open}
+                id={cafe.id} /> : null;
+            }}
+            keyExtractor={(item) => item.id}
+            horizontal
+            ItemSeparatorComponent={() => <View style={{ width: SPACING["sm"] }} />}
+          style={{
+            paddingHorizontal: SPACING["sm"],
+            paddingBottom: SPACING["md"],
+          }}
+          />
           </View>
         )}
 
