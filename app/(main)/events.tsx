@@ -1,5 +1,5 @@
-import { View, Text, Touchable, TouchableOpacity, Modal, Platform, Linking, Alert, Image, StatusBar } from 'react-native';
-import React, { use, useEffect } from 'react';
+import { View, Text, Touchable, TouchableOpacity, Modal, Platform, Linking, Alert, Image, StatusBar, FlatList } from 'react-native';
+import React, { use, useEffect, useMemo, useCallback, memo } from 'react';
 import ScrollableLayout from '@/components/layouts/ScrollableLayout';
 import SPACING from '@/constants/Spacing';
 import TYPOGRAPHY from "@/constants/Typography";
@@ -7,6 +7,7 @@ import HeaderLayout from '@/components/layouts/HeaderLayout';
 import MapView, { Marker } from 'react-native-maps';
 import AntDesign from '@expo/vector-icons/AntDesign'; 
 import COLORS from "@/constants/Colors";
+import { useFocusEffect } from '@react-navigation/native';
 
 export default function EventsPage() {
 
@@ -159,10 +160,46 @@ export default function EventsPage() {
   }
 
   const [showModal, setShowModal] = React.useState(false);
+  const [currentPage, setCurrentPage] = React.useState(0);
+  const [isFocused, setIsFocused] = React.useState(true);
+  const ITEMS_PER_PAGE = 5;
   
+  // Use focus effect to clean up when navigating away
+  useFocusEffect(
+    useCallback(() => {
+      // When screen comes into focus
+      setIsFocused(true);
+      console.log('Events page focused - loading data');
+      
+      return () => {
+        // When screen loses focus, clean up everything
+        console.log('Events page unfocused - cleaning up');
+        setIsFocused(false);
+        setShowModal(false);
+        setModalData(null);
+        setLaliste(null);
+        setEvents(null);
+        setListeCafes(null);
+        setIsLoading(true);
+        setIsEventsLoading(true);
+        setIsCafesLoading(true);
+        setCurrentPage(0);
+      };
+    }, [])
+  );
 
+  // Reset to page 0 when switching tabs
+  useEffect(() => {
+    setCurrentPage(0);
+  }, [activeTab]);
 
   useEffect(() => {
+    // Only fetch data when screen is focused
+    if (!isFocused) {
+      console.log('Screen not focused, skipping data fetch');
+      return;
+    }
+    
     // Prevent multiple simultaneous requests
     if (isRequestingData) return;
     
@@ -177,45 +214,7 @@ export default function EventsPage() {
       ]);
     };
 
-    // Fetch announcements
-    const fetchAnnouncements = async () => {
-      try {
-        const response = await fetchWithTimeout('https://cafesansfil-api-r0kj.onrender.com/api/announcements/');
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-        console.log('Announcements fetched:', data.items?.[0]);
-        setLaliste(data);
-        setIsLoading(false);
-      } catch (error) {
-        console.error('Error fetching announcements:', error);
-        setIsLoading(false);
-        // Set empty data to prevent infinite loading
-        setLaliste({ items: [] });
-      }
-    };
-
-    // Fetch events
-    const fetchEvents = async () => {
-      try {
-        const response = await fetchWithTimeout('https://cafesansfil-api-r0kj.onrender.com/api/events/');
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-        console.log('Events fetched:', data.items?.[0]);
-        setEvents(data);
-        setIsEventsLoading(false);
-      } catch (error) {
-        console.error('Error fetching events:', error);
-        setIsEventsLoading(false);
-        // Set empty data to prevent infinite loading
-        setEvents({ items: [] });
-      }
-    };
-
-    // Fetch cafes
+    // Fetch cafes first (needed for both tabs)
     const fetchCafes = async () => {
       try {
         const response = await fetchWithTimeout('https://cafesansfil-api-r0kj.onrender.com/api/cafes/');
@@ -229,37 +228,77 @@ export default function EventsPage() {
       } catch (error) {
         console.error('Error fetching cafes:', error);
         setIsCafesLoading(false);
-        // Set empty data to prevent infinite loading
         setListeCafes({ items: [] });
       }
     };
 
-    // Execute all requests
-    Promise.all([fetchAnnouncements(), fetchEvents(), fetchCafes()])
+    // Only fetch data for the active tab
+    const fetchActiveTabData = async () => {
+      if (activeTab === 'events') {
+        // Fetch events only
+        try {
+          const response = await fetchWithTimeout('https://cafesansfil-api-r0kj.onrender.com/api/events/');
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          const data = await response.json();
+          console.log('Events fetched:', data.items?.[0]);
+          setEvents(data);
+          setIsEventsLoading(false);
+          // Clear announcements to free memory
+          setLaliste(null);
+        } catch (error) {
+          console.error('Error fetching events:', error);
+          setIsEventsLoading(false);
+          setEvents({ items: [] });
+        }
+      } else {
+        // Fetch announcements only
+        try {
+          const response = await fetchWithTimeout('https://cafesansfil-api-r0kj.onrender.com/api/announcements/');
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          const data = await response.json();
+          console.log('Announcements fetched:', data.items?.[0]);
+          setLaliste(data);
+          setIsLoading(false);
+          // Clear events to free memory
+          setEvents(null);
+        } catch (error) {
+          console.error('Error fetching announcements:', error);
+          setIsLoading(false);
+          setLaliste({ items: [] });
+        }
+      }
+    };
+
+    // Execute requests
+    Promise.all([fetchCafes(), fetchActiveTabData()])
       .finally(() => {
         setIsRequestingData(false);
       });
 
-  }, []); // Empty dependency array to run only once
+  }, [activeTab, isFocused]); // Empty dependency array to run only once
 
-  const displayEvent = (event: any) => {
+  // Memoized event card component for better performance
+  const EventCard = memo(({ event }: { event: any }) => {
     return (
-      <TouchableOpacity key={event.id} onPress={() => {
-        openModalWithData(event);
-      }}>
+      <TouchableOpacity onPress={() => openModalWithData(event)}>
         <View style={{
           backgroundColor: 'white',
           borderRadius: 16,
           padding: SPACING["lg"],
           marginBottom: SPACING["md"],
-          shadowColor: "#000",
-          shadowOffset: {
-            width: 0,
-            height: 4,
-          },
-          shadowOpacity: 0.1,
-          shadowRadius: 8,
-          elevation: 4,
+          // Use simpler shadow on Android for better performance
+          ...(Platform.OS === 'android' ? {
+            elevation: 2,
+          } : {
+            shadowColor: "#000",
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.1,
+            shadowRadius: 4,
+          }),
           borderWidth: 1,
           borderColor: '#F0F0F0'
         }}>
@@ -277,7 +316,6 @@ export default function EventsPage() {
           )}
           <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: SPACING["sm"]}}>
             <Text style={{...TYPOGRAPHY.body.large.semiBold, flex: 1, marginRight: SPACING["sm"]}}>{event.name}</Text>
-            
           </View>
           <Text 
             style={{...TYPOGRAPHY.body.normal.base, color: '#666', marginBottom: SPACING["sm"], lineHeight: 18}}
@@ -304,27 +342,27 @@ export default function EventsPage() {
           </View>
         </View>
       </TouchableOpacity>
-    )
-  }
+    );
+  });
 
-  const displayAnnouncement = (announcement : any) => {
+  // Memoized announcement card component for better performance
+  const AnnouncementCard = memo(({ announcement }: { announcement: any }) => {
     return (
-      <TouchableOpacity key={announcement.id} onPress={() => {
-        openModalWithData(announcement);
-      }}>
+      <TouchableOpacity onPress={() => openModalWithData(announcement)}>
         <View style={{
           backgroundColor: 'white',
           borderRadius: 16,
           padding: SPACING["lg"],
           marginBottom: SPACING["md"],
-          shadowColor: "#000",
-          shadowOffset: {
-            width: 0,
-            height: 4,
-          },
-          shadowOpacity: 0.1,
-          shadowRadius: 8,
-          elevation: 4,
+          // Use simpler shadow on Android for better performance
+          ...(Platform.OS === 'android' ? {
+            elevation: 2,
+          } : {
+            shadowColor: "#000",
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.1,
+            shadowRadius: 4,
+          }),
           borderWidth: 1,
           borderColor: '#F0F0F0'
         }}>
@@ -368,8 +406,8 @@ export default function EventsPage() {
           </View>
         </View>
       </TouchableOpacity>
-    )
-  }
+    );
+  });
 
   return (
     <>
@@ -433,18 +471,164 @@ export default function EventsPage() {
             </TouchableOpacity>
           </View>
 
-          <View style={{marginHorizontal: SPACING["md"]}}>
+          <View style={{flex: 1, marginHorizontal: SPACING["md"]}}>
             {activeTab === 'events' ? (
               isEventsLoading ? (
                 <Text>Loading events...</Text>
               ) : (
-                events && events.items && events.items.map((event: any) => displayEvent(event))
+                events && events.items && events.items.length > 0 ? (
+                  <>
+                    <FlatList
+                      data={events.items.slice(currentPage * ITEMS_PER_PAGE, (currentPage + 1) * ITEMS_PER_PAGE)}
+                      renderItem={({ item }) => <EventCard event={item} />}
+                      keyExtractor={(item) => item.id}
+                      scrollEnabled={false}
+                      removeClippedSubviews={true}
+                      maxToRenderPerBatch={5}
+                      windowSize={3}
+                      initialNumToRender={5}
+                    />
+                    
+                    {/* Pagination Controls */}
+                    {events.items.length > ITEMS_PER_PAGE && (
+                      <View style={{
+                        flexDirection: 'row',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        marginTop: SPACING["lg"],
+                        marginBottom: SPACING["xl"],
+                        paddingHorizontal: SPACING["md"]
+                      }}>
+                        <TouchableOpacity
+                          onPress={() => setCurrentPage(Math.max(0, currentPage - 1))}
+                          disabled={currentPage === 0}
+                          style={{
+                            backgroundColor: currentPage === 0 ? '#E0E0E0' : '#0057AC',
+                            paddingHorizontal: SPACING["lg"],
+                            paddingVertical: SPACING["sm"],
+                            borderRadius: 8,
+                            flex: 1,
+                            marginRight: SPACING["sm"]
+                          }}
+                        >
+                          <Text style={{
+                            ...TYPOGRAPHY.body.normal.semiBold,
+                            color: currentPage === 0 ? '#999' : 'white',
+                            textAlign: 'center'
+                          }}>← Précédent</Text>
+                        </TouchableOpacity>
+                        
+                        <Text style={{
+                          ...TYPOGRAPHY.body.normal.base,
+                          color: '#666',
+                          marginHorizontal: SPACING["md"]
+                        }}>
+                          {currentPage + 1} / {Math.ceil(events.items.length / ITEMS_PER_PAGE)}
+                        </Text>
+                        
+                        <TouchableOpacity
+                          onPress={() => setCurrentPage(Math.min(Math.ceil(events.items.length / ITEMS_PER_PAGE) - 1, currentPage + 1))}
+                          disabled={currentPage >= Math.ceil(events.items.length / ITEMS_PER_PAGE) - 1}
+                          style={{
+                            backgroundColor: currentPage >= Math.ceil(events.items.length / ITEMS_PER_PAGE) - 1 ? '#E0E0E0' : '#0057AC',
+                            paddingHorizontal: SPACING["lg"],
+                            paddingVertical: SPACING["sm"],
+                            borderRadius: 8,
+                            flex: 1,
+                            marginLeft: SPACING["sm"]
+                          }}
+                        >
+                          <Text style={{
+                            ...TYPOGRAPHY.body.normal.semiBold,
+                            color: currentPage >= Math.ceil(events.items.length / ITEMS_PER_PAGE) - 1 ? '#999' : 'white',
+                            textAlign: 'center'
+                          }}>Suivant →</Text>
+                        </TouchableOpacity>
+                      </View>
+                    )}
+                  </>
+                ) : (
+                  <Text style={{...TYPOGRAPHY.body.normal.base, color: '#666', textAlign: 'center', marginTop: SPACING["xl"]}}>Aucun événement disponible</Text>
+                )
               )
             ) : (
               isLoading ? (
                 <Text>Loading announcements...</Text>
               ) : (
-                laliste && laliste.items && laliste.items.map((announcement: any) => displayAnnouncement(announcement))
+                laliste && laliste.items && laliste.items.length > 0 ? (
+                  <>
+                    <FlatList
+                      data={laliste.items.slice(currentPage * ITEMS_PER_PAGE, (currentPage + 1) * ITEMS_PER_PAGE)}
+                      renderItem={({ item }) => <AnnouncementCard announcement={item} />}
+                      keyExtractor={(item) => item.id}
+                      scrollEnabled={false}
+                      removeClippedSubviews={true}
+                      maxToRenderPerBatch={5}
+                      windowSize={3}
+                      initialNumToRender={5}
+                    />
+                    
+                    {/* Pagination Controls */}
+                    {laliste.items.length > ITEMS_PER_PAGE && (
+                      <View style={{
+                        flexDirection: 'row',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        marginTop: SPACING["lg"],
+                        marginBottom: SPACING["xl"],
+                        paddingHorizontal: SPACING["md"]
+                      }}>
+                        <TouchableOpacity
+                          onPress={() => setCurrentPage(Math.max(0, currentPage - 1))}
+                          disabled={currentPage === 0}
+                          style={{
+                            backgroundColor: currentPage === 0 ? '#E0E0E0' : '#0057AC',
+                            paddingHorizontal: SPACING["lg"],
+                            paddingVertical: SPACING["sm"],
+                            borderRadius: 8,
+                            flex: 1,
+                            marginRight: SPACING["sm"]
+                          }}
+                        >
+                          <Text style={{
+                            ...TYPOGRAPHY.body.normal.semiBold,
+                            color: currentPage === 0 ? '#999' : 'white',
+                            textAlign: 'center'
+                          }}>← Précédent</Text>
+                        </TouchableOpacity>
+                        
+                        <Text style={{
+                          ...TYPOGRAPHY.body.normal.base,
+                          color: '#666',
+                          marginHorizontal: SPACING["md"]
+                        }}>
+                          {currentPage + 1} / {Math.ceil(laliste.items.length / ITEMS_PER_PAGE)}
+                        </Text>
+                        
+                        <TouchableOpacity
+                          onPress={() => setCurrentPage(Math.min(Math.ceil(laliste.items.length / ITEMS_PER_PAGE) - 1, currentPage + 1))}
+                          disabled={currentPage >= Math.ceil(laliste.items.length / ITEMS_PER_PAGE) - 1}
+                          style={{
+                            backgroundColor: currentPage >= Math.ceil(laliste.items.length / ITEMS_PER_PAGE) - 1 ? '#E0E0E0' : '#0057AC',
+                            paddingHorizontal: SPACING["lg"],
+                            paddingVertical: SPACING["sm"],
+                            borderRadius: 8,
+                            flex: 1,
+                            marginLeft: SPACING["sm"]
+                          }}
+                        >
+                          <Text style={{
+                            ...TYPOGRAPHY.body.normal.semiBold,
+                            color: currentPage >= Math.ceil(laliste.items.length / ITEMS_PER_PAGE) - 1 ? '#999' : 'white',
+                            textAlign: 'center'
+                          }}>Suivant →</Text>
+                        </TouchableOpacity>
+                      </View>
+                    )}
+                  </>
+                ) : (
+                  <Text style={{...TYPOGRAPHY.body.normal.base, color: '#666', textAlign: 'center', marginTop: SPACING["xl"]}}>Aucune annonce disponible</Text>
+                )
               )
             )}
             <Modal visible={showModal}
@@ -563,7 +747,7 @@ export default function EventsPage() {
                             </Text>
                             
                             
-                            {getCafeById(modalData.cafe_id) && (
+                            {getCafeById(modalData.cafe_id) && showModal && (
                               <MapView 
                                 style={{
                                   width:'100%',
@@ -576,6 +760,7 @@ export default function EventsPage() {
                                 zoomEnabled={false}
                                 rotateEnabled={false}
                                 pitchEnabled={false}
+                                loadingEnabled={true}
                                 onPress={() => openMapNavigation(getCafeById(modalData.cafe_id))}
                               >
                                 <Marker
@@ -620,7 +805,7 @@ export default function EventsPage() {
                             })}
                             
                             {/* Show map for the first cafe in events */}
-                            {modalData.cafes[0] && getCafeById(modalData.cafes[0].id) && getCafeById(modalData.cafes[0].id).location?.geometry?.coordinates && (
+                            {showModal && modalData.cafes[0] && getCafeById(modalData.cafes[0].id) && getCafeById(modalData.cafes[0].id).location?.geometry?.coordinates && (
                               <MapView 
                                 style={{
                                   width:'100%',
@@ -633,6 +818,7 @@ export default function EventsPage() {
                                 zoomEnabled={false}
                                 rotateEnabled={false}
                                 pitchEnabled={false}
+                                loadingEnabled={true}
                                 onPress={() => openMapNavigation(getCafeById(modalData.cafes[0].id))}
                               >
                                 <Marker
