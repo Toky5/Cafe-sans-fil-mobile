@@ -29,8 +29,15 @@ export default function TabLayout() {
           const userInfo = await getInfoFromToken(accessToken);
           console.log("User Info: ", userInfo);
           if (userInfo ==  false) {
-            await updateToken(refreshToken);
-            <Redirect href="/first-onboarding" />
+            // Token is invalid, try to refresh
+            try {
+              await updateToken(refreshToken);
+              setIsSignedIn(true);
+            } catch (refreshError) {
+              // Refresh failed, updateToken already cleared all data
+              console.log("Token refresh failed, redirecting to onboarding");
+              setIsSignedIn(false);
+            }
           }
         } else {
           console.log("Tokens are missing, user not signed in");

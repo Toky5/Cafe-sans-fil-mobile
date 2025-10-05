@@ -15,6 +15,44 @@ export const displayTokens = async () => {
   }
 }
 
+export const setUserFullname = async (name: string) => {
+  try {
+    await AsyncStorage.setItem('user_fullname', name);
+  } catch (error) {
+    console.error('Error storing user full name:', error);
+    throw error;
+  }
+}
+
+export const getUserFullname = async () => {
+  try {
+    const name = await AsyncStorage.getItem('user_fullname');
+    return name;
+  } catch (error) {
+    console.error('Error retrieving user full name:', error);
+    return null;
+  }
+}
+
+export const setUserPhotoUrl = async (photoUrl: string) => {
+  try {
+    await AsyncStorage.setItem('user_photo_url', photoUrl);
+  } catch (error) {
+    console.error('Error storing user photo URL:', error);
+    throw error;
+  }
+}
+
+export const getUserPhotoUrl = async () => {
+  try {
+    const photoUrl = await AsyncStorage.getItem('user_photo_url');
+    return photoUrl;
+  } catch (error) {
+    console.error('Error retrieving user photo URL:', error);
+    return null;
+  }
+}
+
 // Store access token
 export const setToken = async (token: string) => {
     console.log('Storing token:', token);
@@ -48,6 +86,8 @@ export const updateToken = async (refreshToken: string) => {
     });
 
     if (!response.ok) {
+      // If refresh fails, clear all tokens and user data
+      await clearTokens();
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
@@ -65,6 +105,8 @@ export const updateToken = async (refreshToken: string) => {
     throw new Error('No access token received from refresh endpoint');
   } catch (error) {
     console.error('Error updating token:', error);
+    // Clear all tokens and user data on any error
+    await clearTokens();
     throw error;
   }
 };
@@ -215,7 +257,9 @@ export const clearTokens = async () => {
   try {
     await Promise.all([
       AsyncStorage.removeItem(STAYING_KEY),
-      AsyncStorage.removeItem(REFRESHING_KEY)
+      AsyncStorage.removeItem(REFRESHING_KEY),
+      AsyncStorage.removeItem('user_fullname'),
+      AsyncStorage.removeItem('user_photo_url')
     ]);
   } catch (error) {
     console.error('Error clearing tokens:', error);

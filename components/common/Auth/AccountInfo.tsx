@@ -5,7 +5,7 @@ import SPACING from "@/constants/Spacing";
 import TYPOGRAPHY from "@/constants/Typography";
 import React from "react";
 import { useRouter } from "expo-router";
-import { getInfoFromToken, getToken } from "@/utils/tokenStorage";
+import { getUserFullname, getUserPhotoUrl, setUserPhotoUrl, getInfoFromToken, getToken } from "@/utils/tokenStorage";
 import { user } from "@/components/layouts/HeaderLayout";
 
 
@@ -29,37 +29,39 @@ export default function AccountInfo({
   React.useEffect(() => {
     const getUserInfo = async () => {
       try {
-        // Get the access token
-        const accessToken = await getToken();
+        // Get the stored full name from storage
+        const storedFullName = await getUserFullname();
         
-        if (accessToken) {
-          // Get user info from token
-          const userInfo = await getInfoFromToken(accessToken);
-          console.log("User Info from token:", userInfo);
-          
-          // Set the full name (first name + last name)
-          if (userInfo && userInfo.first_name && userInfo.last_name) {
-            setUserFullName(`${userInfo.first_name} ${userInfo.last_name}`);
-            setUserImage(userInfo.photo_url);
-          } else if (userInfo && userInfo.name) {
-            // Fallback to name field if first_name/last_name aren't available
-            setUserFullName(userInfo.name);
-          } else if (userInfo && userInfo.username) {
-            // Fallback to username if no name fields are available
-            setUserFullName(userInfo.username);
-          } else {
-            setUserFullName("Utilisateur");
-          }
-
-
-
+        if (storedFullName) {
+          setUserFullName(storedFullName);
+          console.log("User full name from storage:", storedFullName);
         } else {
-          console.log("No access token found");
+          console.log("No stored full name found");
           setUserFullName("Utilisateur");
+        }
+
+        // Get the stored photo URL from storage
+        const storedPhotoUrl = await getUserPhotoUrl();
+        
+        if (storedPhotoUrl) {
+          setUserImage(storedPhotoUrl);
+          console.log("User photo URL from storage:", storedPhotoUrl);
+        } else {
+          console.log("No stored photo URL found");
+          // Fallback: try to fetch from server if not in storage
+          const accessToken = await getToken();
+          if (accessToken) {
+            const userInfo = await getInfoFromToken(accessToken);
+            if (userInfo && userInfo.photo_url) {
+              setUserImage(userInfo.photo_url);
+              // Store it for next time
+              await setUserPhotoUrl(userInfo.photo_url);
+            }
+          }
         }
       
       } catch (error) {
-        console.error("Error getting user info from token:", error);
+        console.error("Error getting user info:", error);
         setUserFullName("Utilisateur");
       } finally {
         setIsLoading(false);

@@ -3,7 +3,7 @@ import React from "react";
 import {Text, View, Image, TextInput, ScrollView, KeyboardAvoidingView, Platform, StatusBar, Pressable} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {useRouter} from "expo-router";
-import { setToken, setRefreshToken } from "@/utils/tokenStorage";
+import { setToken, setRefreshToken, setUserFullname, setUserPhotoUrl, getInfoFromToken } from "@/utils/tokenStorage";
 
 
 
@@ -40,10 +40,38 @@ export default function SignInScreen() {
       });
 
       const data = await response.json();
-      data.access_token && setToken(data.access_token);
-      data.refresh_token && setRefreshToken(data.refresh_token);
+      data.access_token && await setToken(data.access_token);
+      data.refresh_token && await setRefreshToken(data.refresh_token);
       console.log(data);
+      
       if (data.access_token && data.refresh_token) {
+        // Fetch user info and store full name and photo URL
+        try {
+          const userInfo = await getInfoFromToken(data.access_token);
+          if (userInfo) {
+            // Store full name
+            if (userInfo.first_name && userInfo.last_name) {
+              const fullName = `${userInfo.first_name} ${userInfo.last_name}`;
+              await setUserFullname(fullName);
+              console.log('Stored user full name:', fullName);
+            } else if (userInfo.name) {
+              await setUserFullname(userInfo.name);
+              console.log('Stored user name:', userInfo.name);
+            } else if (userInfo.username) {
+              await setUserFullname(userInfo.username);
+              console.log('Stored username:', userInfo.username);
+            }
+            
+            // Store photo URL
+            if (userInfo.photo_url) {
+              await setUserPhotoUrl(userInfo.photo_url);
+              console.log('Stored user photo URL:', userInfo.photo_url);
+            }
+          }
+        } catch (error) {
+          console.error('Error fetching user info after login:', error);
+        }
+        
         setIsError(false)
         router.push("/");
       }

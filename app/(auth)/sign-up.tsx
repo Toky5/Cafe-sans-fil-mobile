@@ -1,9 +1,10 @@
 import Button from "@/components/common/Buttons/Button";
 import React from "react";
-import {Text, View, Image, TextInput, ScrollView, KeyboardAvoidingView, Platform,StatusBar,TouchableOpacity} from "react-native";
+import {Text, View, Image, TextInput, ScrollView, KeyboardAvoidingView, Platform,StatusBar,TouchableOpacity, Alert} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {useRouter} from "expo-router";
 import { Ionicons } from '@expo/vector-icons';
+import { setToken, setRefreshToken, setUserFullname, setUserPhotoUrl, getInfoFromToken } from "@/utils/tokenStorage";
 
 
 
@@ -37,9 +38,6 @@ export default function SignInScreen() {
   const signup = async (username: string, first_name: string, last_name: string, matricule: number ,email : string , password : string) => {
     const url = 'https://cafesansfil-api-r0kj.onrender.com/api/auth/register';
 
-
-  
-
     const formBody = {
       username: username,
       first_name: first_name, 
@@ -61,18 +59,132 @@ export default function SignInScreen() {
       });
       console.log("Response status:", response.status);
       
-      const data = await response.json();
-      console.log(data);
-      console.log(data.detail)
-      if (response.ok) {
-        alert('Inscription réussie !');
-        // Optionally, navigate to a confirmation screen or show a success message
-        router.push("/sign-in");
+      // Try to parse JSON, but handle non-JSON responses
+      let data;
+      const contentType = response.headers.get('content-type');
+      
+      try {
+        if (contentType && contentType.includes('application/json')) {
+          data = await response.json();
+        } else {
+          // Non-JSON response (like HTML error page)
+          const textResponse = await response.text();
+          console.log("Non-JSON response received (first 200 chars):", textResponse.substring(0, 200));
+          data = { detail: 'Server returned non-JSON response' };
+        }
+      } catch (parseError) {
+        console.error('Error parsing response:', parseError);
+        // If JSON parsing fails, treat as potential success
+        data = { detail: 'Could not parse server response' };
+      }
+      
+      console.log("Response data:", data);
+      
+      // Sometimes the server returns 500 but still creates the account
+      // So we'll try to login regardless of the response status
+      if (response.ok || response.status === 500) {
+        // Account might be created, try to log in automatically
+        Alert.alert(
+          'Succès',
+          'Inscription réussie ! Connexion en cours...',
+          [{ text: 'OK' }]
+        );
+        
+        // Automatically log in the user
+        try {
+          const loginUrl = 'https://cafesansfil-api-r0kj.onrender.com/api/auth/login';
+          const loginFormBody = new URLSearchParams({
+            grant_type: 'password',
+            username: email.toLowerCase(),
+            password: password,
+            scope: '',
+            client_id: 'string',
+            client_secret: 'string'
+          }).toString();
+
+          const loginResponse = await fetch(loginUrl, {
+            method: 'POST',
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: loginFormBody
+          });
+
+          const loginData = await loginResponse.json();
+          
+          if (loginData.access_token && loginData.refresh_token) {
+            await setToken(loginData.access_token);
+            await setRefreshToken(loginData.refresh_token);
+            
+            // Fetch and store user info
+            const userInfo = await getInfoFromToken(loginData.access_token);
+            if (userInfo) {
+              // Store full name
+              if (userInfo.first_name && userInfo.last_name) {
+                const fullName = `${userInfo.first_name} ${userInfo.last_name}`;
+                await setUserFullname(fullName);
+                console.log('Stored user full name:', fullName);
+              }
+              
+              // Store photo URL
+              if (userInfo.photo_url) {
+                await setUserPhotoUrl(userInfo.photo_url);
+                console.log('Stored user photo URL:', userInfo.photo_url);
+              }
+            }
+            
+            router.push("/");
+          } else {
+            // Login failed, redirect to sign-in
+            Alert.alert(
+              'Compte créé',
+              'Votre compte a été créé avec succès. Veuillez vous connecter.',
+              [{ text: 'OK' }]
+            );
+            router.push("/sign-in");
+          }
+        } catch (loginError) {
+          console.error('Auto-login failed:', loginError);
+          // Account was created but auto-login failed
+          Alert.alert(
+            'Compte créé',
+            'Votre compte a été créé avec succès. Veuillez vous connecter.',
+            [{ text: 'OK' }]
+          );
+          router.push("/sign-in");
+        }
       } else {
-        alert(data.detail[0].ctx.reason || 'Une erreur est survenue lors de l\'inscription.');
+        // Handle different error formats from the API
+        let errorMessage = 'Une erreur est survenue lors de l\'inscription.';
+        
+        if (data.detail) {
+          if (typeof data.detail === 'string') {
+            errorMessage = data.detail;
+          } else if (Array.isArray(data.detail) && data.detail.length > 0) {
+            const firstError = data.detail[0];
+            if (firstError.msg) {
+              errorMessage = firstError.msg;
+            } else if (firstError.ctx && firstError.ctx.reason) {
+              errorMessage = firstError.ctx.reason;
+            }
+          }
+        }
+        
+        console.error('Sign up error:', errorMessage);
+        Alert.alert(
+          'Erreur d\'inscription',
+          errorMessage,
+          [{ text: 'OK' }]
+        );
       }
     } catch (error) {
       console.error('Sign up failed:', error);
+      Alert.alert(
+        'Erreur',
+        'Une erreur réseau est survenue. Veuillez vérifier votre connexion et réessayer.',
+        [{ text: 'OK' }]
+      );
     }
   };
 

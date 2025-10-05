@@ -127,7 +127,9 @@ export default function ParametreScreen() {
   const pulseAnim = React.useRef(new Animated.Value(1)).current;
 
   const logoutfromthis = async () => {
+    // Clear all tokens and user data
     await clearTokens();
+    console.log('Logged out - cleared all tokens and user data');
     setAccountModalVisible(false);
     navigation.push("/first-onboarding");
   };
@@ -171,27 +173,42 @@ export default function ParametreScreen() {
   }, []);
   const [showPassword, setShowPassword] = useState(false);
   const fetchOrders = async () => {
-
-    const token = await getToken();
-
-    const response = await fetch('https://cafesansfil-api-r0kj.onrender.com/api/users/@me/orders', {
-      method: 'GET',
-      headers: {
-      'accept': 'application/json',
-      'Authorization': `Bearer ${token}`
+    try {
+      const token = await getToken();
+      
+      // Don't fetch if no token (user logged out)
+      if (!token) {
+        console.log('No token available, skipping orders fetch');
+        return [];
       }
-    });
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      const response = await fetch('https://cafesansfil-api-r0kj.onrender.com/api/users/@me/orders', {
+        method: 'GET',
+        headers: {
+        'accept': 'application/json',
+        'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        // Don't throw error, just log it and return empty array
+        console.log(`Failed to fetch orders: ${response.status}`);
+        return [];
+      }
+
+      const ordersData = await response.json();
+      console.log("Orders Data: ", ordersData);
+      return ordersData;
+    } catch (error) {
+      console.error('Error fetching orders:', error);
+      return [];
     }
-
-    const ordersData = await response.json();
-    console.log("Orders Data: ", ordersData);
-    return ordersData;
   }
 
-  fetchOrders()
+  // Only fetch orders if component is mounted and user is logged in
+  React.useEffect(() => {
+    fetchOrders();
+  }, []);
   // Menu items data with their respective icons and actions
   const menuItems: MenuItem[] = [
     /*
@@ -319,7 +336,7 @@ export default function ParametreScreen() {
               </View>
               <View style={styles.modalContent}>
                 <TouchableOpacity>
-                  <Image source={{ uri: userProfilePicture }} style={styles.profilePicture} />
+                  <Image source={{ uri: userProfilePicture || undefined }} style={styles.profilePicture} />
                 </TouchableOpacity>
                 <Text style={[{alignSelf:'center',padding:20, fontWeight:500}]}>Modifier votre photo de profil</Text>
                 <TextInput style={styles.input } placeholder="Modifier  Nom" placeholderTextColor="grey" defaultValue={userFullName} />
