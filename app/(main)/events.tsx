@@ -474,7 +474,7 @@ export default function EventsPage() {
           <View style={{flex: 1, marginHorizontal: SPACING["md"]}}>
             {activeTab === 'events' ? (
               isEventsLoading ? (
-                <Text>Loading events...</Text>
+                <Text>Chargement des événements...</Text>
               ) : (
                 events && events.items && events.items.length > 0 ? (
                   <>
@@ -553,7 +553,7 @@ export default function EventsPage() {
               )
             ) : (
               isLoading ? (
-                <Text>Loading announcements...</Text>
+                <Text>Chargement des annonces...</Text>
               ) : (
                 laliste && laliste.items && laliste.items.length > 0 ? (
                   <>
