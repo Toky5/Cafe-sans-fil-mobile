@@ -98,41 +98,165 @@ export default function ArticleCard({
   return (
     <Pressable
       onPress={() => router.push(`/cafe/${cafeSlug}/${slug}`)}
-      style={[styles.menuItemCard, style]}
+      style={[styles.horizontalCard, style]}
     >
       <Image 
         source={image ? { uri: image } : cardDimensions[size].image}
-        style={styles.menuItemImage}
+        style={styles.horizontalCardImage}
         resizeMode="cover"
       />
-      <View style={styles.menuItemContent}>
-        <Text style={styles.menuItemTitle}>{name}</Text>
-        <Text style={styles.menuItemDescription}>
-          {calories || "Délicieux plat préparé avec soin et des ingrédients frais."}
-        </Text>
-        <Text style={styles.menuItemPrice}>{formatPrice(price)}</Text>
-        <View style={styles.statusIndicator}>
-          <Circle
-            width={8}
-            height={8}
-            strokeWidth={0}
-            fill={
-              status === "En Stock"
-                ? COLORS.status.green
-                : status === "Almost Out"
-                ? COLORS.status.orange
-                : COLORS.status.red
-            }
-          />
-          <Text style={styles.statusText}>{status}</Text>
+      <View style={styles.horizontalCardContent}>
+        <View style={styles.cardHeader}>
+          <Text style={styles.horizontalCardTitle} numberOfLines={1}>{name}</Text>
+          <View style={[
+            styles.compactStatusBadge,
+            status === "En Stock" && styles.statusInStock,
+            status === "Almost Out" && styles.statusAlmostOut,
+            status === "En Rupture" && styles.statusOutOfStock,
+          ]} />
         </View>
+        <Text style={styles.horizontalCardDescription} numberOfLines={2}>
+          {calories || "Délicieux plat préparé avec soin."}
+        </Text>
+        <Text style={styles.horizontalCardPrice}>{formatPrice(price)}</Text>
       </View>
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  // Horizontal Menu Card Styles
+  // Horizontal Full-Width Card Styles
+  horizontalCard: {
+    backgroundColor: COLORS.white,
+    borderRadius: 12,
+    overflow: 'hidden',
+    flexDirection: 'row',
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.06,
+    shadowRadius: 4,
+    elevation: 2,
+    borderWidth: 1,
+    borderColor: '#F0F0F0',
+  },
+  horizontalCardImage: {
+    width: 110,
+    height: 110,
+  },
+  horizontalCardContent: {
+    flex: 1,
+    padding: 12,
+    justifyContent: 'space-between',
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 4,
+  },
+  horizontalCardTitle: {
+    ...TYPOGRAPHY.body.large.semiBold,
+    color: COLORS.black,
+    fontSize: 15,
+    flex: 1,
+    marginRight: 8,
+  },
+  compactStatusBadge: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+  },
+  statusInStock: {
+    backgroundColor: COLORS.status.green,
+  },
+  statusAlmostOut: {
+    backgroundColor: COLORS.status.orange,
+  },
+  statusOutOfStock: {
+    backgroundColor: COLORS.status.red,
+  },
+  horizontalCardDescription: {
+    ...TYPOGRAPHY.body.small.base,
+    color: '#666',
+    lineHeight: 16,
+    fontSize: 12,
+    marginBottom: 6,
+  },
+  horizontalCardPrice: {
+    ...TYPOGRAPHY.body.large.semiBold,
+    color: COLORS.black,
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  // Legacy vertical card styles (keeping for backward compatibility)
+  modernCard: {
+    backgroundColor: COLORS.white,
+    borderRadius: 16,
+    overflow: 'hidden',
+    width: '48%',
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 4,
+    marginBottom: 16,
+  },
+  imageContainer: {
+    position: 'relative',
+    width: '100%',
+    height: 140,
+  },
+  modernCardImage: {
+    width: '100%',
+    height: '100%',
+  },
+  modernStatusBadge: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  modernStatusText: {
+    ...TYPOGRAPHY.body.small.base,
+    color: '#fff',
+    fontSize: 10,
+    fontWeight: '600',
+  },
+  modernCardContent: {
+    padding: 12,
+  },
+  modernCardTitle: {
+    ...TYPOGRAPHY.body.large.semiBold,
+    color: COLORS.black,
+    marginBottom: 4,
+    fontSize: 15,
+  },
+  modernCardDescription: {
+    ...TYPOGRAPHY.body.small.base,
+    color: COLORS.subtuleDark,
+    lineHeight: 16,
+    marginBottom: 8,
+    height: 32,
+    fontSize: 12,
+  },
+  modernCardPrice: {
+    ...TYPOGRAPHY.body.large.semiBold,
+    color: COLORS.black,
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  // Legacy horizontal card styles (keeping for backward compatibility)
   menuItemCard: {
     backgroundColor: COLORS.white,
     borderRadius: 12,

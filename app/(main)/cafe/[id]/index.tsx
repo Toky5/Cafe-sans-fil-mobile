@@ -559,65 +559,114 @@ console.log(paymentDetails);
 
       </View>
       {/* Horaires du café */}
-<View style={styles.hoursContainer}>
-  <Text style={styles.hoursTitle}>Horaires</Text>
-  <FlatList 
-    data={cafe?.opening_hours} 
+<View style={styles.hoursSection}>
+  <Text style={styles.sectionTitle}>Horaires d'ouverture</Text>
+  <ScrollView 
     horizontal
     showsHorizontalScrollIndicator={false}
-    keyExtractor={item => item.day}
-    contentContainerStyle={styles.hoursListContent}
-    renderItem={({ item }) => (
-      <View style={styles.dayCard}>
-        <Text style={styles.dayName}>
-          {item.day.slice(0, 3)}
-        </Text>
-        <View style={styles.timeBlocks}>
-          {item.blocks.map((block, index) => (
-            <View key={index} style={styles.timeBlock}>
-              <Text style={styles.timeText}>{block.start} - {block.end}</Text>
+    contentContainerStyle={styles.hoursScrollContent}
+  >
+    {(() => {
+      // Map English days to French
+      const dayMapping: { [key: string]: string } = {
+        'monday': 'lundi',
+        'tuesday': 'mardi',
+        'wednesday': 'mercredi',
+        'thursday': 'jeudi',
+        'friday': 'vendredi',
+        'saturday': 'samedi',
+        'sunday': 'dimanche'
+      };
+
+      // Get today's day in French
+      const todayFrench = new Date().toLocaleDateString('fr-FR', { weekday: 'long' }).toLowerCase();
+      
+      // Find today's index in the opening_hours array
+      const hours = cafe?.opening_hours || [];
+      const todayIndex = hours.findIndex(item => {
+        const itemDayFrench = dayMapping[item.day.toLowerCase()] || item.day.toLowerCase();
+        return itemDayFrench === todayFrench;
+      });
+
+      // Reorder array to start from today
+      const reorderedHours = todayIndex >= 0 
+        ? [...hours.slice(todayIndex), ...hours.slice(0, todayIndex)]
+        : hours;
+
+      return reorderedHours.map((item, index) => {
+        const isToday = index === 0 && todayIndex >= 0;
+        const itemDayFrench = dayMapping[item.day.toLowerCase()] || item.day.toLowerCase();
+        
+        return (
+          <View 
+            key={item.day} 
+            style={[
+              styles.modernDayCard,
+              isToday && styles.modernDayCardToday
+            ]}
+          >
+            <View style={styles.dayHeader}>
+              <Text style={[
+                styles.modernDayName,
+                isToday && styles.modernDayNameToday
+              ]}>
+                {isToday ? "Aujourd'hui" : itemDayFrench.charAt(0).toUpperCase() + itemDayFrench.slice(1)}
+              </Text>
             </View>
-          ))}
-          {item.blocks.length === 0 && (
-            <Text style={styles.closedText}>Fermé</Text>
-          )}
-        </View>
-      </View>
-    )}
-    ItemSeparatorComponent={() => <View style={styles.daySeparator} />}
-  />
+            <View style={styles.modernTimeBlocks}>
+              {item.blocks.length > 0 ? (
+                item.blocks.map((block, blockIndex) => (
+                  <View key={blockIndex} style={styles.modernTimeBlock}>
+                    <Text style={[
+                      styles.modernTimeText,
+                      isToday && styles.modernTimeTextToday
+                    ]}>
+                      {block.start}
+                    </Text>
+                    <Text style={[styles.timeSeparator, isToday && styles.timeSeparatorToday]}>-</Text>
+                    <Text style={[
+                      styles.modernTimeText,
+                      isToday && styles.modernTimeTextToday
+                    ]}>
+                      {block.end}
+                    </Text>
+                  </View>
+                ))
+              ) : (
+                <View style={styles.closedContainer}>
+                  <Text style={[styles.modernClosedText, isToday && styles.modernClosedTextToday]}>Fermé</Text>
+                </View>
+              )}
+            </View>
+          </View>
+        );
+      });
+    })()}
+  </ScrollView>
 </View>
 
-      {/* Menu */}
-      <Text 
-        style={{
-          marginVertical: SPACING["md"], 
-          marginHorizontal: SPACING["md"], 
-          alignSelf: 'center',
-          ...TYPOGRAPHY.heading.large.bold
-        }}>Menu
-        </Text>
-
-
-      {/* Catégories */}
-      <View style={styles.filterSection}>
+      {/* Menu Section */}
+      <View style={styles.menuSection}>
+        <Text style={styles.sectionTitle}>Notre Menu</Text>
+        
+        {/* Catégories */}
         <ScrollView 
           horizontal 
           showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.filterScrollContainer}
-          style={styles.filterScrollView}
+          contentContainerStyle={styles.modernFilterScrollContainer}
+          style={styles.modernFilterScrollView}
         >
           {/* "Tous" filter */}
           <TouchableOpacity 
             style={[
-              styles.filterChip,
-              activeFilter === "Tous" ? styles.filterChipActive : styles.filterChipInactive
+              styles.modernFilterChip,
+              activeFilter === "Tous" && styles.modernFilterChipActive
             ]}
             onPress={() => setItemList(filterMenu())}
           >
             <Text style={[
-              styles.filterChipText,
-              activeFilter === "Tous" ? styles.filterChipTextActive : styles.filterChipTextInactive
+              styles.modernFilterChipText,
+              activeFilter === "Tous" && styles.modernFilterChipTextActive
             ]}>
               Tous
             </Text>
@@ -628,42 +677,44 @@ console.log(paymentDetails);
             <TouchableOpacity 
               key={item.id}
               style={[
-                styles.filterChip,
-                activeFilter === item.name ? styles.filterChipActive : styles.filterChipInactive
+                styles.modernFilterChip,
+                activeFilter === item.name && styles.modernFilterChipActive
               ]}
               onPress={() => setItemList(filterMenu(item.name))}
             >
               <Text style={[
-                styles.filterChipText,
-                activeFilter === item.name ? styles.filterChipTextActive : styles.filterChipTextInactive
+                styles.modernFilterChipText,
+                activeFilter === item.name && styles.modernFilterChipTextActive
               ]}>
                 {item.name}
               </Text>
             </TouchableOpacity>
           ))}
         </ScrollView>
-      </View>
 
-      {/* Menu */}
-      <FlatList 
-        data={itemList? itemList : []}  
-        keyExtractor={item => item.id}
-        renderItem={({item}) => (
-          <ArticleCard
-            cafeSlug={cafe?.slug}
-            slug={item.id}
-            name={item.name} 
-            price={"$" + item.price} 
-            status={item.in_stock? "En Stock" : "En Rupture"}
-            image={item.image_url}
-            calories={item.description}
-            style={styles.articleCardWrapper}
-          />
-        )}
-        scrollEnabled={false}
-        style={styles.menuContainer}
-        ItemSeparatorComponent={() => <View style={{ height: SPACING["md"] }} />}
-      />      
+        {/* Menu Items Grid */}
+        <View style={styles.menuGrid}>
+          {itemList && itemList.length > 0 ? (
+            itemList.map((item) => (
+              <ArticleCard
+                key={item.id}
+                cafeSlug={cafe?.slug}
+                slug={item.id}
+                name={item.name} 
+                price={"$" + item.price} 
+                status={item.in_stock ? "En Stock" : "En Rupture"}
+                image={item.image_url}
+                calories={item.description}
+                size="large"
+              />
+            ))
+          ) : (
+            <View style={styles.emptyMenuContainer}>
+              <Text style={styles.emptyMenuText}>Aucun article disponible</Text>
+            </View>
+          )}
+        </View>
+      </View>      
 
       {/* Cafés similaires */}
       <Text 
@@ -682,7 +733,7 @@ console.log(paymentDetails);
               image={item.banner_url}
               location={item.location.pavillon}
               priceRange="$$"
-              //rating={4.8}
+              rating={4.5}
               status={item.is_open}
               id={item.id}
             />
@@ -792,117 +843,125 @@ const styles = StyleSheet.create({
     marginTop: SPACING["xs"],
     textAlign: "center",
   },
-  hoursContainer: {
-    marginHorizontal: 16,
-    marginTop: 20,
-    backgroundColor: '#fff',
-    borderRadius: 15,
-    padding: 20,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  hoursTitle: {
-    ...TYPOGRAPHY.heading.medium.bold,
+  // Section Titles
+  sectionTitle: {
+    ...TYPOGRAPHY.body.large.semiBold,
     color: COLORS.black,
-    marginBottom: 15,
-    textAlign: "center",
-  },
-  hoursListContent: {
-    paddingVertical: 8,
-    paddingHorizontal: 4,
-  },
-  dayCard: {
-    backgroundColor: '#f9f9f9',
-    borderRadius: 12,
-    padding: 12,
-    minWidth: 90,
-    alignItems: 'center',
-  },
-  dayName: {
-    ...TYPOGRAPHY.body.normal.semiBold,
-    color: COLORS.black,
+    marginBottom: 12,
+    fontSize: 18,
     textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
+  // Modern Hours Styles
+  hoursSection: {
+    marginTop: 24,
+    paddingHorizontal: 16,
+  },
+  hoursScrollContent: {
+    paddingRight: 16,
+  },
+  modernDayCard: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    minWidth: 100,
+    borderWidth: 1,
+    borderColor: '#E8E8E8',
+    marginRight: 10,
+  },
+  modernDayCardToday: {
+    backgroundColor: '#000',
+    borderColor: '#000',
+  },
+  dayHeader: {
     marginBottom: 8,
   },
-  timeBlocks: {
-    width: '100%',
-  },
-  timeBlock: {
-    marginVertical: 3,
-  },
-  timeText: {
-    ...TYPOGRAPHY.body.small.base,
-    color: COLORS.subtuleDark,
-    textAlign: 'center',
-  },
-  closedText: {
-    ...TYPOGRAPHY.body.small.bold,
-    color: COLORS.status.red,
-    textAlign: 'center',
-    marginTop: 4,
-  },
-  daySeparator: {
-    width: 10,
-  },
-  filterSection: {
-  },
-  filterScrollView: {
-    flexGrow: 0,
-  },
-  filterScrollContainer: {
-    paddingHorizontal: SPACING["md"],
-    alignItems: 'center',
-  },
-  filterChip: {
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 25,
-    marginRight: 12,
-    minHeight: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-    marginBottom: 4,
-  },
-  filterChipActive: {
-    backgroundColor: COLORS.black,
-    borderWidth: 0,
-  },
-  filterChipInactive: {
-    backgroundColor: COLORS.white,
-    borderWidth: 1,
-    borderColor: '#E5E5E5',
-  },
-  filterChipText: {
-    fontSize: 14,
-    fontWeight: '600',
-    textAlign: 'center',
-  },
-  filterChipTextActive: {
-    color: COLORS.white,
-  },
-  filterChipTextInactive: {
+  modernDayName: {
+    ...TYPOGRAPHY.body.normal.semiBold,
     color: COLORS.black,
+    fontSize: 13,
+    fontWeight: '600',
   },
-  // Custom Menu Item Styles
-  menuContainer: {
-    paddingHorizontal: SPACING["md"],
-    marginTop: SPACING["md"],
+  modernDayNameToday: {
+    color: '#fff',
   },
-  articleCardWrapper: {
-    marginHorizontal: 0,
+  modernTimeBlocks: {
+    gap: 4,
+  },
+  modernTimeBlock: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  modernTimeText: {
+    ...TYPOGRAPHY.body.small.base,
+    color: '#666',
+    fontSize: 12,
+  },
+  modernTimeTextToday: {
+    color: '#fff',
+  },
+  timeSeparator: {
+    color: '#999',
+    fontSize: 12,
+  },
+  timeSeparatorToday: {
+    color: '#fff',
+  },
+  closedContainer: {
+    paddingVertical: 4,
+  },
+  modernClosedText: {
+    ...TYPOGRAPHY.body.small.base,
+    color: '#999',
+    fontSize: 12,
+  },
+  modernClosedTextToday: {
+    color: '#fff',
+  },
+  // Modern Menu Styles
+  menuSection: {
+    marginTop: 24,
+    paddingHorizontal: 16,
+    marginBottom: 24,
+  },
+  modernFilterScrollView: {
+    flexGrow: 0,
+    marginBottom: 16,
+  },
+  modernFilterScrollContainer: {
+    gap: 8,
+    paddingRight: 16,
+  },
+  modernFilterChip: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: '#ffffffff',
+  },
+  modernFilterChipActive: {
+    backgroundColor: '#000',
+  },
+  modernFilterChipText: {
+    ...TYPOGRAPHY.body.normal.semiBold,
+    color: '#666',
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  modernFilterChipTextActive: {
+    color: '#fff',
+  },
+  menuGrid: {
+    gap: 12,
+  },
+  emptyMenuContainer: {
+    width: '100%',
+    paddingVertical: 40,
+    alignItems: 'center',
+  },
+  emptyMenuText: {
+    ...TYPOGRAPHY.body.normal.base,
+    color: COLORS.subtuleDark,
   },
 });
