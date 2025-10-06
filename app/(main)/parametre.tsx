@@ -25,6 +25,12 @@ import {
   Info,
   Eye,
   EyeOff,
+  Camera,
+  User,
+  Mail,
+  Lock,
+  LogOut,
+  Trash2,
 } from "lucide-react-native";
 import COLORS from "@/constants/Colors";
 import SPACING from "@/constants/Spacing";
@@ -335,49 +341,122 @@ export default function ParametreScreen() {
         >
           <View style={styles.modalOverlay}>
             <View style={styles.modalContainer}>
+              {/* Header */}
               <View style={styles.modalHeader}>
-                <Text style={styles.modalTitle}>Mon compte</Text>
-                <TouchableOpacity onPress={() => setAccountModalVisible(false)}>
+                <Text style={styles.modalTitle}>Mon Profil</Text>
+                <TouchableOpacity 
+                  onPress={() => setAccountModalVisible(false)}
+                >
                   <AntDesign name="close" size={24} color={COLORS.black} />
                 </TouchableOpacity>
               </View>
-              <View style={styles.modalContent}>
-                <TouchableOpacity>
-                  <Image source={{ uri: userProfilePicture || undefined }} style={styles.profilePicture} />
-                </TouchableOpacity>
-                <Text style={[{alignSelf:'center',padding:20, fontWeight:500}]}>Modifier votre photo de profil</Text>
-                <TextInput style={styles.input } placeholder="Modifier  Nom" placeholderTextColor="grey" defaultValue={userFullName} />
-                <TextInput style={styles.input} placeholder="Modifier votre Email" placeholderTextColor="grey" defaultValue={userEmail}/>
-                
-                <View style={styles.passwordContainer}>
-                  <TextInput 
-                    style={styles.passwordInput} 
-                    placeholder="Modifier votre Mot de passe" 
-                    secureTextEntry={!showPassword} 
-                    placeholderTextColor="grey"
-                  />
-                  <TouchableOpacity 
-                    style={styles.passwordToggle}
-                    onPress={() => setShowPassword(!showPassword)}
-                  >
-                    {!showPassword ? (
-                      <EyeOff size={20} color="#666" />
-                    ) : (
-                      <Eye size={20} color="#666" />
-                    )}
-                  </TouchableOpacity>
+
+              <ScrollView 
+                style={styles.accountModalScroll}
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={styles.accountModalContent}
+              >
+                {/* Profile Picture Section */}
+                <View style={styles.modalProfileSection}>
+                  <View style={styles.profileImageContainer}>
+                    <Image 
+                      source={{ uri: userImage || 'https://via.placeholder.com/120' }} 
+                      style={styles.modernProfilePicture} 
+                    />
+                    <TouchableOpacity style={styles.cameraButton}>
+                      <Camera size={20} color="white" />
+                    </TouchableOpacity>
+                  </View>
+                  <Text style={styles.modalProfileName}>{userFullName || 'Utilisateur'}</Text>
+                  <Text style={styles.modalProfileEmail}>{userEmail || 'email@exemple.com'}</Text>
                 </View>
-                
-                <View style={styles.buttonContainer}>
-                  <TouchableOpacity style={styles.deleteButton} onPress={() => { deletethisaccount()}}>
-                    <Text style={styles.deleteButtonText}>Supprimer votre compte</Text>
+
+                {/* Account Information Section */}
+                <View style={styles.accountSectionContainer}>
+                  
+                  {/* Full Name Input */}
+                  <View style={styles.inputGroup}>
+                    <View style={styles.inputLabelContainer}>
+                      <User size={18} color="#666" />
+                      <Text style={styles.inputLabel}>Nom complet</Text>
+                    </View>
+                    <TextInput 
+                      style={styles.modernInput}
+                      placeholder="Entrez votre nom complet" 
+                      placeholderTextColor="#999" 
+                      defaultValue={userFullName}
+                    />
+                  </View>
+
+                  {/* Email Input */}
+                  <View style={styles.inputGroup}>
+                    <View style={styles.inputLabelContainer}>
+                      <Mail size={18} color="#666" />
+                      <Text style={styles.inputLabel}>Adresse e-mail</Text>
+                    </View>
+                    <TextInput 
+                      style={styles.modernInput}
+                      placeholder="Entrez votre email" 
+                      placeholderTextColor="#999" 
+                      defaultValue={userEmail}
+                      keyboardType="email-address"
+                      autoCapitalize="none"
+                    />
+                  </View>
+
+                  {/* Password Input */}
+                  <View style={styles.inputGroup}>
+                    <View style={styles.inputLabelContainer}>
+                      <Lock size={18} color="#666" />
+                      <Text style={styles.inputLabel}>Mot de passe</Text>
+                    </View>
+                    <View style={styles.modernPasswordContainer}>
+                      <TextInput 
+                        style={styles.modernPasswordInput} 
+                        placeholder="Nouveau mot de passe" 
+                        secureTextEntry={!showPassword} 
+                        placeholderTextColor="#999"
+                      />
+                      <TouchableOpacity 
+                        style={styles.modernPasswordToggle}
+                        onPress={() => setShowPassword(!showPassword)}
+                      >
+                        {!showPassword ? (
+                          <EyeOff size={20} color="#666" />
+                        ) : (
+                          <Eye size={20} color="#666" />
+                        )}
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                </View>
+
+                {/* Save Changes Button */}
+                <TouchableOpacity onPress={() => console.log("save")} style={styles.saveButton}>
+                  <Text style={styles.saveButtonText}>Enregistrer les modifications</Text>
+                </TouchableOpacity>
+
+                {/* Danger Zone Section */}
+                <View style={styles.dangerZone}>
+                  <Text style={styles.dangerZoneTitle}>Zone de danger</Text>
+                  
+                  <TouchableOpacity 
+                    style={styles.modernLogoutButton} 
+                    onPress={async () => { logoutfromthis() }}
+                  >
+                    <LogOut size={20} color="#FF9800" />
+                    <Text style={styles.modernLogoutText}>Se déconnecter</Text>
                   </TouchableOpacity>
                   
-                  <TouchableOpacity style={styles.logoutButton} onPress={async () => { logoutfromthis() }}>
-                    <Text style={styles.logoutButtonText}>Se Déconnecter</Text>
+                  <TouchableOpacity 
+                    style={styles.modernDeleteButton} 
+                    onPress={() => { deletethisaccount() }}
+                  >
+                    <Trash2 size={20} color="#FF4444" />
+                    <Text style={styles.modernDeleteText}>Supprimer mon compte</Text>
                   </TouchableOpacity>
                 </View>
-              </View>
+              </ScrollView>
             </View>
           </View>
         </Modal>
@@ -826,7 +905,7 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '90%',
     backgroundColor: '#fff',
-    borderRadius: 10,
+    borderRadius: 24,
     overflow: 'hidden',
     marginTop: '20%',
   },
@@ -834,9 +913,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 16,
+    paddingBottom: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#F0F0F0'
+    borderBottomColor: '#ddd',
+    padding:20
   },
   modalTitle: {
     fontSize: 20,
@@ -864,6 +944,205 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     borderWidth: 1,
     borderColor: '#ddd',
+  },
+  // Modern Account Modal Styles
+  accountModalContainer: {
+    width: '100%',
+    height: '90%',
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    overflow: 'hidden',
+    marginTop: 'auto',
+  },
+  accountModalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F0F0F0',
+    backgroundColor: 'white',
+  },
+  accountModalTitle: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: COLORS.black,
+  },
+  closeButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#F8F9FA',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  accountModalScroll: {
+    flex: 1,
+  },
+  accountModalContent: {
+    paddingHorizontal: 20,
+    paddingBottom: 30,
+  },
+  modalProfileSection: {
+    alignItems: 'center',
+    paddingVertical: 30,
+  },
+  profileImageContainer: {
+    position: 'relative',
+    marginBottom: 16,
+  },
+  modernProfilePicture: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    borderWidth: 4,
+    borderColor: 'rgba(3, 172, 0, 0.2)',
+  },
+  cameraButton: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#00ac28ff',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 3,
+    borderColor: 'white',
+  },
+  modalProfileName: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: COLORS.black,
+    marginBottom: 4,
+  },
+  modalProfileEmail: {
+    fontSize: 14,
+    color: '#666',
+  },
+  accountSectionContainer: {
+    marginBottom: 24,
+  },
+  accountSectionTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: COLORS.black,
+    marginBottom: 16,
+  },
+  inputGroup: {
+    marginBottom: 20,
+  },
+  inputLabelContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 8,
+  },
+  inputLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#333',
+  },
+  modernInput: {
+    height: 50,
+    backgroundColor: '#F8F9FA',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    fontSize: 15,
+    color: COLORS.black,
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+  },
+  modernPasswordContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    height: 50,
+    backgroundColor: '#F8F9FA',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+  },
+  modernPasswordInput: {
+    flex: 1,
+    height: '100%',
+    fontSize: 15,
+    color: COLORS.black,
+  },
+  modernPasswordToggle: {
+    padding: 4,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  saveButton: {
+    backgroundColor: '#00ac25ff',
+    height: 54,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 24,
+    shadowColor: '#0eac00ff',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  saveButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  dangerZone: {
+    paddingTop: 20,
+    borderTopWidth: 1,
+    borderTopColor: '#F0F0F0',
+  },
+  dangerZoneTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#FF4444',
+    marginBottom: 16,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  modernLogoutButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 50,
+    backgroundColor: '#FFF3E0',
+    borderRadius: 12,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#FFE0B2',
+    gap: 10,
+  },
+  modernLogoutText: {
+    color: '#FF9800',
+    fontSize: 15,
+    fontWeight: '600',
+  },
+  modernDeleteButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 50,
+    backgroundColor: '#FFEBEE',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#FFCDD2',
+    gap: 10,
+  },
+  modernDeleteText: {
+    color: '#FF4444',
+    fontSize: 15,
+    fontWeight: '600',
   },
   btn: {
     borderRadius: 15,
