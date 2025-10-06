@@ -1,10 +1,13 @@
 import Button from "@/components/common/Buttons/Button";
 import React from "react";
-import {Text, View, Image, TextInput, ScrollView, KeyboardAvoidingView, Platform, StatusBar, Pressable} from "react-native";
+import {Text, View, Image, TextInput, ScrollView, KeyboardAvoidingView, Platform, StatusBar, Pressable, TouchableOpacity, Keyboard} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {useRouter} from "expo-router";
 import { setToken, setRefreshToken, setUserFullname, setUserPhotoUrl, getInfoFromToken } from "@/utils/tokenStorage";
-
+import {
+  Eye,
+  EyeOff,
+} from "lucide-react-native";
 
 
 
@@ -16,6 +19,7 @@ export default function SignInScreen() {
   const emailInputRef = React.useRef<TextInput>(null);
   const passwordInputRef = React.useRef<TextInput>(null);
   const [isError,setIsError] = React.useState(false)
+  const [showPassword, setShowPassword] =React.useState(false);
 
   const login = async (email : string , password : string) => {
     const url = 'https://cafesansfil-api-r0kj.onrender.com/api/auth/login';
@@ -110,6 +114,7 @@ export default function SignInScreen() {
       <Text style={{color: "#ff0000", fontSize: 19, fontWeight: "400"}}> *</Text>
     </Text>
       <TextInput
+      
           style={isError ? styles.inputR : styles.input}
           ref={emailInputRef}
           onChangeText={onChangeEmail}
@@ -139,8 +144,9 @@ export default function SignInScreen() {
       <Text style={{color: "#ff0000", fontSize: 19, fontWeight: "400"}}> *</Text>
     </Text>
 
-      <TextInput
-          style={isError ? styles.inputR : styles.input}
+      <View style={isError ? styles.passwordContainerR : styles.passwordContainer}>
+        <TextInput
+          style={styles.passwordInput}
           ref={passwordInputRef}
           onChangeText={onChangePassword}
           value={password}
@@ -149,19 +155,30 @@ export default function SignInScreen() {
           autoComplete="password"
           returnKeyType="done"
           placeholderTextColor={"#A1A1A1"}
-          secureTextEntry
+          secureTextEntry={!showPassword}
           onFocus={() => {
-  setTimeout(() => {
-    passwordInputRef.current?.measureLayout(
-      scrollViewRef.current as any,
-      (x, y) => {
-        scrollViewRef.current?.scrollTo({ y: y - 100, animated: true });
-      }
-    );
-  }, 100);
-}}
-
+            setTimeout(() => {
+              passwordInputRef.current?.measureLayout(
+                scrollViewRef.current as any,
+                (x, y) => {
+                  scrollViewRef.current?.scrollTo({ y: y - 100, animated: true });
+                }
+              );
+            }, 100);
+          }}
         />
+        <TouchableOpacity 
+          style={styles.passwordToggle}
+          onPress={() => setShowPassword(!showPassword)}
+        >
+          {!showPassword ? (
+            <EyeOff size={20} color="#666" />
+          ) : (
+            <Eye size={20} color="#666" />
+          )}
+        </TouchableOpacity>
+      </View>
+      
       <View style={{marginRight: "5%"}}>
         <Pressable
           onPress={() => router.push("/forgot")}
@@ -255,6 +272,41 @@ const styles = {
     textAlign: "left" as const,
     paddingLeft: 30,
     color : "#FF0000",
+  },
+  passwordContainer: {
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
+    height: 40,
+    margin: 20,
+    borderWidth: 1,
+    borderRadius: 8,
+    marginTop: 10,
+    marginBottom: 15,
+    borderColor: "#CCCCCC",
+    paddingHorizontal: 10,
+  },
+  passwordContainerR: {
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
+    height: 40,
+    margin: 20,
+    borderWidth: 1,
+    borderRadius: 8,
+    marginTop: 10,
+    marginBottom: 15,
+    borderColor: "#FF0000",
+    paddingHorizontal: 10,
+  },
+  passwordInput: {
+    flex: 1,
+    height: 40,
+    padding: 0,
+  },
+  passwordToggle: {
+    padding: 4,
+    justifyContent: 'center' as const,
+    alignItems: 'center' as const,
+    marginLeft: 5,
   },
   
 }
