@@ -10,7 +10,8 @@ import {
   Button,
   TextInput,
   ScrollView,
-  StatusBar
+  StatusBar,
+  Switch
 } from "react-native";
 
 import React, { useState } from 'react'
@@ -58,6 +59,12 @@ export default function ParametreScreen() {
   const [isLoading, setIsLoading] = React.useState(true);
   const [userEmail, setUserEmail] = React.useState<string>("");
   
+  // Preference states
+  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+  const [promotionsEnabled, setPromotionsEnabled] = useState(true);
+  const [updatesEnabled, setUpdatesEnabled] = useState(false);
+  const [darkModeEnabled, setDarkModeEnabled] = useState(false);
+  const [languagePreference, setLanguagePreference] = useState('french');
 
   const orders = [
     {
@@ -223,7 +230,7 @@ export default function ParametreScreen() {
       icon: <Settings2 size={26} strokeWidth={2.5} color={COLORS.black} />,
       title: "Mes préférences",
       subtitle: "Gérez et personnalisez vos préférences.",
-      onPress: () => console.log("Preferences pressed"),
+      onPress: () => setPreferencesModalVisible(true),
     },
     /*
     {
@@ -465,6 +472,202 @@ export default function ParametreScreen() {
         <View style={styles.footerSection}>
           <Text style={styles.versionText}>Version 1.0.0</Text>
           <Text style={styles.copyrightText}>© 2025 CADUM. Tous droits réservés.</Text>
+        </View>
+      </ScrollView>
+    </View>
+  </View>
+</Modal>
+
+<Modal
+  animationType="slide"
+  transparent={true}
+  visible={prferencesModalVisible}
+  onRequestClose={() => setPreferencesModalVisible(false)}
+>
+  <View style={styles.modalOverlay}>
+    <View style={styles.modalContainer}>
+      <View style={styles.modalHeader}>
+        <Text style={styles.modernModalTitle}>Mes préférences</Text>
+        <TouchableOpacity onPress={() => setPreferencesModalVisible(false)}>
+          <AntDesign name="close" size={24} color={COLORS.black} />
+        </TouchableOpacity>
+      </View>
+      
+      <ScrollView 
+        style={styles.modernModalContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Notifications Section */}
+        <View style={styles.preferenceSection}>
+          <View style={styles.preferenceSectionHeader}>
+            <View style={styles.sectionIcon}>
+              <Bell size={20} color={COLORS.black} />
+            </View>
+            <Text style={styles.preferenceSectionTitle}>Notifications</Text>
+          </View>
+          <Text style={styles.preferenceSectionDescription}>
+            Gérez vos préférences de notification pour rester informé
+          </Text>
+          
+          <View style={styles.toggleContainer}>
+            <View style={styles.toggleItem}>
+              <View style={styles.toggleTextContainer}>
+                <Text style={styles.toggleTitle}>Toutes les notifications</Text>
+                <Text style={styles.toggleSubtitle}>Activer/désactiver toutes les notifications</Text>
+              </View>
+              <Switch
+                value={notificationsEnabled}
+                onValueChange={setNotificationsEnabled}
+                trackColor={{ false: '#E0E0E0', true: '#25c800ff' }}
+                thumbColor={'#FFFFFF'}
+                ios_backgroundColor="#E0E0E0"
+              />
+            </View>
+
+            <View style={styles.toggleItem}>
+              <View style={styles.toggleTextContainer}>
+                <Text style={styles.toggleTitle}>Promotions</Text>
+                <Text style={styles.toggleSubtitle}>Recevez les offres spéciales</Text>
+              </View>
+              <Switch
+                value={promotionsEnabled}
+                onValueChange={setPromotionsEnabled}
+                trackColor={{ false: '#E0E0E0', true: '#25c800ff' }}
+                thumbColor={'#FFFFFF'}
+                ios_backgroundColor="#E0E0E0"
+                disabled={!notificationsEnabled}
+              />
+            </View>
+
+            <View style={styles.toggleItem}>
+              <View style={styles.toggleTextContainer}>
+                <Text style={styles.toggleTitle}>Mises à jour</Text>
+                <Text style={styles.toggleSubtitle}>Nouvelles fonctionnalités et améliorations</Text>
+              </View>
+              <Switch
+                value={updatesEnabled}
+                onValueChange={setUpdatesEnabled}
+                trackColor={{ false: '#E0E0E0', true: '#25c800ff' }}
+                thumbColor={'#FFFFFF'}
+                ios_backgroundColor="#E0E0E0"
+                disabled={!notificationsEnabled}
+              />
+            </View>
+          </View>
+        </View>
+
+        <View style={styles.divider} />
+
+        {/* Theme Section */}
+        <View style={styles.preferenceSection}>
+          <View style={styles.preferenceSectionHeader}>
+            <View style={styles.sectionIcon}>
+              <Settings2 size={20} color={COLORS.black} />
+            </View>
+            <Text style={styles.preferenceSectionTitle}>Apparence</Text>
+          </View>
+          <Text style={styles.preferenceSectionDescription}>
+            Personnalisez l'apparence de l'application
+          </Text>
+          
+          <View style={styles.toggleContainer}>
+            <View style={styles.toggleItem}>
+              <View style={styles.toggleTextContainer}>
+                <Text style={styles.toggleTitle}>Mode sombre</Text>
+                <Text style={styles.toggleSubtitle}>Activez le thème sombre pour réduire la fatigue oculaire</Text>
+              </View>
+              <Switch
+                value={darkModeEnabled}
+                onValueChange={setDarkModeEnabled}
+                trackColor={{ false: '#E0E0E0', true: '#25c800ff' }}
+                thumbColor={'#FFFFFF'}
+                ios_backgroundColor="#E0E0E0"
+              />
+            </View>
+          </View>
+        </View>
+
+        <View style={styles.divider} />
+
+        {/* Language Section */}
+        <View style={styles.preferenceSection}>
+          <View style={styles.preferenceSectionHeader}>
+            <View style={styles.sectionIcon}>
+              <FontAwesome name="globe" size={20} color={COLORS.black} />
+            </View>
+            <Text style={styles.preferenceSectionTitle}>Langue</Text>
+          </View>
+          <Text style={styles.preferenceSectionDescription}>
+            Sélectionnez votre langue préférée
+          </Text>
+          
+          <View style={styles.languageContainer}>
+            <TouchableOpacity 
+              style={[
+                styles.languageOption,
+                languagePreference === 'french' && styles.languageOptionSelected
+              ]}
+              onPress={() => setLanguagePreference('french')}
+            >
+              <View style={styles.languageOptionContent}>
+                <Text style={[
+                  styles.languageText,
+                  languagePreference === 'french' && styles.languageTextSelected
+                ]}>
+                  🇫🇷 Français
+                </Text>
+                {languagePreference === 'french' && (
+                  <View style={styles.checkmark}>
+                    <Text style={styles.checkmarkText}>✓</Text>
+                  </View>
+                )}
+              </View>
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              style={[
+                styles.languageOption,
+                languagePreference === 'english' && styles.languageOptionSelected
+              ]}
+              onPress={() => setLanguagePreference('english')}
+            >
+              <View style={styles.languageOptionContent}>
+                <Text style={[
+                  styles.languageText,
+                  languagePreference === 'english' && styles.languageTextSelected
+                ]}>
+                  🇬🇧 English
+                </Text>
+                {languagePreference === 'english' && (
+                  <View style={styles.checkmark}>
+                    <Text style={styles.checkmarkText}>✓</Text>
+                  </View>
+                )}
+              </View>
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              style={[
+                styles.languageOption,
+                languagePreference === 'spanish' && styles.languageOptionSelected
+              ]}
+              onPress={() => setLanguagePreference('spanish')}
+            >
+              <View style={styles.languageOptionContent}>
+                <Text style={[
+                  styles.languageText,
+                  languagePreference === 'spanish' && styles.languageTextSelected
+                ]}>
+                  🇪🇸 Español
+                </Text>
+                {languagePreference === 'spanish' && (
+                  <View style={styles.checkmark}>
+                    <Text style={styles.checkmarkText}>✓</Text>
+                  </View>
+                )}
+              </View>
+            </TouchableOpacity>
+          </View>
         </View>
       </ScrollView>
     </View>
@@ -817,6 +1020,101 @@ versionText: {
 copyrightText: {
   fontSize: 12,
   color: '#999',
+  marginBottom: SPACING["md"],
+},
+// Preferences Modal Styles
+preferenceSection: {
+  marginBottom: 24,
+},
+preferenceSectionHeader: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  marginBottom: 8,
+  gap: 10,
+},
+preferenceSectionTitle: {
+  fontSize: 20,
+  fontWeight: '700',
+  color: COLORS.black,
+  marginTop : -14
+  
+},
+preferenceSectionDescription: {
+  fontSize: 14,
+  color: '#666',
+  marginBottom: 16,
+  lineHeight: 20,
+},
+toggleContainer: {
+  backgroundColor: '#F8F9FA',
+  borderRadius: 12,
+  padding: 4,
+},
+toggleItem: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  paddingVertical: 14,
+  paddingHorizontal: 16,
+  backgroundColor: 'white',
+  borderRadius: 10,
+  marginBottom: 4,
+},
+toggleTextContainer: {
+  flex: 1,
+  marginRight: 12,
+},
+toggleTitle: {
+  fontSize: 16,
+  fontWeight: '600',
+  color: COLORS.black,
+  marginBottom: 4,
+},
+toggleSubtitle: {
+  fontSize: 13,
+  color: '#666',
+  lineHeight: 18,
+},
+languageContainer: {
+  gap: 8,
+},
+languageOption: {
+  backgroundColor: '#f8faf8ff',
+  borderRadius: 12,
+  padding: 16,
+  borderWidth: 2,
+  borderColor: 'transparent',
+},
+languageOptionSelected: {
+  backgroundColor: 'rgba(0, 172, 34, 0.08)',
+  borderColor: '#1dac00ff',
+},
+languageOptionContent: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+},
+languageText: {
+  fontSize: 16,
+  fontWeight: '500',
+  color: '#333',
+},
+languageTextSelected: {
+  color: '#1dac00ff',
+  fontWeight: '600',
+},
+checkmark: {
+  width: 24,
+  height: 24,
+  borderRadius: 12,
+  backgroundColor: '#1dac00ff',
+  alignItems: 'center',
+  justifyContent: 'center',
+},
+checkmarkText: {
+  color: 'white',
+  fontSize: 14,
+  fontWeight: 'bold',
 },
 buttonContainer: {
   marginTop: 20,

@@ -1,4 +1,4 @@
-import { View, Text, Touchable, TouchableOpacity, Modal, Platform, Linking, Alert, Image, StatusBar, FlatList } from 'react-native';
+import { View, Text, Touchable, TouchableOpacity, Modal, Platform, Linking, Alert, Image, StatusBar, FlatList, ScrollView } from 'react-native';
 import React, { use, useEffect, useMemo, useCallback, memo } from 'react';
 import ScrollableLayout from '@/components/layouts/ScrollableLayout';
 import SPACING from '@/constants/Spacing';
@@ -678,7 +678,11 @@ export default function EventsPage() {
 
                   {/* Modal Content */}
                   {modalData && (
-                    <View style={{flex: 1, paddingHorizontal: SPACING["lg"]}}>
+                    <ScrollView 
+                      style={{flex: 1}} 
+                      contentContainerStyle={{paddingHorizontal: SPACING["lg"], paddingBottom: SPACING["xl"]}}
+                      showsVerticalScrollIndicator={true}
+                    >
                       {/* Title and Tags/Location */}
                       <View style={{marginTop: SPACING["lg"]}}>
                         
@@ -919,15 +923,15 @@ export default function EventsPage() {
                       </View>
 
                       {/* Description */}
-                      <View style={{flex: 1}}>
+                      <View>
                         <Text style={{...TYPOGRAPHY.body.normal.semiBold, color: '#333', marginBottom: SPACING["sm"]}}>
                           Description
                         </Text>
-                        <Text style={{...TYPOGRAPHY.body.normal.base, color: '#666', lineHeight: 22}}>
+                        <Text style={{...TYPOGRAPHY.body.normal.base, color: '#666', lineHeight: 22, marginBottom: SPACING["xl"]}}>
                           {modalData.description || modalData.content}
                         </Text>
                       </View>
-                    </View>
+                    </ScrollView>
                   )}
                 </View>
               </View>

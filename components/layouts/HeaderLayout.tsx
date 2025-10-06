@@ -1,4 +1,4 @@
-import { Button, Modal, StyleSheet, TouchableOpacity, View, Text, TouchableHighlight,Animated } from "react-native";
+import { Button, Modal, StyleSheet, TouchableOpacity, View, ScrollView ,Text, TouchableHighlight,Animated } from "react-native";
 
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Redirect, Tabs, useRouter } from "expo-router";
@@ -151,7 +151,7 @@ export default function HeaderLayout({fullName, profilePicture}: HeaderLayoutPro
               <Text style={styles.modalTitle}>Mes Notifications</Text>
               <Button title="Fermer" onPress={() => setNotifModal(false)} />
             </View>
-            <View style={styles.modalContent}>
+            <ScrollView style={styles.modalContent}>
             {notifs.length === 0 ? (
                   <Text style={styles.noNotificationsText}>Aucune notification</Text>
                 ) : (
@@ -180,7 +180,7 @@ export default function HeaderLayout({fullName, profilePicture}: HeaderLayoutPro
                 </GestureHandlerRootView>
               )))}
               
-            </View>
+            </ScrollView>
             {unreadCount > 0 && (
               <TouchableOpacity style={styles.readAllButton} onPress={handleReadAll}>
               <Text style={styles.readAllButtonText}>✓</Text>
