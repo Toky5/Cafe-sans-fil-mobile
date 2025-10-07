@@ -218,7 +218,7 @@ const styles = StyleSheet.create({
   modalContainer: {
     width: '100%',
     height: '90%',
-    backgroundColor: '#fff',
+    backgroundColor: COLORS.white,
     borderRadius: 24,
     overflow: 'hidden',
     marginTop: '20%',
@@ -247,7 +247,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 16,
     marginBottom: 12,
-    shadowColor: '#000',
+    shadowColor: COLORS.black ,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -290,11 +290,11 @@ const styles = StyleSheet.create({
   toggleButtonText: {
     fontSize: 12,
     textAlign: 'center',
-    color: '#000',
+    color: COLORS.black ,
     fontWeight: 'bold',
   },
   deleteButtonText: {
-    color: '#fff',
+    color: COLORS.white,
     fontWeight: 'bold',
   },
   noNotificationsText: {

@@ -598,7 +598,7 @@ export default function ParametreScreen() {
                 value={notificationsEnabled}
                 onValueChange={setNotificationsEnabled}
                 trackColor={{ false: '#E0E0E0', true: '#25c800ff' }}
-                thumbColor={'#FFFFFF'}
+                thumbColor={COLORS.white}
                 ios_backgroundColor="#E0E0E0"
               />
             </View>
@@ -612,7 +612,7 @@ export default function ParametreScreen() {
                 value={promotionsEnabled}
                 onValueChange={setPromotionsEnabled}
                 trackColor={{ false: '#E0E0E0', true: '#25c800ff' }}
-                thumbColor={'#FFFFFF'}
+                thumbColor={COLORS.white}
                 ios_backgroundColor="#E0E0E0"
                 disabled={!notificationsEnabled}
               />
@@ -627,7 +627,7 @@ export default function ParametreScreen() {
                 value={updatesEnabled}
                 onValueChange={setUpdatesEnabled}
                 trackColor={{ false: '#E0E0E0', true: '#25c800ff' }}
-                thumbColor={'#FFFFFF'}
+                thumbColor={COLORS.white}
                 ios_backgroundColor="#E0E0E0"
                 disabled={!notificationsEnabled}
               />
@@ -659,7 +659,7 @@ export default function ParametreScreen() {
                 value={darkModeEnabled}
                 onValueChange={setDarkModeEnabled}
                 trackColor={{ false: '#E0E0E0', true: '#25c800ff' }}
-                thumbColor={'#FFFFFF'}
+                thumbColor={COLORS.white}
                 ios_backgroundColor="#E0E0E0"
               />
             </View>
@@ -904,7 +904,7 @@ const styles = StyleSheet.create({
   modalContainer: {
     width: '100%',
     height: '90%',
-    backgroundColor: '#fff',
+    backgroundColor: COLORS.white,
     borderRadius: 24,
     overflow: 'hidden',
     marginTop: '20%',
@@ -949,7 +949,7 @@ const styles = StyleSheet.create({
   accountModalContainer: {
     width: '100%',
     height: '90%',
-    backgroundColor: '#fff',
+    backgroundColor: COLORS.white,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     overflow: 'hidden',
@@ -1222,10 +1222,10 @@ const styles = StyleSheet.create({
 modernModalContainer: {
   width: '100%',
   maxHeight: '90%',
-  backgroundColor: '#fff',
+  backgroundColor: COLORS.white,
   borderRadius: 20,
   overflow: 'hidden',
-  shadowColor: "#000",
+  shadowColor: COLORS.black ,
   shadowOffset: {
     width: 0,
     height: 10,
@@ -1426,7 +1426,7 @@ logoutButton: {
   paddingHorizontal: 24,
   borderWidth: 1.5,
   borderColor: '#E0E0E0',
-  shadowColor: '#000',
+  shadowColor:COLORS.black,
   shadowOffset: {
     width: 0,
     height: 1,
@@ -1453,7 +1453,7 @@ passwordContainer: {
 passwordInput: {
   flex: 1,
   height: '100%',
-  color: '#000',
+  color: COLORS.black ,
 },
 passwordToggle: {
   padding: 4,

@@ -4,6 +4,7 @@ import {Text, View, Image, TextInput, ScrollView, KeyboardAvoidingView, Platform
 import { SafeAreaView } from "react-native-safe-area-context";
 import {useRouter} from "expo-router";
 import { Ionicons } from '@expo/vector-icons';
+import COLORS from "@/constants/Colors";
 
 
 
@@ -58,7 +59,7 @@ export default function SignInScreen() {
       style={styles.backButton} 
       onPress={() => router.push("/sign-in")}
     >
-      <Ionicons name="arrow-back" size={24} color="#000" />
+      <Ionicons name="arrow-back" size={24} color={COLORS.black} />
     </TouchableOpacity>
       <Image source={require("@/logoold.png")} style={styles.logo}/>
       <View style={styles.header}>

@@ -365,7 +365,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     boxShadow: "0px 1px 2px 0px rgba(228, 229, 231, 0.24)",
-    color: "#000000",
+    color: COLORS.black,
     height: 160,
   },
   cafeBackgroundImage: {

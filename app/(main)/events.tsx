@@ -294,7 +294,7 @@ export default function EventsPage() {
           ...(Platform.OS === 'android' ? {
             elevation: 2,
           } : {
-            shadowColor: "#000",
+            shadowColor: COLORS.black,
             shadowOffset: { width: 0, height: 2 },
             shadowOpacity: 0.1,
             shadowRadius: 4,
@@ -358,7 +358,7 @@ export default function EventsPage() {
           ...(Platform.OS === 'android' ? {
             elevation: 2,
           } : {
-            shadowColor: "#000",
+            shadowColor: COLORS.black,
             shadowOffset: { width: 0, height: 2 },
             shadowOpacity: 0.1,
             shadowRadius: 4,
@@ -434,8 +434,8 @@ export default function EventsPage() {
                 paddingVertical: SPACING["sm"],
                 paddingHorizontal: SPACING["md"],
                 borderRadius: 8,
-                backgroundColor: activeTab === 'events' ? '#fff' : 'transparent',
-                shadowColor: activeTab === 'events' ? '#000' : 'transparent',
+                backgroundColor: activeTab === 'events' ? COLORS.white  : 'transparent',
+                shadowColor: activeTab === 'events' ? COLORS.black : 'transparent',
                 shadowOffset: { width: 0, height: 1 },
                 shadowOpacity: activeTab === 'events' ? 0.1 : 0,
                 shadowRadius: 2,
@@ -455,8 +455,8 @@ export default function EventsPage() {
                 paddingVertical: SPACING["sm"],
                 paddingHorizontal: SPACING["md"],
                 borderRadius: 8,
-                backgroundColor: activeTab === 'announcements' ? '#fff' : 'transparent',
-                shadowColor: activeTab === 'announcements' ? '#000' : 'transparent',
+                backgroundColor: activeTab === 'announcements' ? COLORS.white : 'transparent',
+                shadowColor: activeTab === 'announcements' ? COLORS.black : 'transparent',
                 shadowOffset: { width: 0, height: 1 },
                 shadowOpacity: activeTab === 'announcements' ? 0.1 : 0,
                 shadowRadius: 2,
@@ -644,7 +644,7 @@ export default function EventsPage() {
                 <View style={{
                   width: '100%',
                   height: '90%',
-                  backgroundColor: '#fff',
+                  backgroundColor: COLORS.white,
                   borderTopLeftRadius: 24,
                   borderTopRightRadius: 24,
                 }}>

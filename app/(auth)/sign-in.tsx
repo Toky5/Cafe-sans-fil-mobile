@@ -8,6 +8,7 @@ import {
   Eye,
   EyeOff,
 } from "lucide-react-native";
+import COLORS from "@/constants/Colors";
 
 
 
@@ -191,7 +192,7 @@ export default function SignInScreen() {
           {({ pressed }) => (
         <Text 
           style={{
-            color: pressed ? "#000000" : "#000000", 
+            color: pressed ? COLORS.black : COLORS.black, 
             textAlign: "right",
             padding: 8,
             fontWeight: "500"

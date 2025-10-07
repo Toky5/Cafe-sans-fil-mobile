@@ -8,6 +8,7 @@ import HeaderLayout from '@/components/layouts/HeaderLayout';
 import { clearTokens, getInfoFromToken, getToken, deleteAccount } from "@/utils/tokenStorage";
 import CafeCard from "@/components/common/Cards/CafeCard";
 import ArticleCard from "@/components/common/Cards/ArticleCard";
+import COLORS from '@/constants/Colors';
 
 
 export default function FavorisScreen() {
@@ -224,7 +225,7 @@ export default function FavorisScreen() {
                       ...Platform.OS === 'android' ? {
                         elevation: 3,
                       } : {
-                        shadowColor: '#000',
+                        shadowColor: COLORS.black,
                         shadowOffset: { width: 0, height: 2 },
                         shadowOpacity: 0.1,
                         shadowRadius: 8,

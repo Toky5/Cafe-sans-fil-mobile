@@ -90,7 +90,7 @@ export default function CafeCard({
                       console.log(slug);
       }}
       style={{ width: cardDimensions[size].width, 
-        shadowColor: "#000",                       // Black shadow
+        shadowColor: COLORS.black ,                       // Black shadow
         shadowOffset: { width: 5, height: 5 },     // Offset shadow towards bottom-right 
         shadowOpacity: 0.25,                        // Half opaque
         shadowRadius: 6,                          // Smoothness of the shadow
@@ -186,7 +186,7 @@ const styles = StyleSheet.create({
     top: SPACING.sm,
   },
   wrapper: {
-    shadowColor: "#000",                       // Black shadow
+    shadowColor: COLORS.black ,                       // Black shadow
     shadowOffset: { width: 5, height: 5 },     // Offset shadow towards bottom-right 
     shadowOpacity: 0.25,                        // Half opaque
     shadowRadius: 5,                          // Smoothness of the shadow

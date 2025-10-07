@@ -131,7 +131,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     overflow: 'hidden',
     flexDirection: 'row',
-    shadowColor: "#000",
+    shadowColor: COLORS.black ,
     shadowOffset: {
       width: 0,
       height: 2,
@@ -197,7 +197,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     overflow: 'hidden',
     width: '48%',
-    shadowColor: "#000",
+    shadowColor: COLORS.black ,
     shadowOffset: {
       width: 0,
       height: 4,
@@ -229,7 +229,7 @@ const styles = StyleSheet.create({
   },
   modernStatusText: {
     ...TYPOGRAPHY.body.small.base,
-    color: '#fff',
+    color: COLORS.white,
     fontSize: 10,
     fontWeight: '600',
   },
@@ -262,7 +262,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     flexDirection: 'row',
     overflow: 'hidden',
-    shadowColor: "#000",
+    shadowColor: COLORS.black ,
     shadowOffset: {
       width: 0,
       height: 2,
@@ -343,7 +343,7 @@ const styles = StyleSheet.create({
     top: SPACING.sm,
   },
   wrapper: {
-    shadowColor: "#000",
+    shadowColor: COLORS.black ,
     shadowOffset: { width: 5, height: 5 },
     shadowOpacity: 0.25,
     shadowRadius: 5,

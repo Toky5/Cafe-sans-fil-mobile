@@ -46,7 +46,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#EDF1F3",
     boxShadow: "0px 1px 2px 0px rgba(228, 229, 231, 0.24)",
-    color: "#000000",
+    color: COLORS.black,
     flexDirection: "row",
     justifyContent: "space-around",
     alignItems: "center",

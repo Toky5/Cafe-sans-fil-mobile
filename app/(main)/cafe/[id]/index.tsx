@@ -419,7 +419,7 @@ console.log(paymentDetails);
             outputRange: [0, 1],
           }),
           borderBottomColor: 'rgba(0, 0, 0, 0.1)',
-          shadowColor: "#000",
+          shadowColor: COLORS.black ,
           shadowOffset: {
             width: 0,
             height: 2,
@@ -919,7 +919,7 @@ const styles = StyleSheet.create({
     paddingRight: 16,
   },
   modernDayCard: {
-    backgroundColor: '#fff',
+    backgroundColor: COLORS.white,
     borderRadius: 12,
     paddingVertical: 12,
     paddingHorizontal: 16,
@@ -929,8 +929,8 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   modernDayCardToday: {
-    backgroundColor: '#000',
-    borderColor: '#000',
+    backgroundColor: COLORS.black ,
+    borderColor: COLORS.black ,
   },
   dayHeader: {
     marginBottom: 8,
@@ -942,7 +942,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   modernDayNameToday: {
-    color: '#fff',
+    color: COLORS.white,
   },
   modernTimeBlocks: {
     gap: 4,
@@ -958,14 +958,14 @@ const styles = StyleSheet.create({
     fontSize: 12,
   },
   modernTimeTextToday: {
-    color: '#fff',
+    color: COLORS.white,
   },
   timeSeparator: {
     color: '#999',
     fontSize: 12,
   },
   timeSeparatorToday: {
-    color: '#fff',
+    color:COLORS.white,
   },
   closedContainer: {
     paddingVertical: 4,
@@ -976,7 +976,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
   },
   modernClosedTextToday: {
-    color: '#fff',
+    color: COLORS.white,
   },
   // Modern Menu Styles
   menuSection: {
@@ -999,7 +999,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffffff',
   },
   modernFilterChipActive: {
-    backgroundColor: '#000',
+    backgroundColor: COLORS.black ,
   },
   modernFilterChipText: {
     ...TYPOGRAPHY.body.normal.semiBold,
@@ -1008,7 +1008,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   modernFilterChipTextActive: {
-    color: '#fff',
+    color: COLORS.white,
   },
   menuGrid: {
     gap: 12,
