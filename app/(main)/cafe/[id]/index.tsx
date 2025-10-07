@@ -868,13 +868,11 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
   },
   searchContainer: {
-    backgroundColor: "white",
+    backgroundColor: COLORS.lightGray,
     borderRadius: 25,
     height: 40,
     overflow: "hidden",
     marginLeft: -6,
-    borderColor: '#E5E5E5',
-    borderWidth: 1,
 
   },
   searchInput: {
