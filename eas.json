@@ -5,6 +5,7 @@
     },
     "development": {
     },
+    "production": {},
     "ios-simulator": {
     "extends": "development",
     "ios": {
