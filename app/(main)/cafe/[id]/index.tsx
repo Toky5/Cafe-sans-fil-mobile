@@ -60,6 +60,8 @@ export default function CafeScreen() {
   
   // list of items to display
   const [itemList, setItemList] = useState<Item[]>();
+  const [filteredItemList, setFilteredItemList] = useState<Item[]>();
+  const [isSearchActive, setIsSearchActive] = useState(false);
 
   const [cafe, setCafe] = useState<Cafe>(); // set social media as empty object
   const [data, setData] = useState<allCafe | any>([]);
@@ -143,6 +145,11 @@ export default function CafeScreen() {
 function filterMenu(filter?: string, menuData?: any): Item[] {
   let menu = menuData ? menuData : ((cafe && cafe.menu) ? cafe.menu.categories : []);
   let itemList: Item[] = [];
+
+  // Clear search when using category filters
+  setIsSearchActive(false);
+  setFilteredItemList(undefined);
+  setSearchText("");
 
   // if no filter --> all items to be displayed
   if (filter) {
@@ -329,7 +336,44 @@ console.log(paymentDetails);
       
       if (!isExpanding) {
         setSearchText(""); // Clear search text when closing
+        setFilteredItemList(undefined); // Clear filtered results
+        setIsSearchActive(false); // Deactivate search
+        setActiveFilter("Tous"); // Reset filter to "Tous"
       }
+    };
+
+    // Handle search text changes
+    const handleSearchChange = (text: string) => {
+      setSearchText(text);
+      
+      if (!text.trim()) {
+        // If search is empty, clear filtered results
+        setFilteredItemList(undefined);
+        setIsSearchActive(false);
+        return;
+      }
+
+      // Scroll to menu section when user starts typing
+      if (!isSearchActive && scrollViewRef.current) {
+        setIsSearchActive(true);
+        // Scroll to menu section (adjust offset as needed based on your layout)
+        scrollViewRef.current.scrollTo({ y: 600, animated: true });
+      }
+
+      // Get all menu items from all categories
+      const allItems: Item[] = [];
+      cafe?.menu.categories.forEach(category => {
+        allItems.push(...category.items);
+      });
+
+      // Filter items based on search text
+      const filtered = allItems.filter(item => 
+        item.name.toLowerCase().includes(text.toLowerCase()) ||
+        item.description?.toLowerCase().includes(text.toLowerCase())
+      );
+
+      setFilteredItemList(filtered);
+      setActiveFilter(""); // Clear active filter when searching
     };
 
     // Handle scroll to change header background
@@ -397,9 +441,9 @@ console.log(paymentDetails);
             <Animated.View style={[styles.searchContainer, { width: searchWidth }]}>
               <TextInput
                 style={styles.searchInput}
-                placeholder="Rechercher..."
+                placeholder="Rechercher dans le menu..."
                 value={searchText}
-                onChangeText={setSearchText}
+                onChangeText={handleSearchChange}
                 autoFocus={true}
                 placeholderTextColor={COLORS.subtuleDark}
                 onBlur={() => {
@@ -448,11 +492,20 @@ console.log(paymentDetails);
                   onPress={toggleSearch}
                 />
                 {!isScrolledPastImage && (
-                  <IconButton 
-                    Icon={Locate} 
-                    style={styles.cafeHeaderIconButtons} 
-                    onPress={() => cafe?.location && openLocation(cafe.location.geometry.coordinates)} 
-                  />
+                  <View style={{ flexDirection: "row", gap: 8 }}>
+                    <IconButton 
+                      Icon={Locate} 
+                      style={styles.cafeHeaderIconButtons} 
+                      onPress={() => cafe?.location && openLocation(cafe.location.geometry.coordinates)} 
+                    />
+                    <IconButton
+                      Icon={Heart}
+                      onPress={() => toggleHeart(!heart)}
+                      iconColor={heart ? COLORS.status.red : COLORS.black}
+                      fill={heart ? "red" : "none"}
+                      style={styles.cafeHeaderIconButtons}
+                    />
+                  </View>
                 )}
               </View>
             </>
@@ -694,25 +747,32 @@ console.log(paymentDetails);
 
         {/* Menu Items Grid */}
         <View style={styles.menuGrid}>
-          {itemList && itemList.length > 0 ? (
-            itemList.map((item) => (
-              <ArticleCard
-                key={item.id}
-                cafeSlug={cafe?.slug}
-                slug={item.id}
-                name={item.name} 
-                price={"$" + item.price} 
-                status={item.in_stock ? "En Stock" : "En Rupture"}
-                image={item.image_url}
-                calories={item.description}
-                size="large"
-              />
-            ))
-          ) : (
-            <View style={styles.emptyMenuContainer}>
-              <Text style={styles.emptyMenuText}>Aucun article disponible</Text>
-            </View>
-          )}
+          {(() => {
+            // Use filtered list if search is active, otherwise use regular itemList
+            const displayItems = isSearchActive ? filteredItemList : itemList;
+            
+            return displayItems && displayItems.length > 0 ? (
+              displayItems.map((item) => (
+                <ArticleCard
+                  key={item.id}
+                  cafeSlug={cafe?.slug}
+                  slug={item.id}
+                  name={item.name} 
+                  price={"$" + item.price} 
+                  status={item.in_stock ? "En Stock" : "En Rupture"}
+                  image={item.image_url}
+                  calories={item.description}
+                  size="large"
+                />
+              ))
+            ) : (
+              <View style={styles.emptyMenuContainer}>
+                <Text style={styles.emptyMenuText}>
+                  {isSearchActive ? `Aucun résultat pour "${searchText}"` : "Aucun article disponible"}
+                </Text>
+              </View>
+            );
+          })()}
         </View>
       </View>      
 
