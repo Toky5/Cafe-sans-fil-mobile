@@ -60,7 +60,7 @@ export default function HomeScreen() {
   const [isLoading, setIsLoading] = useState(true);
   const [showOnlyOrder, setShowOnlyOrder] = useState(false);
   const [showOpen, setShowOpen] = useState(false);
-  const [location, getCurrentLocation] = useLocation();
+  const [location, getCurrentLocation, locationPermissionDenied] = useLocation();
   const [originalData, setOriginalData] = useState<Cafe[]>();
   const [searched, setSearched] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState<{
@@ -71,6 +71,13 @@ export default function HomeScreen() {
   useOnForegroundBack(getCurrentLocation);
 
   useEffect(() => {
+    // Only fetch cafes if location is available OR permission was denied
+    if (!location) {
+      console.log("Location not yet available, waiting...");
+      return;
+    }
+
+    console.log("Location available or permission denied, fetching cafes...");
     setIsLoading(true);
     fetch("https://cafesansfil-api-r0kj.onrender.com/api/cafes")
       .then((response) => response.json())
@@ -80,14 +87,24 @@ export default function HomeScreen() {
         // Only set data and closest if we don't have a selected location
         if (!selectedLocation) {
           setData(json.items);
-          setClosest(sortByDistance(location as Location.LocationObject, json.items));
+          
+          // Only sort by distance if location permission was granted
+          if (!locationPermissionDenied) {
+            const sortedCafes = sortByDistance(location as Location.LocationObject, json.items);
+            setClosest(sortedCafes);
+            console.log("Cafes sorted by distance, closest:", sortedCafes?.[0]?.location.pavillon);
+          } else {
+            console.log("Location permission denied, showing all cafes without sorting");
+            // Just set the cafes without sorting
+            setClosest(json.items);
+          }
         }
       })
       .catch((error) => console.error(error))
       .finally(() => {
         setIsLoading(false);
       });
-  }, [location]);
+  }, [location, selectedLocation, locationPermissionDenied]);
 
   // Add this useEffect to ensure locations are re-sorted when selectedLocation changes
   useEffect(() => {
@@ -214,10 +231,20 @@ export default function HomeScreen() {
     setSearched(true);
   }
 
-  if (isLoading || (!data && !closest)) {
+  if (isLoading || !location || (!data && !closest)) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignContent: 'center' }}>
         <ActivityIndicator size={'large'} />
+        {!location && !locationPermissionDenied && (
+          <Text style={{ textAlign: 'center', marginTop: 10, color: COLORS.subtuleDark }}>
+            Récupération de votre position...
+          </Text>
+        )}
+        {locationPermissionDenied && (
+          <Text style={{ textAlign: 'center', marginTop: 10, color: COLORS.subtuleDark }}>
+            Chargement des cafés...
+          </Text>
+        )}
       </View>
     )
   }
@@ -231,7 +258,7 @@ export default function HomeScreen() {
             {/* User Location and Search */}
             
             <View style={styles.locationAndSearchContainer}>
-              {location && (
+              {location && !locationPermissionDenied && (
               <SelectLocalisation
                 currentLocalisation={selectedLocation ? selectedLocation.name : (closest && closest.length > 0) ? closest[0].location.pavillon : ""}
                 location={location as Location.LocationObject}
