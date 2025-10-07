@@ -168,6 +168,13 @@ export default function SignInScreen() {
             } else if (firstError.ctx && firstError.ctx.reason) {
               errorMessage = firstError.ctx.reason;
             }
+            
+            if (firstError.loc && firstError.loc[1] !== "body"){
+             errorMessage += ` (Pour le champ de : ${firstError.loc[1]})`;
+            }
+            else if (firstError.input ){
+              errorMessage += `Pour la valeur : ${firstError.input})`;
+            }
           }
         }
         
