@@ -69,8 +69,8 @@ export default function ParametreScreen() {
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [promotionsEnabled, setPromotionsEnabled] = useState(true);
   const [updatesEnabled, setUpdatesEnabled] = useState(false);
-  const [darkModeEnabled, setDarkModeEnabled] = useState(false);
-  const [languagePreference, setLanguagePreference] = useState('french');
+  //const [darkModeEnabled, setDarkModeEnabled] = useState(false);
+  //const [languagePreference, setLanguagePreference] = useState('french');
 
   const orders = [
     {
@@ -605,8 +605,8 @@ export default function ParametreScreen() {
 
             <View style={styles.toggleItem}>
               <View style={styles.toggleTextContainer}>
-                <Text style={styles.toggleTitle}>Promotions</Text>
-                <Text style={styles.toggleSubtitle}>Recevez les offres spéciales</Text>
+                <Text style={styles.toggleTitle}>Annonces</Text>
+                <Text style={styles.toggleSubtitle}>Recevez les nouvelles annonces</Text>
               </View>
               <Switch
                 value={promotionsEnabled}
@@ -614,14 +614,14 @@ export default function ParametreScreen() {
                 trackColor={{ false: '#E0E0E0', true: '#25c800ff' }}
                 thumbColor={COLORS.white}
                 ios_backgroundColor="#E0E0E0"
-                disabled={!notificationsEnabled}
+                disabled={notificationsEnabled}
               />
             </View>
 
             <View style={styles.toggleItem}>
               <View style={styles.toggleTextContainer}>
-                <Text style={styles.toggleTitle}>Mises à jour</Text>
-                <Text style={styles.toggleSubtitle}>Nouvelles fonctionnalités et améliorations</Text>
+                <Text style={styles.toggleTitle}>Événements</Text>
+                <Text style={styles.toggleSubtitle}>Recevez les nouveaux événements</Text>
               </View>
               <Switch
                 value={updatesEnabled}
@@ -629,15 +629,16 @@ export default function ParametreScreen() {
                 trackColor={{ false: '#E0E0E0', true: '#25c800ff' }}
                 thumbColor={COLORS.white}
                 ios_backgroundColor="#E0E0E0"
-                disabled={!notificationsEnabled}
+                disabled={notificationsEnabled}
               />
             </View>
           </View>
         </View>
-
+        
+        {/*
         <View style={styles.divider} />
 
-        {/* Theme Section */}
+         Theme Section 
         <View style={styles.preferenceSection}>
           <View style={styles.preferenceSectionHeader}>
             <View style={styles.sectionIcon}>
@@ -668,7 +669,7 @@ export default function ParametreScreen() {
 
         <View style={styles.divider} />
 
-        {/* Language Section */}
+        {/* Language Section 
         <View style={styles.preferenceSection}>
           <View style={styles.preferenceSectionHeader}>
             <View style={styles.sectionIcon}>
@@ -748,6 +749,7 @@ export default function ParametreScreen() {
             </TouchableOpacity>
           </View>
         </View>
+        */}
       </ScrollView>
     </View>
   </View>
