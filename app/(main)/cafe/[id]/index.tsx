@@ -590,7 +590,7 @@ console.log(paymentDetails);
                 key={`${method}-${minimum}`}
                 label={`${method}`}
                 showChevron={false }
-                color="white"
+                color={COLORS.white}
                 description={`Minimum: ${minimum}`}
                 Icon={CreditCard}
                 /> 
@@ -602,7 +602,7 @@ console.log(paymentDetails);
                 key={method} 
                   label={method}
                   showChevron={false}
-                  color="white"
+                  color={COLORS.white}
                   Icon={DollarSign}/>
               </View>    
               )
@@ -865,7 +865,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   cafeHeaderIconButtons: {
-    backgroundColor: "white",
+    backgroundColor: COLORS.white,
   },
   searchContainer: {
     backgroundColor: COLORS.lightGray,

@@ -26,13 +26,13 @@ export default function Counter({count, setCount} : CounterProps ){
   return (
     <View style={styles.textInput}>
       <TouchableOpacity onPress={decrement} style={styles.button}>
-        <Minus width={15} strokeWidth={3} color={"black"}></Minus>
+        <Minus width={15} strokeWidth={3} color={COLORS.black}></Minus>
       </TouchableOpacity>
 
       <Text style={TYPOGRAPHY.body.normal.medium}>{count}</Text>
 
       <TouchableOpacity onPress={increment} style={styles.button}>
-        <Plus width={15} strokeWidth={3} color={"black"}></Plus>
+        <Plus width={15} strokeWidth={3} color={COLORS.black}></Plus>
       </TouchableOpacity>
     </View>
   );

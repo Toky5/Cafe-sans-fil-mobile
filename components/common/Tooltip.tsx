@@ -193,16 +193,16 @@ export default function Tooltip({
               width={12}
               height={12}
               strokeWidth={3}
-              color={"black"}
-              fill={"black"}
+              color={COLORS.black}
+              fill={COLORS.black}
               testID="tooltip-icon"
             />) : status === "white" ? (
               <Icon
                 width={12}
                 height={12}
                 strokeWidth={3}
-                color={"black"}
-                fill={"white"}
+                color={COLORS.black}
+                fill={COLORS.white}
                 testID="tooltip-icon"
               />) :(
             <Icon

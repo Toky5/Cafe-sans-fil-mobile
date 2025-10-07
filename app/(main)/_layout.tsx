@@ -6,6 +6,7 @@ import { Home, Settings, ShoppingBasket, UserRound, Newspaper, UserRoundPen} fro
 import { Platform, View, ActivityIndicator } from "react-native";
 import { getInfoFromToken, getToken, getRefreshToken, clearTokens, updateToken } from "@/utils/tokenStorage";
 import { useEffect, useState } from "react";
+import COLORS from "@/constants/Colors";
 
 export default function TabLayout() {
   const [isSignedIn, setIsSignedIn] = useState(false);
@@ -80,7 +81,7 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: "black",
+        tabBarActiveTintColor: COLORS.black,
         tabBarInactiveTintColor: "#89898D",
         tabBarStyle: {
           ...Platform.select({

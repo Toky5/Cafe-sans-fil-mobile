@@ -364,7 +364,7 @@ export default function ParametreScreen() {
                       style={styles.modernProfilePicture} 
                     />
                     <TouchableOpacity style={styles.cameraButton}>
-                      <Camera size={20} color="white" />
+                      <Camera size={20} color={COLORS.white} />
                     </TouchableOpacity>
                   </View>
                   <Text style={styles.modalProfileName}>{userFullName || 'Utilisateur'}</Text>
@@ -520,16 +520,16 @@ export default function ParametreScreen() {
           </Text>
           <View style={styles.socialIcons}>
             <TouchableOpacity style={styles.socialButton}>
-              <FontAwesome6 name="discord" size={24} color="black" onPress={() => 
+              <FontAwesome6 name="discord" size={24} color={COLORS.black} onPress={() => 
               navigation.push("https://discord.gg/DvJWz9hwWF")}/>
             </TouchableOpacity>
             <TouchableOpacity style={styles.socialButton}>
-              <AntDesign name="github" size={24} color="black" onPress={() => 
+              <AntDesign name="github" size={24} color={COLORS.black} onPress={() => 
               navigation.push("https://github.com/CADUM-UdeM")}/>
             </TouchableOpacity>
             <TouchableOpacity style={styles.socialButton} onPress={() => 
               navigation.push("https://cadum.aediroum.ca")}>
-              <FontAwesome name="globe" size={24} color="black" />
+              <FontAwesome name="globe" size={24} color={COLORS.black} />
             </TouchableOpacity>
           </View>
         </View>
@@ -1214,7 +1214,7 @@ const styles = StyleSheet.create({
   },
   textContainer: {
     margin: 10,
-    borderColor: "black",
+    borderColor:COLORS.black,
     borderWidth: 1,
     borderRadius:10,
   },

@@ -387,7 +387,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   cafeHeaderIconButtons: {
-    backgroundColor: "white",
+    backgroundColor: COLORS.white,
   },
   cafeHeaderOpenStatus: {
     position: "absolute",
