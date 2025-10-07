@@ -99,7 +99,7 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => <Home size={28} color={color} />,
           tabBarLabelStyle: TYPOGRAPHY.body.small.bold,
           animation: 'shift',
-          sceneStyle: { backgroundColor: 'white' }  
+          sceneStyle: { backgroundColor: COLORS.white }  
         }}
         
       />

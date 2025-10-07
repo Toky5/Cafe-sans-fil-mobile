@@ -282,7 +282,7 @@ export default function FavorisScreen() {
                         }}>
                           <Text style={{ 
                             ...TYPOGRAPHY.body.normal.semiBold, 
-                            color: 'black',
+                            color: COLORS.black,
                             fontSize: 14
                           }}>
                             {formatPrice(priceDisplay)}

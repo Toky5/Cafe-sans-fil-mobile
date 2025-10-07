@@ -597,9 +597,9 @@ export default function ParametreScreen() {
               <Switch
                 value={notificationsEnabled}
                 onValueChange={setNotificationsEnabled}
-                trackColor={{ false: '#E0E0E0', true: '#25c800ff' }}
+                trackColor={{ false: COLORS.darkWhite, true: '#25c800ff' }}
                 thumbColor={COLORS.white}
-                ios_backgroundColor="#E0E0E0"
+                ios_backgroundColor={COLORS.darkWhite}
               />
             </View>
 
@@ -611,9 +611,9 @@ export default function ParametreScreen() {
               <Switch
                 value={promotionsEnabled}
                 onValueChange={setPromotionsEnabled}
-                trackColor={{ false: '#E0E0E0', true: '#25c800ff' }}
+                trackColor={{ false: COLORS.darkWhite, true: '#25c800ff' }}
                 thumbColor={COLORS.white}
-                ios_backgroundColor="#E0E0E0"
+                ios_backgroundColor={COLORS.darkWhite}
                 disabled={notificationsEnabled}
               />
             </View>
@@ -626,9 +626,9 @@ export default function ParametreScreen() {
               <Switch
                 value={updatesEnabled}
                 onValueChange={setUpdatesEnabled}
-                trackColor={{ false: '#E0E0E0', true: '#25c800ff' }}
+                trackColor={{ false: COLORS.darkWhite, true: '#25c800ff' }}
                 thumbColor={COLORS.white}
-                ios_backgroundColor="#E0E0E0"
+                ios_backgroundColor={COLORS.darkWhite}
                 disabled={notificationsEnabled}
               />
             </View>
@@ -965,7 +965,7 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     borderBottomWidth: 1,
     borderBottomColor: '#F0F0F0',
-    backgroundColor: 'white',
+    backgroundColor: COLORS.white,
   },
   accountModalTitle: {
     fontSize: 24,
@@ -1013,7 +1013,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 3,
-    borderColor: 'white',
+    borderColor: COLORS.white,
   },
   modalProfileName: {
     fontSize: 22,
@@ -1056,7 +1056,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: COLORS.black,
     borderWidth: 1,
-    borderColor: '#E0E0E0',
+    borderColor: COLORS.darkWhite,
   },
   modernPasswordContainer: {
     flexDirection: 'row',
@@ -1066,7 +1066,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingHorizontal: 16,
     borderWidth: 1,
-    borderColor: '#E0E0E0',
+    borderColor: COLORS.darkWhite,
   },
   modernPasswordInput: {
     flex: 1,
@@ -1096,7 +1096,7 @@ const styles = StyleSheet.create({
     elevation: 6,
   },
   saveButtonText: {
-    color: 'white',
+    color: COLORS.white,
     fontSize: 16,
     fontWeight: '700',
   },
@@ -1337,7 +1337,7 @@ toggleItem: {
   justifyContent: 'space-between',
   paddingVertical: 14,
   paddingHorizontal: 16,
-  backgroundColor: 'white',
+  backgroundColor: COLORS.white,
   borderRadius: 10,
   marginBottom: 4,
 },
@@ -1393,7 +1393,7 @@ checkmark: {
   justifyContent: 'center',
 },
 checkmarkText: {
-  color: 'white',
+  color: COLORS.white,
   fontSize: 14,
   fontWeight: 'bold',
 },
@@ -1416,18 +1416,18 @@ deleteButton: {
   elevation: 4,
 },
 deleteButtonText: {
-  color: 'white',
+  color: COLORS.white,
   textAlign: 'center',
   fontSize: 16,
   fontWeight: '600',
 },
 logoutButton: {
-  backgroundColor: 'white',
+  backgroundColor: COLORS.white,
   borderRadius: 12,
   paddingVertical: 14,
   paddingHorizontal: 24,
   borderWidth: 1.5,
-  borderColor: '#E0E0E0',
+  borderColor: COLORS.darkWhite,
   shadowColor:COLORS.black,
   shadowOffset: {
     width: 0,

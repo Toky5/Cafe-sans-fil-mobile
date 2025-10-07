@@ -19,7 +19,8 @@ import {
 import { useCallback, useEffect, useRef, useState } from "react";
 import { View, Text, StyleSheet, SafeAreaView, Image, TextInput, KeyboardAvoidingView,
   Platform,
-  ScrollView, FlatList } from "react-native";
+  ScrollView, FlatList, 
+  Alert} from "react-native";
 
 import { Item } from "@/constants/types/GET_item";
 import { fetchSync, saveSecurely, saveSync } from "@/scripts/storage";
@@ -270,6 +271,7 @@ const [error, setError] = useState<string | null>(null);
             >
               {loading ? "": menuItem.description}
             </Text>
+            
           </>
         )}
       </View>
@@ -310,7 +312,7 @@ const [error, setError] = useState<string | null>(null);
       {options.length > 0 && (showOptions())}
 
      
-      <View style={{ borderBottomWidth: 3, borderColor: COLORS.lightGray, paddingHorizontal: 16 }}>
+      <View style={{  paddingHorizontal: 16 }}>
          {/* a remove pour la 1.0
         <View style={{ marginBlock: 20, gap: 8 }}>
           <Text style={[TYPOGRAPHY.heading.small.bold]}>Instructions</Text>
@@ -334,16 +336,14 @@ const [error, setError] = useState<string | null>(null);
           onChangeText={() => {}}
         ></TextInput>
         */}
-        {/*
+        
         <View style={{ marginBottom: 44, marginTop: 32, flexDirection: "row", alignItems: "center", gap: 32}}>
-          <Counter
-          count={quantity}
-          setCount={setQuantity}></Counter>
-          <Button onPress={() => addToCart()} style={{ flex: 1, width: "auto" }}>
-            Ajouter au panier ・ ${total /* menuItem.price * quantity /* + fees *
+          
+          <Button onPress={() => Alert.alert("Pas encore possible", "La commande en ligne n'est pas encore disponible, mais c'est pour bientot :)")} style={{ flex: 1, width: "auto" }}>
+            Prix de l'article : ${total /* menuItem.price * quantity /* + fees */}
           </Button>
         </View>
-      */}
+      
       </View>
       
 

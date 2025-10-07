@@ -320,7 +320,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   notificationBadgeText: {
-    color: 'white',
+    color: COLORS.white,
     fontSize: 12,
     fontWeight: 'bold',
   },
@@ -337,7 +337,7 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   readAllButtonText: {
-    color: 'white',
+    color: COLORS.white,
     fontSize: 24,
     fontWeight: 'bold',
   },

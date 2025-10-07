@@ -286,7 +286,7 @@ export default function EventsPage() {
     return (
       <TouchableOpacity onPress={() => openModalWithData(event)}>
         <View style={{
-          backgroundColor: 'white',
+          backgroundColor: COLORS.white,
           borderRadius: 16,
           padding: SPACING["lg"],
           marginBottom: SPACING["md"],
@@ -350,7 +350,7 @@ export default function EventsPage() {
     return (
       <TouchableOpacity onPress={() => openModalWithData(announcement)}>
         <View style={{
-          backgroundColor: 'white',
+          backgroundColor: COLORS.white,
           borderRadius: 16,
           padding: SPACING["lg"],
           marginBottom: SPACING["md"],
@@ -503,7 +503,7 @@ export default function EventsPage() {
                           onPress={() => setCurrentPage(Math.max(0, currentPage - 1))}
                           disabled={currentPage === 0}
                           style={{
-                            backgroundColor: currentPage === 0 ? '#E0E0E0' : '#0057AC',
+                            backgroundColor: currentPage === 0 ? COLORS.darkWhite : COLORS.black,
                             paddingHorizontal: SPACING["lg"],
                             paddingVertical: SPACING["sm"],
                             borderRadius: 8,
@@ -513,7 +513,7 @@ export default function EventsPage() {
                         >
                           <Text style={{
                             ...TYPOGRAPHY.body.normal.semiBold,
-                            color: currentPage === 0 ? '#999' : 'white',
+                            color: currentPage === 0 ? '#999' : COLORS.white,
                             textAlign: 'center'
                           }}>← Précédent</Text>
                         </TouchableOpacity>
@@ -530,7 +530,7 @@ export default function EventsPage() {
                           onPress={() => setCurrentPage(Math.min(Math.ceil(events.items.length / ITEMS_PER_PAGE) - 1, currentPage + 1))}
                           disabled={currentPage >= Math.ceil(events.items.length / ITEMS_PER_PAGE) - 1}
                           style={{
-                            backgroundColor: currentPage >= Math.ceil(events.items.length / ITEMS_PER_PAGE) - 1 ? '#E0E0E0' : '#0057AC',
+                            backgroundColor: currentPage >= Math.ceil(events.items.length / ITEMS_PER_PAGE) - 1 ? COLORS.darkWhite : COLORS.black,
                             paddingHorizontal: SPACING["lg"],
                             paddingVertical: SPACING["sm"],
                             borderRadius: 8,
@@ -540,7 +540,7 @@ export default function EventsPage() {
                         >
                           <Text style={{
                             ...TYPOGRAPHY.body.normal.semiBold,
-                            color: currentPage >= Math.ceil(events.items.length / ITEMS_PER_PAGE) - 1 ? '#999' : 'white',
+                            color: currentPage >= Math.ceil(events.items.length / ITEMS_PER_PAGE) - 1 ? '#999' : COLORS.white,
                             textAlign: 'center'
                           }}>Suivant →</Text>
                         </TouchableOpacity>
@@ -582,7 +582,7 @@ export default function EventsPage() {
                           onPress={() => setCurrentPage(Math.max(0, currentPage - 1))}
                           disabled={currentPage === 0}
                           style={{
-                            backgroundColor: currentPage === 0 ? '#E0E0E0' : '#0057AC',
+                            backgroundColor: currentPage === 0 ? COLORS.darkWhite : COLORS.black,
                             paddingHorizontal: SPACING["lg"],
                             paddingVertical: SPACING["sm"],
                             borderRadius: 8,
@@ -592,7 +592,7 @@ export default function EventsPage() {
                         >
                           <Text style={{
                             ...TYPOGRAPHY.body.normal.semiBold,
-                            color: currentPage === 0 ? '#999' : 'white',
+                            color: currentPage === 0 ? '#999' : COLORS.white,
                             textAlign: 'center'
                           }}>← Précédent</Text>
                         </TouchableOpacity>
@@ -609,7 +609,7 @@ export default function EventsPage() {
                           onPress={() => setCurrentPage(Math.min(Math.ceil(laliste.items.length / ITEMS_PER_PAGE) - 1, currentPage + 1))}
                           disabled={currentPage >= Math.ceil(laliste.items.length / ITEMS_PER_PAGE) - 1}
                           style={{
-                            backgroundColor: currentPage >= Math.ceil(laliste.items.length / ITEMS_PER_PAGE) - 1 ? '#E0E0E0' : '#0057AC',
+                            backgroundColor: currentPage >= Math.ceil(laliste.items.length / ITEMS_PER_PAGE) - 1 ? COLORS.darkWhite : COLORS.black,
                             paddingHorizontal: SPACING["lg"],
                             paddingVertical: SPACING["sm"],
                             borderRadius: 8,
@@ -619,7 +619,7 @@ export default function EventsPage() {
                         >
                           <Text style={{
                             ...TYPOGRAPHY.body.normal.semiBold,
-                            color: currentPage >= Math.ceil(laliste.items.length / ITEMS_PER_PAGE) - 1 ? '#999' : 'white',
+                            color: currentPage >= Math.ceil(laliste.items.length / ITEMS_PER_PAGE) - 1 ? '#999' : COLORS.white,
                             textAlign: 'center'
                           }}>Suivant →</Text>
                         </TouchableOpacity>
