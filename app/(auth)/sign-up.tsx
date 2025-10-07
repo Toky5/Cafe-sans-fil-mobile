@@ -339,7 +339,7 @@ export default function SignInScreen() {
           ref={usernameInputRef}
           onChangeText={onChangeUsername}
           value={username}
-          placeholder="nom_utilisateur"
+          placeholder="nomutilisateur"
           keyboardType="default"
           autoComplete="username"
           returnKeyType="next"
