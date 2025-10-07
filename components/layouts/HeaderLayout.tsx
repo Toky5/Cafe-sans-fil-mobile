@@ -100,6 +100,7 @@ export default function HeaderLayout({fullName, profilePicture}: HeaderLayoutPro
       </Animated.View>
     );
   };
+  /*
   const [notifs, setNotifs] = useState([
       {
         id: 1,
@@ -121,6 +122,10 @@ export default function HeaderLayout({fullName, profilePicture}: HeaderLayoutPro
       },
       // Add more notifications as needed
     ]);
+    */
+    // a desac pr le test
+    const [notifs, setNotifs] = useState([]);
+    
     const handleReadAll = () => {
       setNotifs(notifs.map((notif) => ({ ...notif, status: true })));
     };

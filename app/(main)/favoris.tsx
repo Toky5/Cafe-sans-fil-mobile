@@ -60,7 +60,8 @@ export default function FavorisScreen() {
         console.log('Cafes fetched:', data.items?.[0]);
         setListeCafes(data);
         setCafeFavoris(data.items?.slice(0, 3) || []);
-        //setCafeFavoris([])
+        // a desac pr le test
+        setCafeFavoris([])
         setIsCafesLoading(false);
       } catch (error) {
         console.error('Error fetching cafes:', error);
@@ -98,7 +99,8 @@ export default function FavorisScreen() {
         console.log("All items extracted: ", allItems.length);
         // Set only the first 3 items for testing
         setItems(allItems.slice(0, 3));
-        //setItems([])
+        // a desac pr le test
+        setItems([])
         setIsArticlesLoading(false);
       } catch (error) {
         console.error('Error fetching articles:', error);
