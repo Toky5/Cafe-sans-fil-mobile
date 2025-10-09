@@ -2,7 +2,7 @@
   "expo": {
     "name": "Café sans-fil",
     "slug": "cafe-sans-fil",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "orientation": "portrait",
     "icon": "logo.png",
     "scheme": "myapp",
@@ -10,6 +10,7 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
+      "buildNumber": "3",
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "This app uses the location to find cafes near you."
       },
@@ -21,6 +22,7 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.cadum.cafesansfil",
+      "versionCode": 3,
       "config": {
         "googleMaps": {
           "apiKey": "process.env.GOOGLE_MAPS_API_KEY"

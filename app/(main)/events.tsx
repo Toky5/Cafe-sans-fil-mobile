@@ -759,7 +759,7 @@ export default function EventsPage() {
                                   borderRadius:10,
                                   marginTop: SPACING["sm"]
                                 }} 
-                                provider={PROVIDER_GOOGLE}
+                                provider={Platform.OS === 'android' ? PROVIDER_GOOGLE : undefined}
                                 initialRegion={updateCafeRegion(modalData.cafe_id)}
                                 scrollEnabled={false}
                                 zoomEnabled={false}
@@ -818,7 +818,7 @@ export default function EventsPage() {
                                   borderRadius:10,
                                   marginTop: SPACING["sm"]
                                 }} 
-                                provider={PROVIDER_GOOGLE}
+                                provider={Platform.OS === 'android' ? PROVIDER_GOOGLE : undefined}
                                 initialRegion={updateCafeRegion(modalData.cafes[0].id)}
                                 scrollEnabled={false}
                                 zoomEnabled={false}
