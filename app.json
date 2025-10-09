@@ -2,7 +2,7 @@
   "expo": {
     "name": "Café sans-fil",
     "slug": "cafe-sans-fil",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "logo.png",
     "scheme": "myapp",
