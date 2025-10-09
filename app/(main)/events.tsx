@@ -4,7 +4,7 @@ import ScrollableLayout from '@/components/layouts/ScrollableLayout';
 import SPACING from '@/constants/Spacing';
 import TYPOGRAPHY from "@/constants/Typography";
 import HeaderLayout from '@/components/layouts/HeaderLayout';
-import MapView, { Marker } from 'react-native-maps';
+import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import AntDesign from '@expo/vector-icons/AntDesign'; 
 import COLORS from "@/constants/Colors";
 import { useFocusEffect } from '@react-navigation/native';
@@ -759,6 +759,7 @@ export default function EventsPage() {
                                   borderRadius:10,
                                   marginTop: SPACING["sm"]
                                 }} 
+                                provider={PROVIDER_GOOGLE}
                                 initialRegion={updateCafeRegion(modalData.cafe_id)}
                                 scrollEnabled={false}
                                 zoomEnabled={false}
@@ -817,6 +818,7 @@ export default function EventsPage() {
                                   borderRadius:10,
                                   marginTop: SPACING["sm"]
                                 }} 
+                                provider={PROVIDER_GOOGLE}
                                 initialRegion={updateCafeRegion(modalData.cafes[0].id)}
                                 scrollEnabled={false}
                                 zoomEnabled={false}

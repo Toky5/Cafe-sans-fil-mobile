@@ -20,7 +20,12 @@
         "foregroundImage": "logo.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.cadum.cafesansfil"
+      "package": "com.cadum.cafesansfil",
+      "config": {
+        "googleMaps": {
+          "apiKey": "process.env.GOOGLE_MAPS_API_KEY"
+        }
+      }
     },
     "web": {
       "bundler": "metro",

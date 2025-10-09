@@ -4,7 +4,7 @@ import * as Location from "expo-location";
 import COLORS from "@/constants/Colors";
 import SPACING from "@/constants/Spacing";
 import TYPOGRAPHY from "@/constants/Typography";
-import MapView, { Marker, Callout } from "react-native-maps";
+import MapView, { Marker, Callout, PROVIDER_GOOGLE } from "react-native-maps";
 import FilterModalLayout from "./FilterModalLayout";
 
 export default function MapModalLayout({
@@ -73,6 +73,7 @@ export default function MapModalLayout({
           borderRadius: 20,
           marginTop: 16,
         }}
+        provider={PROVIDER_GOOGLE}
         initialRegion={{
           latitude: location.coords.latitude,
           longitude: location.coords.longitude,

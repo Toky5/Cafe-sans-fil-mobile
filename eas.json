@@ -1,16 +1,32 @@
 {
   "build": {
     "preview": {
-      "distribution": "internal"
+      "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_CLOUDFLARE_API_TOKEN": "$EXPO_PUBLIC_CLOUDFLARE_API_TOKEN",
+        "EXPO_PUBLIC_CLOUDFLARE_ACCOUNT_ID": "$EXPO_PUBLIC_CLOUDFLARE_ACCOUNT_ID",
+        "GOOGLE_MAPS_API_KEY": "$GOOGLE_MAPS_API_KEY"
+      }
     },
     "development": {
+      "env": {
+        "EXPO_PUBLIC_CLOUDFLARE_API_TOKEN": "$EXPO_PUBLIC_CLOUDFLARE_API_TOKEN",
+        "EXPO_PUBLIC_CLOUDFLARE_ACCOUNT_ID": "$EXPO_PUBLIC_CLOUDFLARE_ACCOUNT_ID",
+        "GOOGLE_MAPS_API_KEY": "$GOOGLE_MAPS_API_KEY"
+      }
     },
-    "production": {},
+    "production": {
+      "env": {
+        "EXPO_PUBLIC_CLOUDFLARE_API_TOKEN": "$EXPO_PUBLIC_CLOUDFLARE_API_TOKEN",
+        "EXPO_PUBLIC_CLOUDFLARE_ACCOUNT_ID": "$EXPO_PUBLIC_CLOUDFLARE_ACCOUNT_ID",
+        "GOOGLE_MAPS_API_KEY": "$GOOGLE_MAPS_API_KEY"
+      }
+    },
     "ios-simulator": {
-    "extends": "development",
-    "ios": {
-      "simulator": true
+      "extends": "development",
+      "ios": {
+        "simulator": true
+      }
     }
-  }
   }
 }
