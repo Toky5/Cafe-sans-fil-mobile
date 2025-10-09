@@ -41,7 +41,7 @@ import AntDesign from '@expo/vector-icons/AntDesign';  // icone de Instagram
 import FontAwesome from '@expo/vector-icons/FontAwesome'; // icone de user-secret 
 import { useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
-import { clearTokens, getInfoFromToken, getToken, deleteAccount} from "@/utils/tokenStorage";
+import { clearTokens, getInfoFromToken, getToken, deleteAccount, setUserFullname, setUserPhotoUrl} from "@/utils/tokenStorage";
 
 // Menu item interface for type safety
 interface MenuItem {
@@ -64,6 +64,23 @@ export default function ParametreScreen() {
   const [userProfilePicture, setUserProfilePicture] = React.useState<string | null>(null);
   const [isLoading, setIsLoading] = React.useState(true);
   const [userEmail, setUserEmail] = React.useState<string>("");
+  
+  // Form state for editing
+  const [editFirstName, setEditFirstName] = React.useState<string>("");
+  const [editLastName, setEditLastName] = React.useState<string>("");
+  const [editEmail, setEditEmail] = React.useState<string>("");
+  const [editPassword, setEditPassword] = React.useState<string>("");
+  const [editPhotoUrl, setEditPhotoUrl] = React.useState<string>("");
+  const [editUsername, setEditUsername] = React.useState<string>("");
+  const [editMatricule, setEditMatricule] = React.useState<string>("");
+  
+  // Original values to track changes
+  const [originalFirstName, setOriginalFirstName] = React.useState<string>("");
+  const [originalLastName, setOriginalLastName] = React.useState<string>("");
+  const [originalEmail, setOriginalEmail] = React.useState<string>("");
+  const [originalPhotoUrl, setOriginalPhotoUrl] = React.useState<string>("");
+  const [originalUsername, setOriginalUsername] = React.useState<string>("");
+  const [originalMatricule, setOriginalMatricule] = React.useState<string>("");
   
   // Preference states
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
@@ -109,6 +126,21 @@ export default function ParametreScreen() {
               setUserFullName(`${userInfo.first_name} ${userInfo.last_name}`);
               setUserImage(userInfo.photo_url);
               setUserEmail(userInfo.email);
+              
+              // Set original and edit values
+              setOriginalFirstName(userInfo.first_name || "");
+              setOriginalLastName(userInfo.last_name || "");
+              setOriginalEmail(userInfo.email || "");
+              setOriginalPhotoUrl(userInfo.photo_url || "");
+              setOriginalUsername(userInfo.username || "");
+              setOriginalMatricule(userInfo.matricule || "");
+              
+              setEditFirstName(userInfo.first_name || "");
+              setEditLastName(userInfo.last_name || "");
+              setEditEmail(userInfo.email || "");
+              setEditPhotoUrl(userInfo.photo_url || "");
+              setEditUsername(userInfo.username || "");
+              setEditMatricule(userInfo.matricule || "");
             } else if (userInfo && userInfo.name) {
               // Fallback to name field if first_name/last_name aren't available
               setUserFullName(userInfo.name);
@@ -136,6 +168,119 @@ export default function ParametreScreen() {
   
       getUserInfo();
     }, []);
+
+  const updateProfile = async () => {
+    try {
+      const token = await getToken();
+      if (!token) {
+        alert("Vous devez être connecté pour modifier votre profil.");
+        return;
+      }
+
+      // Build the update payload with only changed values
+      const updates: any = {};
+      
+      if (editUsername !== originalUsername && editUsername.trim() !== "") {
+        updates.username = editUsername.trim();
+      }
+      
+      if (editEmail !== originalEmail && editEmail.trim() !== "") {
+        updates.email = editEmail.trim();
+      }
+      
+      if (editMatricule !== originalMatricule && editMatricule.trim() !== "") {
+        updates.matricule = editMatricule.trim();
+      }
+      
+      if (editPassword.trim() !== "") {
+        updates.password = editPassword.trim();
+      }
+      
+      if (editFirstName !== originalFirstName && editFirstName.trim() !== "") {
+        updates.first_name = editFirstName.trim();
+      }
+      
+      if (editLastName !== originalLastName && editLastName.trim() !== "") {
+        updates.last_name = editLastName.trim();
+      }
+      
+      if (editPhotoUrl !== originalPhotoUrl && editPhotoUrl.trim() !== "") {
+        updates.photo_url = editPhotoUrl.trim();
+      }
+
+      // If no changes, don't make the request
+      if (Object.keys(updates).length === 0) {
+        alert("Aucune modification détectée.");
+        return;
+      }
+
+      console.log("Sending updates:", updates);
+
+      const response = await fetch('https://cafesansfil-api-r0kj.onrender.com/api/users/@me', {
+        method: 'PUT',
+        headers: {
+          'accept': 'application/json',
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(updates)
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Error updating profile:", errorData);
+        alert(`Erreur lors de la mise à jour: ${errorData.detail || 'Erreur inconnue'}`);
+        return;
+      }
+
+      const updatedUserInfo = await response.json();
+      console.log("Profile updated successfully:", updatedUserInfo);
+
+      // Update local state with new values
+      if (updatedUserInfo.first_name && updatedUserInfo.last_name) {
+        const newFullName = `${updatedUserInfo.first_name} ${updatedUserInfo.last_name}`;
+        setUserFullName(newFullName);
+        setOriginalFirstName(updatedUserInfo.first_name);
+        setOriginalLastName(updatedUserInfo.last_name);
+        
+        // Update stored full name
+        await setUserFullname(newFullName);
+      }
+      
+      if (updatedUserInfo.email) {
+        setUserEmail(updatedUserInfo.email);
+        setOriginalEmail(updatedUserInfo.email);
+      }
+      
+      if (updatedUserInfo.photo_url) {
+        setUserImage(updatedUserInfo.photo_url);
+        setOriginalPhotoUrl(updatedUserInfo.photo_url);
+        setEditPhotoUrl(updatedUserInfo.photo_url);
+        
+        // Update stored photo URL
+        await setUserPhotoUrl(updatedUserInfo.photo_url);
+      }
+      
+      if (updatedUserInfo.username) {
+        setOriginalUsername(updatedUserInfo.username);
+        setEditUsername(updatedUserInfo.username);
+      }
+      
+      if (updatedUserInfo.matricule) {
+        setOriginalMatricule(updatedUserInfo.matricule);
+        setEditMatricule(updatedUserInfo.matricule);
+      }
+
+      // Clear password field
+      setEditPassword("");
+
+      alert("Profil mis à jour avec succès!");
+      setAccountModalVisible(false);
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      alert("Erreur lors de la mise à jour du profil.");
+    }
+  };
 
   const pulseAnim = React.useRef(new Animated.Value(1)).current;
 
@@ -360,12 +505,9 @@ export default function ParametreScreen() {
                 <View style={styles.modalProfileSection}>
                   <View style={styles.profileImageContainer}>
                     <Image 
-                      source={{ uri: userImage || 'https://via.placeholder.com/120' }} 
+                      source={{ uri: editPhotoUrl || userImage || 'https://via.placeholder.com/120' }} 
                       style={styles.modernProfilePicture} 
                     />
-                    <TouchableOpacity style={styles.cameraButton}>
-                      <Camera size={20} color={COLORS.white} />
-                    </TouchableOpacity>
                   </View>
                   <Text style={styles.modalProfileName}>{userFullName || 'Utilisateur'}</Text>
                   <Text style={styles.modalProfileEmail}>{userEmail || 'email@exemple.com'}</Text>
@@ -374,17 +516,66 @@ export default function ParametreScreen() {
                 {/* Account Information Section */}
                 <View style={styles.accountSectionContainer}>
                   
-                  {/* Full Name Input */}
+                  {/* Photo URL Input */}
                   <View style={styles.inputGroup}>
                     <View style={styles.inputLabelContainer}>
-                      <User size={18} color="#666" />
-                      <Text style={styles.inputLabel}>Nom complet</Text>
+                      <Camera size={18} color="#666" />
+                      <Text style={styles.inputLabel}>Photo de profil (URL)</Text>
                     </View>
                     <TextInput 
                       style={styles.modernInput}
-                      placeholder="Entrez votre nom complet" 
+                      placeholder="https://exemple.com/image.jpg" 
                       placeholderTextColor="#999" 
-                      defaultValue={userFullName}
+                      value={editPhotoUrl}
+                      onChangeText={setEditPhotoUrl}
+                      autoCapitalize="none"
+                      keyboardType="url"
+                    />
+                  </View>
+                  
+                  {/* Username Input */}
+                  <View style={styles.inputGroup}>
+                    <View style={styles.inputLabelContainer}>
+                      <User size={18} color="#666" />
+                      <Text style={styles.inputLabel}>Nom d'utilisateur</Text>
+                    </View>
+                    <TextInput 
+                      style={styles.modernInput}
+                      placeholder="Entrez votre nom d'utilisateur" 
+                      placeholderTextColor="#999" 
+                      value={editUsername}
+                      onChangeText={setEditUsername}
+                      autoCapitalize="none"
+                    />
+                  </View>
+
+                  {/* First Name Input */}
+                  <View style={styles.inputGroup}>
+                    <View style={styles.inputLabelContainer}>
+                      <User size={18} color="#666" />
+                      <Text style={styles.inputLabel}>Prénom</Text>
+                    </View>
+                    <TextInput 
+                      style={styles.modernInput}
+                      placeholder="Entrez votre prénom" 
+                      placeholderTextColor="#999" 
+                      value={editFirstName}
+                      onChangeText={setEditFirstName}
+                    />
+                  </View>
+
+                  {/* Last Name Input */}
+                  <View style={styles.inputGroup}>
+                    <View style={styles.inputLabelContainer}>
+                      <User size={18} color="#666" />
+                      <Text style={styles.inputLabel}>Nom de famille</Text>
+                    </View>
+                    <TextInput 
+                      style={styles.modernInput}
+                      placeholder="Entrez votre nom de famille" 
+                      placeholderTextColor="#999" 
+                      value={editLastName}
+                      onChangeText={setEditLastName}
                     />
                   </View>
 
@@ -398,9 +589,25 @@ export default function ParametreScreen() {
                       style={styles.modernInput}
                       placeholder="Entrez votre email" 
                       placeholderTextColor="#999" 
-                      defaultValue={userEmail}
+                      value={editEmail}
+                      onChangeText={setEditEmail}
                       keyboardType="email-address"
                       autoCapitalize="none"
+                    />
+                  </View>
+
+                  {/* Matricule Input */}
+                  <View style={styles.inputGroup}>
+                    <View style={styles.inputLabelContainer}>
+                      <User size={18} color="#666" />
+                      <Text style={styles.inputLabel}>Matricule</Text>
+                    </View>
+                    <TextInput 
+                      style={styles.modernInput}
+                      placeholder="Entrez votre matricule" 
+                      placeholderTextColor="#999" 
+                      value={editMatricule}
+                      onChangeText={setEditMatricule}
                     />
                   </View>
 
@@ -416,6 +623,9 @@ export default function ParametreScreen() {
                         placeholder="Nouveau mot de passe" 
                         secureTextEntry={!showPassword} 
                         placeholderTextColor="#999"
+                        value={editPassword}
+                        onChangeText={setEditPassword}
+                        autoCapitalize="none"
                       />
                       <TouchableOpacity 
                         style={styles.modernPasswordToggle}
@@ -432,7 +642,7 @@ export default function ParametreScreen() {
                 </View>
 
                 {/* Save Changes Button */}
-                <TouchableOpacity onPress={() => console.log("save")} style={styles.saveButton}>
+                <TouchableOpacity onPress={updateProfile} style={styles.saveButton}>
                   <Text style={styles.saveButtonText}>Enregistrer les modifications</Text>
                 </TouchableOpacity>
 
