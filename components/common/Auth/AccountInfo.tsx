@@ -4,7 +4,7 @@ import COLORS from "@/constants/Colors";
 import SPACING from "@/constants/Spacing";
 import TYPOGRAPHY from "@/constants/Typography";
 import React from "react";
-import { useRouter } from "expo-router";
+import { useRouter, useFocusEffect } from "expo-router";
 import { getUserFullname, getUserPhotoUrl, setUserPhotoUrl, getInfoFromToken, getToken } from "@/utils/tokenStorage";
 import { user } from "@/components/layouts/HeaderLayout";
 
@@ -26,50 +26,59 @@ export default function AccountInfo({
   const [isLoading, setIsLoading] = React.useState(true);
   const navigation = useRouter();
 
-  React.useEffect(() => {
-    const getUserInfo = async () => {
-      try {
-        // Get the stored full name from storage
-        const storedFullName = await getUserFullname();
-        
-        if (storedFullName) {
-          setUserFullName(storedFullName);
-          console.log("User full name from storage:", storedFullName);
-        } else {
-          console.log("No stored full name found");
-          setUserFullName("Utilisateur");
-        }
+  const getUserInfo = React.useCallback(async () => {
+    try {
+      // Get the stored full name from storage
+      const storedFullName = await getUserFullname();
+      
+      if (storedFullName) {
+        setUserFullName(storedFullName);
+        console.log("User full name from storage:", storedFullName);
+      } else {
+        console.log("No stored full name found");
+        setUserFullName("Utilisateur");
+      }
 
-        // Get the stored photo URL from storage
-        const storedPhotoUrl = await getUserPhotoUrl();
-        
-        if (storedPhotoUrl) {
-          setUserImage(storedPhotoUrl);
-          console.log("User photo URL from storage:", storedPhotoUrl);
-        } else {
-          console.log("No stored photo URL found");
-          // Fallback: try to fetch from server if not in storage
-          const accessToken = await getToken();
-          if (accessToken) {
-            const userInfo = await getInfoFromToken(accessToken);
-            if (userInfo && userInfo.photo_url) {
-              setUserImage(userInfo.photo_url);
-              // Store it for next time
-              await setUserPhotoUrl(userInfo.photo_url);
-            }
+      // Get the stored photo URL from storage
+      const storedPhotoUrl = await getUserPhotoUrl();
+      
+      if (storedPhotoUrl) {
+        setUserImage(storedPhotoUrl);
+        console.log("User photo URL from storage:", storedPhotoUrl);
+      } else {
+        console.log("No stored photo URL found");
+        // Fallback: try to fetch from server if not in storage
+        const accessToken = await getToken();
+        if (accessToken) {
+          const userInfo = await getInfoFromToken(accessToken);
+          if (userInfo && userInfo.photo_url) {
+            setUserImage(userInfo.photo_url);
+            // Store it for next time
+            await setUserPhotoUrl(userInfo.photo_url);
           }
         }
-      
-      } catch (error) {
-        console.error("Error getting user info:", error);
-        setUserFullName("Utilisateur");
-      } finally {
-        setIsLoading(false);
       }
-    };
-
-    getUserInfo();
+    
+    } catch (error) {
+      console.error("Error getting user info:", error);
+      setUserFullName("Utilisateur");
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
+
+  // Initial load
+  React.useEffect(() => {
+    getUserInfo();
+  }, [getUserInfo]);
+
+  // Refresh data when screen comes into focus
+  useFocusEffect(
+    React.useCallback(() => {
+      console.log("Screen focused - refreshing user info");
+      getUserInfo();
+    }, [getUserInfo])
+  );
 
   
 

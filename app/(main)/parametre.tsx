@@ -11,7 +11,8 @@ import {
   TextInput,
   ScrollView,
   StatusBar,
-  Switch
+  Switch,
+  ActivityIndicator
 } from "react-native";
 
 import React, { useState } from 'react'
@@ -39,9 +40,9 @@ import TYPOGRAPHY from "@/constants/Typography";
 import Divider from "@/components/common/Divider";
 import AntDesign from '@expo/vector-icons/AntDesign';  // icone de Instagram
 import FontAwesome from '@expo/vector-icons/FontAwesome'; // icone de user-secret 
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
-import { clearTokens, getInfoFromToken, getToken, deleteAccount, setUserFullname, setUserPhotoUrl} from "@/utils/tokenStorage";
+import { clearTokens, getInfoFromToken, getToken, deleteAccount, setUserFullname, setUserPhotoUrl, getUserFullname, getUserPhotoUrl} from "@/utils/tokenStorage";
 
 // Menu item interface for type safety
 interface MenuItem {
@@ -73,6 +74,7 @@ export default function ParametreScreen() {
   const [editPhotoUrl, setEditPhotoUrl] = React.useState<string>("");
   const [editUsername, setEditUsername] = React.useState<string>("");
   const [editMatricule, setEditMatricule] = React.useState<string>("");
+  const [isUploading, setIsUploading] = React.useState<boolean>(false);
   
   // Original values to track changes
   const [originalFirstName, setOriginalFirstName] = React.useState<string>("");
@@ -168,6 +170,201 @@ export default function ParametreScreen() {
   
       getUserInfo();
     }, []);
+
+  // Refresh user data when screen comes into focus
+  useFocusEffect(
+    React.useCallback(() => {
+      const refreshUserInfo = async () => {
+        try {
+          console.log("Parametre screen focused - refreshing user info");
+          
+          // Get stored values from AsyncStorage
+          const storedFullName = await getUserFullname();
+          const storedPhotoUrl = await getUserPhotoUrl();
+          
+          // Get fresh data from server
+          const accessToken = await getToken();
+          if (accessToken) {
+            const userInfo = await getInfoFromToken(accessToken);
+            console.log("Fresh user info from server:", userInfo);
+            
+            if (userInfo) {
+              // Update full name if changed
+              if (userInfo.first_name && userInfo.last_name) {
+                const newFullName = `${userInfo.first_name} ${userInfo.last_name}`;
+                if (newFullName !== storedFullName) {
+                  setUserFullName(newFullName);
+                  setEditFirstName(userInfo.first_name);
+                  setEditLastName(userInfo.last_name);
+                  setOriginalFirstName(userInfo.first_name);
+                  setOriginalLastName(userInfo.last_name);
+                }
+              }
+              
+              // Update photo URL if changed
+              if (userInfo.photo_url && userInfo.photo_url !== storedPhotoUrl) {
+                setUserImage(userInfo.photo_url);
+                setEditPhotoUrl(userInfo.photo_url);
+                setOriginalPhotoUrl(userInfo.photo_url);
+              }
+              
+              // Update other fields
+              if (userInfo.email) {
+                setUserEmail(userInfo.email);
+                setEditEmail(userInfo.email);
+                setOriginalEmail(userInfo.email);
+              }
+              
+              if (userInfo.username) {
+                setEditUsername(userInfo.username);
+                setOriginalUsername(userInfo.username);
+              }
+              
+              if (userInfo.matricule) {
+                setEditMatricule(userInfo.matricule);
+                setOriginalMatricule(userInfo.matricule);
+              }
+            }
+          }
+        } catch (error) {
+          console.error("Error refreshing user info on focus:", error);
+        }
+      };
+      
+      refreshUserInfo();
+    }, [])
+  );
+
+  const uploadImageToCloudflare = async (imageUri: string) => {
+    try {
+      const cloudflareToken = process.env.EXPO_PUBLIC_CLOUDFLARE_API_TOKEN;
+      const cloudflareAccountId = process.env.EXPO_PUBLIC_CLOUDFLARE_ACCOUNT_ID;
+      
+      if (!cloudflareToken || !cloudflareAccountId) {
+        throw new Error('Cloudflare credentials not configured');
+      }
+      
+      const formData = new FormData();
+      
+      // Extract filename from URI or use a default
+      const filename = imageUri.split('/').pop() || 'profile-picture.jpg';
+      
+      // Append the image file
+      formData.append('file', {
+        uri: imageUri,
+        name: filename,
+        type: 'image/jpeg', // You can adjust based on actual image type
+      } as any);
+      
+      formData.append('requireSignedURLs', 'false');
+      formData.append('metadata', JSON.stringify({ key: 'profile_picture' }));
+
+      const response = await fetch(
+        `https://api.cloudflare.com/client/v4/accounts/${cloudflareAccountId}/images/v1`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${cloudflareToken}`,
+          },
+          body: formData,
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Cloudflare upload error:', errorData);
+        throw new Error('Failed to upload image to Cloudflare');
+      }
+
+      const data = await response.json();
+      console.log('Cloudflare upload response:', data);
+      
+      // Return the public variant URL (2nd variant)
+      if (data.result && data.result.variants && data.result.variants.length >= 2) {
+        return data.result.variants[1]; // The "public" variant
+      }
+      
+      throw new Error('No public variant URL in response');
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      throw error;
+    }
+  };
+
+  const pickImageAndUpload = async () => {
+    try {
+      // Request permission to access media library
+      const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      
+      if (!permissionResult.granted) {
+        alert("Permission d'accéder à la galerie est requise!");
+        return;
+      }
+
+      // Open image picker
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.8,
+      });
+
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        const imageUri = result.assets[0].uri;
+        
+        // Show loading state
+        setIsUploading(true);
+        
+        // Upload to Cloudflare
+        const uploadedUrl = await uploadImageToCloudflare(imageUri);
+        
+        // Set the uploaded URL
+        setEditPhotoUrl(uploadedUrl);
+        
+        // Automatically update profile with new photo URL
+        const token = await getToken();
+        if (token) {
+          const updateResponse = await fetch('https://cafesansfil-api-r0kj.onrender.com/api/users/@me', {
+            method: 'PUT',
+            headers: {
+              'accept': 'application/json',
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ photo_url: uploadedUrl })
+          });
+
+          if (updateResponse.ok) {
+            const updatedUserInfo = await updateResponse.json();
+            console.log("Profile picture updated successfully:", updatedUserInfo);
+            
+            // Update local state with new photo URL
+            setUserImage(uploadedUrl);
+            setOriginalPhotoUrl(uploadedUrl);
+            
+            // Update stored photo URL
+            await setUserPhotoUrl(uploadedUrl);
+            
+            setIsUploading(false);
+            alert("Photo de profil mise à jour avec succès!");
+            setAccountModalVisible(false);
+          } else {
+            const errorData = await updateResponse.json();
+            console.error("Error updating profile picture:", errorData);
+            setIsUploading(false);
+            alert(`Erreur lors de la mise à jour: ${errorData.detail || 'Erreur inconnue'}`);
+          }
+        } else {
+          setIsUploading(false);
+          alert("Vous devez être connecté pour mettre à jour votre profil.");
+        }
+      }
+    } catch (error) {
+      console.error('Error picking/uploading image:', error);
+      setIsUploading(false);
+      alert("Erreur lors du téléchargement de l'image.");
+    }
+  };
 
   const updateProfile = async () => {
     try {
@@ -508,30 +705,21 @@ export default function ParametreScreen() {
                       source={{ uri: editPhotoUrl || userImage || 'https://via.placeholder.com/120' }} 
                       style={styles.modernProfilePicture} 
                     />
+                    <TouchableOpacity 
+                      style={styles.cameraButton}
+                      onPress={pickImageAndUpload}
+                    >
+                      <Camera size={20} color={COLORS.white} />
+                    </TouchableOpacity>
                   </View>
                   <Text style={styles.modalProfileName}>{userFullName || 'Utilisateur'}</Text>
                   <Text style={styles.modalProfileEmail}>{userEmail || 'email@exemple.com'}</Text>
+                  
+                  
                 </View>
 
                 {/* Account Information Section */}
                 <View style={styles.accountSectionContainer}>
-                  
-                  {/* Photo URL Input */}
-                  <View style={styles.inputGroup}>
-                    <View style={styles.inputLabelContainer}>
-                      <Camera size={18} color="#666" />
-                      <Text style={styles.inputLabel}>Photo de profil (URL)</Text>
-                    </View>
-                    <TextInput 
-                      style={styles.modernInput}
-                      placeholder="https://exemple.com/image.jpg" 
-                      placeholderTextColor="#999" 
-                      value={editPhotoUrl}
-                      onChangeText={setEditPhotoUrl}
-                      autoCapitalize="none"
-                      keyboardType="url"
-                    />
-                  </View>
                   
                   {/* Username Input */}
                   <View style={styles.inputGroup}>
@@ -1671,5 +1859,33 @@ passwordToggle: {
   padding: 4,
   justifyContent: 'center',
   alignItems: 'center',
+},
+uploadImageButton: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  justifyContent: 'center',
+  backgroundColor: 'rgba(0, 87, 172, 1)', // UdeM blue
+  borderRadius: 12,
+  paddingVertical: 12,
+  paddingHorizontal: 20,
+  marginTop: 16,
+  gap: 8,
+  shadowColor: COLORS.black,
+  shadowOffset: {
+    width: 0,
+    height: 2,
+  },
+  shadowOpacity: 0.15,
+  shadowRadius: 4,
+  elevation: 3,
+},
+uploadImageButtonDisabled: {
+  backgroundColor: 'rgba(0, 87, 172, 0.5)',
+  opacity: 0.7,
+},
+uploadImageButtonText: {
+  color: COLORS.white,
+  fontSize: 15,
+  fontWeight: '600',
 },
 });
