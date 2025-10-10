@@ -80,6 +80,7 @@ export default function TabLayout() {
 
   return (
     <Tabs
+      detachInactiveScreens={false}
       screenOptions={{
         tabBarActiveTintColor: COLORS.black,
         tabBarInactiveTintColor: "#89898D",
@@ -131,6 +132,7 @@ export default function TabLayout() {
       />
       <Tabs.Screen
         name="events"
+        
         options={{
           title: "Communauté",
           headerShown: false,
