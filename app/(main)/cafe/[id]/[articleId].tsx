@@ -37,7 +37,8 @@ const [error, setError] = useState<string | null>(null);
   const { id, articleId } = useLocalSearchParams();
   console.log("Café Id", id);
   const [reload, setReload] = useState(false);
-  console.log("Article Id", articleId) ;
+  console.log("Article Id", articleId);
+  console.log("🚀 Component rendering with:", { id, articleId });
   const formatPrice = (price: string) => {
     if (price.charAt(price.length - 2) == ".") {
       return price + "0";
@@ -64,13 +65,27 @@ const [error, setError] = useState<string | null>(null);
     },[])
   )
 
-  // Fetch user's favorite articles to check if current article is favorited
+  console.log('👀 About to define useEffect with deps:', { articleId, id });
+
+  // Also check favorites when route params change (for direct navigation from favorites)
   useEffect(() => {
-    const fetchUserFavorites = async () => {
+    console.log('🔄 useEffect RUNNING - articleId:', articleId, 'id:', id);
+    console.log('🔄 Types - articleId:', typeof articleId, 'id:', typeof id);
+    
+    if (!articleId || !id) {
+      console.log('⚠️ Missing params in useEffect');
+      return;
+    }
+    
+    const checkFavoriteStatus = async () => {
       try {
         const token = await getToken();
-        if (!token) return;
+        if (!token) {
+          console.log('⚠️ No token in useEffect');
+          return;
+        }
 
+        console.log('🔄 Fetching favorites in useEffect...');
         const response = await fetch('https://cafesansfil-api-r0kj.onrender.com/api/users/@me', {
           method: 'GET',
           headers: {
@@ -84,20 +99,53 @@ const [error, setError] = useState<string | null>(null);
           const articlesFavs = data.articles_favs || [];
           setUserArticlesFavorites(articlesFavs);
           
-          // Check if current article is in favorites
+          const currentArticleId = String(articleId);
+          const currentCafeId = String(id);
+          
+          console.log('🔄 Comparing:', currentArticleId, currentCafeId);
+          console.log('🔄 Against favorites:', articlesFavs);
+          
           const isFavorited = articlesFavs.some(
-            ([favArticleId, favCafeId]: [string, string]) => 
-              favArticleId === articleId && favCafeId === id
+            ([favArticleId, favCafeId]: [string, string]) => {
+              const favArticleIdStr = String(favArticleId);
+              const favCafeIdStr = String(favCafeId);
+              const match = favArticleIdStr === currentArticleId && favCafeIdStr === currentCafeId;
+              console.log(`🔄 Checking [${favArticleIdStr}, ${favCafeIdStr}] vs [${currentArticleId}, ${currentCafeId}] = ${match}`);
+              return match;
+            }
           );
+          
+          console.log('🔄 useEffect check - Is favorited:', isFavorited);
           toggleHeart(isFavorited);
+        } else {
+          console.log('⚠️ Response not OK in useEffect:', response.status);
         }
       } catch (error) {
-        console.error('Error fetching user favorites:', error);
+        console.error('❌ Error in useEffect favorite check:', error);
       }
     };
 
-    fetchUserFavorites();
+    checkFavoriteStatus();
   }, [articleId, id]);
+
+  // ALSO check whenever userArticlesFavorites changes (after fetch completes)
+  useEffect(() => {
+    if (!articleId || userArticlesFavorites.length === 0) return;
+    
+    const currentArticleId = String(articleId);
+    // Try to use cafe_id from menuItem if available, otherwise use route param
+    const currentCafeId = menuItem.cafe_id ? String(menuItem.cafe_id) : String(id);
+    
+    console.log('💚 Checking with cafe_id:', currentCafeId, '(from menuItem:', menuItem.cafe_id, ', from route:', id, ')');
+    
+    const isFavorited = userArticlesFavorites.some(
+      ([favArticleId, favCafeId]: [string, string]) => 
+        String(favArticleId) === currentArticleId && String(favCafeId) === currentCafeId
+    );
+    
+    console.log('💚 Favorites array updated - checking heart state:', isFavorited);
+    toggleHeart(isFavorited);
+  }, [userArticlesFavorites, articleId, id, menuItem.cafe_id]);
 
   useEffect(() => {
     // Reset states when articleId changes
@@ -161,9 +209,15 @@ const [error, setError] = useState<string | null>(null);
         return;
       }
 
+      // Use cafe_id from menuItem data (the REAL ID), not from route which might be a slug
+      const currentArticleId = String(articleId);
+      const currentCafeId = menuItem.cafe_id ? String(menuItem.cafe_id) : String(id);
+      
+      console.log('💛 Toggle favorite - Using cafe_id:', currentCafeId, 'from menuItem:', menuItem.cafe_id);
+
       const isCurrentlyFavorited = userArticlesFavorites.some(
         ([favArticleId, favCafeId]: [string, string]) => 
-          favArticleId === articleId && favCafeId === id
+          String(favArticleId) === currentArticleId && String(favCafeId) === currentCafeId
       );
 
       const method = isCurrentlyFavorited ? 'DELETE' : 'PUT';
@@ -175,8 +229,8 @@ const [error, setError] = useState<string | null>(null);
           'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
-          article_id: articleId,
-          cafe_id: id
+          article_id: currentArticleId,
+          cafe_id: currentCafeId
         })
       });
 
@@ -188,12 +242,12 @@ const [error, setError] = useState<string | null>(null);
           // Remove from favorites
           setUserArticlesFavorites(prev => 
             prev.filter(([favArticleId, favCafeId]) => 
-              !(favArticleId === articleId && favCafeId === id)
+              !(String(favArticleId) === currentArticleId && String(favCafeId) === currentCafeId)
             )
           );
         } else {
           // Add to favorites
-          setUserArticlesFavorites(prev => [...prev, [articleId as string, id as string]]);
+          setUserArticlesFavorites(prev => [...prev, [currentArticleId, currentCafeId]]);
         }
         
         console.log(`✅ Article ${isCurrentlyFavorited ? 'retiré des' : 'ajouté aux'} favoris`);
@@ -203,15 +257,17 @@ const [error, setError] = useState<string | null>(null);
       }
     } catch (error) {
       console.error('Error toggling favorite:', error);
+      const currentArticleId = String(articleId);
+      const currentCafeId = String(id);
       const actionText = userArticlesFavorites.some(
         ([favArticleId, favCafeId]: [string, string]) => 
-          favArticleId === articleId && favCafeId === id
+          String(favArticleId) === currentArticleId && String(favCafeId) === currentCafeId
       ) ? 'retirer des' : 'ajouter aux';
       Alert.alert('Erreur', `Impossible de ${actionText} favoris`);
     }
   };
 
-  const panierID = "12345";
+  const panierID = "123jj5";
   function addToCart(){
     
     //get current list of items from cart
@@ -318,7 +374,7 @@ const [error, setError] = useState<string | null>(null);
         <View style={styles.cafeHeaderButtons}>
           <IconButton
             Icon={ArrowLeft}
-            onPress={() => {toggleHeart(false); router.replace(`/cafe/${id}`)}}
+            onPress={() => {router.replace(`/cafe/${id}`)}}
             style={styles.cafeHeaderIconButtons}
           />
           <View style={styles.cafeHeaderButtonsRight}>

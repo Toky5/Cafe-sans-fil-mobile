@@ -297,9 +297,11 @@ export default function FavorisScreen() {
                   <TouchableOpacity 
                     onPress={() => {
                       // Navigate to article page
-                      console.log('article pressed', item);
+                      console.log('📱 article pressed', item);
+                      console.log('📱 Article ID:', item.id, 'Type:', typeof item.id);
+                      console.log('📱 Cafe ID:', item.cafe_id, 'Type:', typeof item.cafe_id);
                       if (item.cafe_id && item.id) {
-                        console.log('Navigating to article:', `/cafe/${item.cafe_id}/${item.id}`);
+                        console.log('📱 Navigating to article:', `/cafe/${item.cafe_id}/${item.id}`);
                         router.push(`/cafe/${item.cafe_id}/${item.id}`);
                       }
                     }}
