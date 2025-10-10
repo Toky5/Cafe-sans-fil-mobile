@@ -27,6 +27,7 @@ import { fetchSync, saveSecurely, saveSync } from "@/scripts/storage";
 import * as hash from "object-hash";
 
 import { fetchPannier } from "@/scripts/pannier";
+import { getToken } from "@/utils/tokenStorage";
 
 export default function ArticleScreen() {
 
@@ -53,6 +54,7 @@ const [error, setError] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1); // nombre d'article à mettre dans le panier
   const [selectedIndex, setSelectedIndex] = useState<Number |null>(null); // option button
   const [heart, toggleHeart] = useState(false); // heart toggle state
+  const [userArticlesFavorites, setUserArticlesFavorites] = useState<Array<[string, string]>>([]); // [[article_id, cafe_id]]
 
   // reset les options à non sélectionnée
   useFocusEffect(
@@ -61,6 +63,41 @@ const [error, setError] = useState<string | null>(null);
       setQuantity(1);
     },[])
   )
+
+  // Fetch user's favorite articles to check if current article is favorited
+  useEffect(() => {
+    const fetchUserFavorites = async () => {
+      try {
+        const token = await getToken();
+        if (!token) return;
+
+        const response = await fetch('https://cafesansfil-api-r0kj.onrender.com/api/users/@me', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          const articlesFavs = data.articles_favs || [];
+          setUserArticlesFavorites(articlesFavs);
+          
+          // Check if current article is in favorites
+          const isFavorited = articlesFavs.some(
+            ([favArticleId, favCafeId]: [string, string]) => 
+              favArticleId === articleId && favCafeId === id
+          );
+          toggleHeart(isFavorited);
+        }
+      } catch (error) {
+        console.error('Error fetching user favorites:', error);
+      }
+    };
+
+    fetchUserFavorites();
+  }, [articleId, id]);
 
   useEffect(() => {
     // Reset states when articleId changes
@@ -114,6 +151,65 @@ const [error, setError] = useState<string | null>(null);
   const total = ((Number(menuItem.price) + Number(selectedFee)) * quantity).toFixed(2);
 
 
+
+  // Toggle article favorite
+  const handleToggleFavorite = async () => {
+    try {
+      const token = await getToken();
+      if (!token) {
+        Alert.alert('Erreur', 'Vous devez être connecté pour ajouter des favoris');
+        return;
+      }
+
+      const isCurrentlyFavorited = userArticlesFavorites.some(
+        ([favArticleId, favCafeId]: [string, string]) => 
+          favArticleId === articleId && favCafeId === id
+      );
+
+      const method = isCurrentlyFavorited ? 'DELETE' : 'PUT';
+
+      const response = await fetch('https://cafesansfil-api-r0kj.onrender.com/api/users/@me/articles', {
+        method: method,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          article_id: articleId,
+          cafe_id: id
+        })
+      });
+
+      if (response.ok) {
+        // Update local state
+        toggleHeart(!isCurrentlyFavorited);
+        
+        if (isCurrentlyFavorited) {
+          // Remove from favorites
+          setUserArticlesFavorites(prev => 
+            prev.filter(([favArticleId, favCafeId]) => 
+              !(favArticleId === articleId && favCafeId === id)
+            )
+          );
+        } else {
+          // Add to favorites
+          setUserArticlesFavorites(prev => [...prev, [articleId as string, id as string]]);
+        }
+        
+        console.log(`✅ Article ${isCurrentlyFavorited ? 'retiré des' : 'ajouté aux'} favoris`);
+      } else {
+        const actionText = isCurrentlyFavorited ? 'retirer des' : 'ajouter aux';
+        throw new Error(`Failed to ${actionText} favoris`);
+      }
+    } catch (error) {
+      console.error('Error toggling favorite:', error);
+      const actionText = userArticlesFavorites.some(
+        ([favArticleId, favCafeId]: [string, string]) => 
+          favArticleId === articleId && favCafeId === id
+      ) ? 'retirer des' : 'ajouter aux';
+      Alert.alert('Erreur', `Impossible de ${actionText} favoris`);
+    }
+  };
 
   const panierID = "12345";
   function addToCart(){
@@ -231,7 +327,7 @@ const [error, setError] = useState<string | null>(null);
               style={styles.cafeHeaderIconButtons}
               iconColor={heart ? COLORS.status.red : COLORS.black}
               fill={heart ? COLORS.status.red : "none"}
-              onPress={() => toggleHeart(!heart)}
+              onPress={handleToggleFavorite}
             />
           </View>
         </View>

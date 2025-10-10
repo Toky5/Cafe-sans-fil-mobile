@@ -1,4 +1,4 @@
-import { View, Text, Touchable, TouchableOpacity, Modal, Platform, Linking, Alert, Image, StatusBar, FlatList, ScrollView } from 'react-native';
+import { View, Text, Touchable, TouchableOpacity, Modal, Platform, Linking, Alert, Image, StatusBar, FlatList, ScrollView, ActivityIndicator } from 'react-native';
 import React, { use, useEffect, useMemo, useCallback, memo } from 'react';
 import ScrollableLayout from '@/components/layouts/ScrollableLayout';
 import SPACING from '@/constants/Spacing';
@@ -160,9 +160,11 @@ export default function EventsPage() {
   }
 
   const [showModal, setShowModal] = React.useState(false);
-  const [currentPage, setCurrentPage] = React.useState(0);
+  const [currentPage, setCurrentPage] = React.useState(1); // API pages start at 1
+  const [totalPages, setTotalPages] = React.useState(1);
   const [isFocused, setIsFocused] = React.useState(true);
-  const ITEMS_PER_PAGE = 5;
+  const [isPaginationLoading, setIsPaginationLoading] = React.useState(false);
+  const ITEMS_PER_PAGE = 4; // Match API size parameter
   
   // Use focus effect to clean up when navigating away
   useFocusEffect(
@@ -183,14 +185,14 @@ export default function EventsPage() {
         setIsLoading(true);
         setIsEventsLoading(true);
         setIsCafesLoading(true);
-        setCurrentPage(0);
+        setCurrentPage(1);
       };
     }, [])
   );
 
-  // Reset to page 0 when switching tabs
+  // Reset to page 1 when switching tabs
   useEffect(() => {
-    setCurrentPage(0);
+    setCurrentPage(1);
   }, [activeTab]);
 
   useEffect(() => {
@@ -214,8 +216,14 @@ export default function EventsPage() {
       ]);
     };
 
-    // Fetch cafes first (needed for both tabs)
+    // Fetch cafes only if not already loaded (needed for both tabs)
     const fetchCafes = async () => {
+      // Skip if already loaded
+      if (ListeCafes && ListeCafes.items && ListeCafes.items.length > 0) {
+        console.log('Cafes already loaded, skipping fetch');
+        return;
+      }
+      
       try {
         const response = await fetchWithTimeout('https://cafesansfil-api-r0kj.onrender.com/api/cafes/');
         if (!response.ok) {
@@ -234,33 +242,45 @@ export default function EventsPage() {
 
     // Only fetch data for the active tab
     const fetchActiveTabData = async () => {
+      console.log(`📄 Fetching ${activeTab} - Page ${currentPage}`);
+      
       if (activeTab === 'events') {
-        // Fetch events only
+        // Fetch events with pagination
         try {
-          const response = await fetchWithTimeout('https://cafesansfil-api-r0kj.onrender.com/api/events/');
+          setIsPaginationLoading(true);
+          const url = `https://cafesansfil-api-r0kj.onrender.com/api/events/?page=${currentPage}&size=${ITEMS_PER_PAGE}`;
+          console.log('Fetching events from:', url);
+          const response = await fetchWithTimeout(url);
           if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
           }
           const data = await response.json();
           console.log('Events fetched:', data.items?.[0]);
+          console.log('Total events:', data.total, 'Page:', data.page, 'Size:', data.size);
           setEvents(data);
+          setTotalPages(Math.ceil((data.total || 0) / ITEMS_PER_PAGE));
           setIsEventsLoading(false);
+          setIsPaginationLoading(false);
           // Clear announcements to free memory
           setLaliste(null);
         } catch (error) {
           console.error('Error fetching events:', error);
           setIsEventsLoading(false);
-          setEvents({ items: [] });
+          setIsPaginationLoading(false);
+          setEvents({ items: [], total: 0 });
+          setTotalPages(1);
         }
       } else {
-        // Fetch announcements only
+        // Fetch ALL announcements (no pagination)
         try {
-          const response = await fetchWithTimeout('https://cafesansfil-api-r0kj.onrender.com/api/announcements/');
+          const url = `https://cafesansfil-api-r0kj.onrender.com/api/announcements/`;
+          console.log('Fetching all announcements from:', url);
+          const response = await fetchWithTimeout(url);
           if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
           }
           const data = await response.json();
-          console.log('Announcements fetched:', data.items?.[0]);
+          console.log('Announcements fetched:', data.items?.length, 'total');
           setLaliste(data);
           setIsLoading(false);
           // Clear events to free memory
@@ -279,7 +299,7 @@ export default function EventsPage() {
         setIsRequestingData(false);
       });
 
-  }, [activeTab, isFocused]); // Empty dependency array to run only once
+  }, [activeTab, currentPage, isFocused]); // Note: currentPage only affects events, announcements ignore it
 
   // Memoized event card component for better performance
   const EventCard = memo(({ event }: { event: any }) => {
@@ -428,7 +448,10 @@ export default function EventsPage() {
             padding: 4
           }}>
             <TouchableOpacity
-              onPress={() => setActiveTab('events')}
+              onPress={() => {
+                setActiveTab('events');
+                setCurrentPage(1); // Reset to page 1 when switching tabs
+              }}
               style={{
                 flex: 1,
                 paddingVertical: SPACING["sm"],
@@ -449,7 +472,10 @@ export default function EventsPage() {
               }}>Événements</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              onPress={() => setActiveTab('announcements')}
+              onPress={() => {
+                setActiveTab('announcements');
+                setCurrentPage(1); // Reset to page 1 when switching tabs
+              }}
               style={{
                 flex: 1,
                 paddingVertical: SPACING["sm"],
@@ -474,23 +500,31 @@ export default function EventsPage() {
           <View style={{flex: 1, marginHorizontal: SPACING["md"]}}>
             {activeTab === 'events' ? (
               isEventsLoading ? (
-                <Text>Chargement des événements...</Text>
+                <View style={{alignItems: 'center', marginTop: SPACING["xl"]}}>
+                  <ActivityIndicator size="large" color={COLORS.black} />
+                  <Text style={{...TYPOGRAPHY.body.normal.base, color: '#666', marginTop: SPACING["md"]}}>Chargement des événements...</Text>
+                </View>
+              ) : isPaginationLoading ? (
+                <View style={{alignItems: 'center', marginTop: SPACING["xl"]}}>
+                  <ActivityIndicator size="large" color={COLORS.black} />
+                  <Text style={{...TYPOGRAPHY.body.normal.base, color: '#666', marginTop: SPACING["md"]}}>Chargement...</Text>
+                </View>
               ) : (
                 events && events.items && events.items.length > 0 ? (
                   <>
                     <FlatList
-                      data={events.items.slice(currentPage * ITEMS_PER_PAGE, (currentPage + 1) * ITEMS_PER_PAGE)}
+                      data={events.items}
                       renderItem={({ item }) => <EventCard event={item} />}
                       keyExtractor={(item) => item.id}
                       scrollEnabled={false}
                       removeClippedSubviews={true}
-                      maxToRenderPerBatch={5}
+                      maxToRenderPerBatch={ITEMS_PER_PAGE}
                       windowSize={3}
-                      initialNumToRender={5}
+                      initialNumToRender={ITEMS_PER_PAGE}
                     />
                     
                     {/* Pagination Controls */}
-                    {events.items.length > ITEMS_PER_PAGE && (
+                    {totalPages > 1 && (
                       <View style={{
                         flexDirection: 'row',
                         justifyContent: 'space-between',
@@ -500,20 +534,21 @@ export default function EventsPage() {
                         paddingHorizontal: SPACING["md"]
                       }}>
                         <TouchableOpacity
-                          onPress={() => setCurrentPage(Math.max(0, currentPage - 1))}
-                          disabled={currentPage === 0}
+                          onPress={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                          disabled={currentPage === 1 || isPaginationLoading}
                           style={{
-                            backgroundColor: currentPage === 0 ? COLORS.darkWhite : COLORS.black,
+                            backgroundColor: (currentPage === 1 || isPaginationLoading) ? COLORS.darkWhite : COLORS.black,
                             paddingHorizontal: SPACING["lg"],
                             paddingVertical: SPACING["sm"],
                             borderRadius: 8,
                             flex: 1,
-                            marginRight: SPACING["sm"]
+                            marginRight: SPACING["sm"],
+                            opacity: isPaginationLoading ? 0.5 : 1
                           }}
                         >
                           <Text style={{
                             ...TYPOGRAPHY.body.normal.semiBold,
-                            color: currentPage === 0 ? '#999' : COLORS.white,
+                            color: (currentPage === 1 || isPaginationLoading) ? '#999' : COLORS.white,
                             textAlign: 'center'
                           }}>← Précédent</Text>
                         </TouchableOpacity>
@@ -523,24 +558,25 @@ export default function EventsPage() {
                           color: '#666',
                           marginHorizontal: SPACING["md"]
                         }}>
-                          {currentPage + 1} / {Math.ceil(events.items.length / ITEMS_PER_PAGE)}
+                          {isPaginationLoading ? '...' : `${currentPage} / ${totalPages}`}
                         </Text>
                         
                         <TouchableOpacity
-                          onPress={() => setCurrentPage(Math.min(Math.ceil(events.items.length / ITEMS_PER_PAGE) - 1, currentPage + 1))}
-                          disabled={currentPage >= Math.ceil(events.items.length / ITEMS_PER_PAGE) - 1}
+                          onPress={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                          disabled={currentPage >= totalPages || isPaginationLoading}
                           style={{
-                            backgroundColor: currentPage >= Math.ceil(events.items.length / ITEMS_PER_PAGE) - 1 ? COLORS.darkWhite : COLORS.black,
+                            backgroundColor: (currentPage >= totalPages || isPaginationLoading) ? COLORS.darkWhite : COLORS.black,
                             paddingHorizontal: SPACING["lg"],
                             paddingVertical: SPACING["sm"],
                             borderRadius: 8,
                             flex: 1,
-                            marginLeft: SPACING["sm"]
+                            marginLeft: SPACING["sm"],
+                            opacity: isPaginationLoading ? 0.5 : 1
                           }}
                         >
                           <Text style={{
                             ...TYPOGRAPHY.body.normal.semiBold,
-                            color: currentPage >= Math.ceil(events.items.length / ITEMS_PER_PAGE) - 1 ? '#999' : COLORS.white,
+                            color: (currentPage >= totalPages || isPaginationLoading) ? '#999' : COLORS.white,
                             textAlign: 'center'
                           }}>Suivant →</Text>
                         </TouchableOpacity>
@@ -553,79 +589,21 @@ export default function EventsPage() {
               )
             ) : (
               isLoading ? (
-                <Text>Chargement des annonces...</Text>
+                <View style={{alignItems: 'center', marginTop: SPACING["xl"]}}>
+                  <ActivityIndicator size="large" color={COLORS.black} />
+                  <Text style={{...TYPOGRAPHY.body.normal.base, color: '#666', marginTop: SPACING["md"]}}>Chargement des annonces...</Text>
+                </View>
               ) : (
                 laliste && laliste.items && laliste.items.length > 0 ? (
-                  <>
-                    <FlatList
-                      data={laliste.items.slice(currentPage * ITEMS_PER_PAGE, (currentPage + 1) * ITEMS_PER_PAGE)}
-                      renderItem={({ item }) => <AnnouncementCard announcement={item} />}
-                      keyExtractor={(item) => item.id}
-                      scrollEnabled={false}
-                      removeClippedSubviews={true}
-                      maxToRenderPerBatch={5}
-                      windowSize={3}
-                      initialNumToRender={5}
-                    />
-                    
-                    {/* Pagination Controls */}
-                    {laliste.items.length > ITEMS_PER_PAGE && (
-                      <View style={{
-                        flexDirection: 'row',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        marginTop: SPACING["lg"],
-                        marginBottom: SPACING["xl"],
-                        paddingHorizontal: SPACING["md"]
-                      }}>
-                        <TouchableOpacity
-                          onPress={() => setCurrentPage(Math.max(0, currentPage - 1))}
-                          disabled={currentPage === 0}
-                          style={{
-                            backgroundColor: currentPage === 0 ? COLORS.darkWhite : COLORS.black,
-                            paddingHorizontal: SPACING["lg"],
-                            paddingVertical: SPACING["sm"],
-                            borderRadius: 8,
-                            flex: 1,
-                            marginRight: SPACING["sm"]
-                          }}
-                        >
-                          <Text style={{
-                            ...TYPOGRAPHY.body.normal.semiBold,
-                            color: currentPage === 0 ? '#999' : COLORS.white,
-                            textAlign: 'center'
-                          }}>← Précédent</Text>
-                        </TouchableOpacity>
-                        
-                        <Text style={{
-                          ...TYPOGRAPHY.body.normal.base,
-                          color: '#666',
-                          marginHorizontal: SPACING["md"]
-                        }}>
-                          {currentPage + 1} / {Math.ceil(laliste.items.length / ITEMS_PER_PAGE)}
-                        </Text>
-                        
-                        <TouchableOpacity
-                          onPress={() => setCurrentPage(Math.min(Math.ceil(laliste.items.length / ITEMS_PER_PAGE) - 1, currentPage + 1))}
-                          disabled={currentPage >= Math.ceil(laliste.items.length / ITEMS_PER_PAGE) - 1}
-                          style={{
-                            backgroundColor: currentPage >= Math.ceil(laliste.items.length / ITEMS_PER_PAGE) - 1 ? COLORS.darkWhite : COLORS.black,
-                            paddingHorizontal: SPACING["lg"],
-                            paddingVertical: SPACING["sm"],
-                            borderRadius: 8,
-                            flex: 1,
-                            marginLeft: SPACING["sm"]
-                          }}
-                        >
-                          <Text style={{
-                            ...TYPOGRAPHY.body.normal.semiBold,
-                            color: currentPage >= Math.ceil(laliste.items.length / ITEMS_PER_PAGE) - 1 ? '#999' : COLORS.white,
-                            textAlign: 'center'
-                          }}>Suivant →</Text>
-                        </TouchableOpacity>
-                      </View>
-                    )}
-                  </>
+                  <FlatList
+                    data={laliste.items}
+                    renderItem={({ item }) => <AnnouncementCard announcement={item} />}
+                    keyExtractor={(item) => item.id}
+                    scrollEnabled={false}
+                    removeClippedSubviews={true}
+                    maxToRenderPerBatch={10}
+                    windowSize={5}
+                  />
                 ) : (
                   <Text style={{...TYPOGRAPHY.body.normal.base, color: '#666', textAlign: 'center', marginTop: SPACING["xl"]}}>Aucune annonce disponible</Text>
                 )

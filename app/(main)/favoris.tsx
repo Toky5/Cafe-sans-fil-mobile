@@ -15,13 +15,18 @@ import COLORS from '@/constants/Colors';
 export default function FavorisScreen() {
   const router = useRouter();
   
+  // Cafe favorites: array of cafe IDs (strings)
+  // Example: ["cafe1", "cafe2", "cafe3"]
   const [cafeFavoris, setCafeFavoris] = React.useState<Array<any>>([]);
   const [cafesData, setCafesData] = React.useState<Array<any>>([]);
   const [ListeCafes, setListeCafes] = React.useState<{ items: Array<any> }>({ items: [] });
   const [isCafesLoading, setIsCafesLoading] = React.useState<boolean>(true);
-  const [items, setItems] = React.useState<Array<any>>([]);
-  const id = "68770cfda6b7c156881aa258"; 
-  const [isArticlesLoading, setIsArticlesLoading] = React.useState<boolean>(true);
+  
+  // Article favorites: array of [article_id, cafe_id] pairs
+  // Example: [["article1", "cafe1"], ["article2", "cafe2"]]
+  const [articlesFavoris, setArticlesFavoris] = React.useState<Array<any>>([]);
+  const [articlesData, setArticlesData] = React.useState<Array<any>>([]);
+  const [isArticlesLoading, setIsArticlesLoading] = React.useState<boolean>(false);
   
   const formatPrice = (price: string) => {
     if (price.charAt(price.length - 2) == ".") {
@@ -33,8 +38,7 @@ export default function FavorisScreen() {
   }
 
   const getCafeById = async (id: string) => {
-    try{
-      
+    try {
       const response = await fetch(`https://cafesansfil-api-r0kj.onrender.com/api/cafes/${id}`, {
         method: 'GET',
         headers: {
@@ -46,66 +50,33 @@ export default function FavorisScreen() {
       }
       const cafe = await response.json();
       return cafe;
-
-    }
-    catch (error) {
+    } catch (error) {
       console.error("Error in getCafeById: ", error);
+      return null;
+    }
+  }
+
+  const getArticleById = async (articleId: string, cafeid: string) => {
+    try {
+      const response = await fetch(`https://cafesansfil-api-r0kj.onrender.com/api/cafes/${cafeid}/menu/items/${articleId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const article = await response.json();
+      return article;
+    } catch (error) {
+      console.error("Error in getArticleById: ", error);
       return null;
     }
   }
 
 
   useEffect(() => {
-     const fetchWithTimeout = (url: string, timeout = 10000): Promise<Response> => {
-      return Promise.race([
-        fetch(url),
-        new Promise<Response>((_, reject) => 
-          setTimeout(() => reject(new Error('Request timeout')), timeout)
-        )
-      ]);
-    };
-
-
-    const fetchArticles = async () => {
-      try {
-        const response = await fetch(
-          `https://cafesansfil-api-r0kj.onrender.com/api/cafes/${id}`
-        );
-        const data = await response.json();
-        console.log("Cafe data fetched: ", data);
-        
-        // Extract all items from all categories and flatten them
-        const allItems: any[] = [];
-        if (data.menu && data.menu.categories) {
-          data.menu.categories.forEach((category: any) => {
-            if (category.items && Array.isArray(category.items)) {
-              category.items.forEach((item: any) => {
-                allItems.push({
-                  ...item,
-                  cafeId: id,
-                  cafeSlug: data.slug
-                });
-              });
-            }
-          });
-        }
-        
-        console.log("All items extracted: ", allItems.length);
-        // Set only the first 3 items for testing
-        setItems(allItems.slice(0, 3));
-        // a desac pr le test
-        setItems([])
-        setIsArticlesLoading(false);
-      } catch (error) {
-        console.error('Error fetching articles:', error);
-        setItems([]);
-        setIsArticlesLoading(false);
-      }
-    };
-    //fetchArticles();
-
-      
-  
     const fetchUserData = async () => {
       const token = await getToken();
       fetch('https://cafesansfil-api-r0kj.onrender.com/api/users/@me', {
@@ -117,7 +88,8 @@ export default function FavorisScreen() {
       })
         .then(response => response.json())
         .then(data => {
-          setCafeFavoris(data.cafe_favs);
+          setCafeFavoris(data.cafe_favs || []);
+          setArticlesFavoris(data.articles_favs || []);
         })
         .catch(error => console.error('Error fetching user data:', error));
     };
@@ -152,33 +124,80 @@ export default function FavorisScreen() {
 
           const data = await response.json();
           const newFavorites = data.cafe_favs || [];
+          const newArticlesFavorites = data.articles_favs || [];
           
           // Compare the new favorites with current ones
-          const currentSorted = [...cafeFavoris].sort().join(',');
-          const newSorted = [...newFavorites].sort().join(',');
+          const currentCafesSorted = [...cafeFavoris].sort().join(',');
+          const newCafesSorted = [...newFavorites].sort().join(',');
           
-          if (currentSorted === newSorted) {
-            console.log('✅ Favorites unchanged - skipping cafe data fetch');
+          // For articles_favs, convert nested arrays to strings for comparison
+          // articles_favs is [[article_id, cafe_id], [article_id, cafe_id], ...]
+          const currentArticlesSorted = [...articlesFavoris]
+            .map(pair => Array.isArray(pair) ? pair.join(':') : pair)
+            .sort()
+            .join(',');
+          const newArticlesSorted = [...newArticlesFavorites]
+            .map(pair => Array.isArray(pair) ? pair.join(':') : pair)
+            .sort()
+            .join(',');
+          
+          const cafesChanged = currentCafesSorted !== newCafesSorted;
+          const articlesChanged = currentArticlesSorted !== newArticlesSorted;
+          
+          // If nothing changed, skip everything
+          if (!cafesChanged && !articlesChanged) {
+            console.log('✅ No changes - skipping all data fetches');
             return;
           }
 
-          console.log('🔄 Favorites changed - fetching cafe data');
-          console.log('Old:', cafeFavoris);
-          console.log('New:', newFavorites);
-          
+          // Log what changed
+          if (cafesChanged) {
+            console.log('🔄 Cafe favorites changed');
+            console.log('Old cafes:', cafeFavoris);
+            console.log('New cafes:', newFavorites);
+          }
+          if (articlesChanged) {
+            console.log('🔄 Article favorites changed');
+            console.log('Old articles:', articlesFavoris);
+            console.log('New articles:', newArticlesFavorites);
+          }
+
+          // Update state
           setCafeFavoris(newFavorites);
+          setArticlesFavoris(newArticlesFavorites);
           
-          // Only fetch full cafe data if the list actually changed
-          if (newFavorites.length > 0) {
-            setIsCafesLoading(true);
-            const cafesPromises = newFavorites.map((cafeId: string) => getCafeById(cafeId));
-            const cafesResults = await Promise.all(cafesPromises);
-            const validCafes = cafesResults.filter(cafe => cafe !== null);
-            setCafesData(validCafes);
-            setIsCafesLoading(false);
-          } else {
-            setCafesData([]);
-            setIsCafesLoading(false);
+          // Fetch cafe data if cafe favorites changed
+          if (cafesChanged) {
+            if (newFavorites.length > 0) {
+              setIsCafesLoading(true);
+              const cafesPromises = newFavorites.map((cafeId: string) => getCafeById(cafeId));
+              const cafesResults = await Promise.all(cafesPromises);
+              const validCafes = cafesResults.filter(cafe => cafe !== null);
+              setCafesData(validCafes);
+              setIsCafesLoading(false);
+            } else {
+              setCafesData([]);
+              setIsCafesLoading(false);
+            }
+          }
+          
+          // Fetch article data if article favorites changed
+          if (articlesChanged) {
+            if (newArticlesFavorites.length > 0) {
+              setIsArticlesLoading(true);
+              // newArticlesFavorites is [[article_id, cafe_id], ...]
+              const articlesPromises = newArticlesFavorites.map((pair: any) => {
+                const [articleId, cafeId] = pair;
+                return getArticleById(articleId, cafeId);
+              });
+              const articlesResults = await Promise.all(articlesPromises);
+              const validArticles = articlesResults.filter(article => article !== null);
+              setArticlesData(validArticles);
+              setIsArticlesLoading(false);
+            } else {
+              setArticlesData([]);
+              setIsArticlesLoading(false);
+            }
           }
         } catch (error) {
           console.error('Error refreshing favorites:', error);
@@ -187,7 +206,7 @@ export default function FavorisScreen() {
       };
 
       refreshFavorites();
-    }, [cafeFavoris])
+    }, [cafeFavoris, articlesFavoris])
   );
 
 
@@ -249,15 +268,21 @@ export default function FavorisScreen() {
             }}
           >Vos articles favoris</Text>
           
-          {isArticlesLoading ? (
+          {articlesFavoris.length === 0 ? (
+            <View style={{ marginHorizontal: SPACING["md"], paddingVertical: SPACING["xl"] }}>
+              <Text style={{ ...TYPOGRAPHY.body.normal.base, color: '#666', textAlign: 'center' }}>
+                Aucun article favori pour le moment.
+              </Text>
+            </View>
+          ) : isArticlesLoading ? (
             <View style={{ marginHorizontal: SPACING["md"], paddingVertical: SPACING["xl"] }}>
               <Text style={{ ...TYPOGRAPHY.body.normal.base, color: '#999', textAlign: 'center' }}>
                 Chargement des articles...
               </Text>
             </View>
-          ) : items.length > 0 ? (
+          ) : articlesData.length > 0 ? (
             <FlatList
-              data={items}
+              data={articlesData}
               renderItem={({ item }) => {
                 // Safely format price
                 let priceDisplay = "N/A";
@@ -272,8 +297,10 @@ export default function FavorisScreen() {
                   <TouchableOpacity 
                     onPress={() => {
                       // Navigate to article page
-                      if (item.cafeSlug && (item.slug || item.id)) {
-                        router.push(`/cafe/${item.cafeSlug}/${item.slug || item.id}`);
+                      console.log('article pressed', item);
+                      if (item.cafe_id && item.id) {
+                        console.log('Navigating to article:', `/cafe/${item.cafe_id}/${item.id}`);
+                        router.push(`/cafe/${item.cafe_id}/${item.id}`);
                       }
                     }}
                     activeOpacity={0.8}
@@ -399,13 +426,7 @@ export default function FavorisScreen() {
               }}
               ItemSeparatorComponent={() => <View style={{ width: SPACING["md"] }} />}
             />
-          ) : (
-            <View style={{ marginHorizontal: SPACING["md"], paddingVertical: SPACING["xl"] }}>
-              <Text style={{ ...TYPOGRAPHY.body.normal.base, color: '#666', textAlign: 'center' }}>
-                Aucun article favori pour le moment.
-              </Text>
-            </View>
-          )}
+          ) : null}
         </View>
       </ScrollableLayout>
     </>
