@@ -347,7 +347,6 @@ export default function ParametreScreen() {
             await setUserPhotoUrl(uploadedUrl);
             
             setIsUploading(false);
-            alert("Photo de profil mise à jour avec succès!");
             setAccountModalVisible(false);
           } else {
             const errorData = await updateResponse.json();
