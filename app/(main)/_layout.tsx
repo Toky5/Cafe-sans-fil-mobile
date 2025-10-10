@@ -87,7 +87,7 @@ export default function TabLayout() {
         tabBarStyle: {
           ...Platform.select({
             ios: { padding: 6 , height: "10%"},
-            android: { padding: 8, height: "10%" }
+            android: { padding: 8, height: "11%" }
           })
         },
       }}

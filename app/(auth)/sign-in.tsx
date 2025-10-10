@@ -110,7 +110,7 @@ export default function SignInScreen() {
 
     <Text style={isError ? styles.textFormR : styles.textForm}>
       <Text >
-        Adresse e-mail
+        Adresse e-mail ou nom d'utilisateur
       </Text>
       <Text style={{color: "#ff0000", fontSize: 19, fontWeight: "400"}}> *</Text>
     </Text>
