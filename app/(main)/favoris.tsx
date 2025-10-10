@@ -1,6 +1,7 @@
 import { View, Text, FlatList, StatusBar, Image, Platform, TouchableOpacity } from 'react-native';
-import React, { useEffect } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { useRouter } from 'expo-router';
+import { useFocusEffect } from '@react-navigation/native';
 import ScrollableLayout from '@/components/layouts/ScrollableLayout';
 import SPACING from '@/constants/Spacing';
 import TYPOGRAPHY from "@/constants/Typography";
@@ -15,6 +16,7 @@ export default function FavorisScreen() {
   const router = useRouter();
   
   const [cafeFavoris, setCafeFavoris] = React.useState<Array<any>>([]);
+  const [cafesData, setCafesData] = React.useState<Array<any>>([]);
   const [ListeCafes, setListeCafes] = React.useState<{ items: Array<any> }>({ items: [] });
   const [isCafesLoading, setIsCafesLoading] = React.useState<boolean>(true);
   const [items, setItems] = React.useState<Array<any>>([]);
@@ -30,12 +32,26 @@ export default function FavorisScreen() {
     }
   }
 
-  const getCafeById = (id: string) => {
-    if (ListeCafes && ListeCafes.items) {
-      const cafe = ListeCafes.items.find((cafe: any) => cafe.id === id);
+  const getCafeById = async (id: string) => {
+    try{
+      
+      const response = await fetch(`https://cafesansfil-api-r0kj.onrender.com/api/cafes/${id}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const cafe = await response.json();
       return cafe;
+
     }
-    return null;
+    catch (error) {
+      console.error("Error in getCafeById: ", error);
+      return null;
+    }
   }
 
 
@@ -49,28 +65,6 @@ export default function FavorisScreen() {
       ]);
     };
 
-    // Fetch cafes
-    const fetchCafes = async () => {
-      try {
-        const response = await fetchWithTimeout('https://cafesansfil-api-r0kj.onrender.com/api/cafes/');
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-        console.log('Cafes fetched:', data.items?.[0]);
-        setListeCafes(data);
-        setCafeFavoris(data.items?.slice(0, 3) || []);
-        // a desac pr le test
-        setCafeFavoris([])
-        setIsCafesLoading(false);
-      } catch (error) {
-        console.error('Error fetching cafes:', error);
-        setIsCafesLoading(false);
-        // Set empty data to prevent infinite loading
-        setListeCafes({ items: [] });
-      }
-    };
-    fetchCafes();
 
     const fetchArticles = async () => {
       try {
@@ -108,7 +102,7 @@ export default function FavorisScreen() {
         setIsArticlesLoading(false);
       }
     };
-    fetchArticles();
+    //fetchArticles();
 
       
   
@@ -123,13 +117,78 @@ export default function FavorisScreen() {
       })
         .then(response => response.json())
         .then(data => {
-          setCafeFavoris(data.cafes);
+          setCafeFavoris(data.cafe_favs);
         })
         .catch(error => console.error('Error fetching user data:', error));
     };
 
     fetchUserData();
   }, []);
+
+  // Refetch favorites when screen comes into focus (only fetch cafe data if list changed)
+  useFocusEffect(
+    useCallback(() => {
+      const refreshFavorites = async () => {
+        try {
+          console.log('Favoris screen focused - checking for updates');
+          const token = await getToken();
+          if (!token) {
+            console.log('No token available, skipping favorites refresh');
+            return;
+          }
+
+          const response = await fetch('https://cafesansfil-api-r0kj.onrender.com/api/users/@me', {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            }
+          });
+
+          if (!response.ok) {
+            console.log(`Failed to fetch favorites: ${response.status}`);
+            return;
+          }
+
+          const data = await response.json();
+          const newFavorites = data.cafe_favs || [];
+          
+          // Compare the new favorites with current ones
+          const currentSorted = [...cafeFavoris].sort().join(',');
+          const newSorted = [...newFavorites].sort().join(',');
+          
+          if (currentSorted === newSorted) {
+            console.log('✅ Favorites unchanged - skipping cafe data fetch');
+            return;
+          }
+
+          console.log('🔄 Favorites changed - fetching cafe data');
+          console.log('Old:', cafeFavoris);
+          console.log('New:', newFavorites);
+          
+          setCafeFavoris(newFavorites);
+          
+          // Only fetch full cafe data if the list actually changed
+          if (newFavorites.length > 0) {
+            setIsCafesLoading(true);
+            const cafesPromises = newFavorites.map((cafeId: string) => getCafeById(cafeId));
+            const cafesResults = await Promise.all(cafesPromises);
+            const validCafes = cafesResults.filter(cafe => cafe !== null);
+            setCafesData(validCafes);
+            setIsCafesLoading(false);
+          } else {
+            setCafesData([]);
+            setIsCafesLoading(false);
+          }
+        } catch (error) {
+          console.error('Error refreshing favorites:', error);
+          setIsCafesLoading(false);
+        }
+      };
+
+      refreshFavorites();
+    }, [cafeFavoris])
+  );
 
 
   return (
@@ -156,20 +215,20 @@ export default function FavorisScreen() {
                 Aucun café favori pour le moment.
               </Text>
             </View>
-        ) : !isCafesLoading && (
+        ) : !isCafesLoading && cafesData.length > 0 && (
            <FlatList
-            data={cafeFavoris}
-            renderItem={({ item }) => {
-              const cafe = getCafeById(item.id);
-              return cafe ? <CafeCard 
-              name={cafe.name}
-              image={cafe.banner_url}
+            data={cafesData}
+            renderItem={({ item: cafe }) => (
+              <CafeCard 
+                name={cafe.name}
+                image={cafe.banner_url}
                 location={cafe.location.pavillon}
                 priceRange="$$"
                 rating={4.5}
                 status={cafe.is_open}
-                id={cafe.id} /> : null;
-            }}
+                id={cafe.id} 
+              />
+            )}
             keyExtractor={(item) => item.id}
             horizontal
             showsHorizontalScrollIndicator={false}

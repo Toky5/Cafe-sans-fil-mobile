@@ -45,6 +45,7 @@ import {
 import { Cafe, Category, Item } from "@/constants/types/GET_cafe";
 import { allCafe } from '@/constants/types/GET_list_cafe';
 import ScrollableLayout from '@/components/layouts/ScrollableLayout';
+import { getToken } from '@/utils/tokenStorage';
 const { Platform } = require('react-native');
 const ActionSheetIOS = require('react-native').ActionSheetIOS;
 const { Alert } = require('react-native');
@@ -64,6 +65,7 @@ export default function CafeScreen() {
   const [isSearchActive, setIsSearchActive] = useState(false);
 
   const [cafe, setCafe] = useState<Cafe>(); // set social media as empty object
+  /*
   const [data, setData] = useState<allCafe | any>([]);
   useEffect(() => {
       setIsLoading(true);
@@ -74,13 +76,18 @@ export default function CafeScreen() {
           // console.log(json)
         })
         .catch((error) => console.error(error))
-        .finally(() => setIsLoading(false));;
+        .finally(() => setIsLoading(false));
+        
+        
+        ;
     }, []);
-
+  */
   // Have an openable link
   const openLink = (url: string) => {
     Linking.openURL(url).catch(err => console.error("Failed to open URL:", err));
   };
+
+  
 
   // function qui donne la plateform et le lien
   // const getSocialMediaLinks = (socialMediaObjet) => {
@@ -128,7 +135,32 @@ export default function CafeScreen() {
         setIsLoading(false);
       }
     };
+
     fetchCafe();
+
+    const fetchProfile = async () => {
+      try{
+        const token = await getToken();
+        if (!token) {
+          console.error("No access token found");
+          return;
+        }
+        fetch(`https://cafesansfil-api-r0kj.onrender.com/api/users/@me`, {
+          method: 'GET',
+          headers: {
+            'accept': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        })
+          .then(response => response.json())
+          .then(data => {if (data.cafe_favs.includes(id)){ toggleHeart(true)} else {toggleHeart(false)}; console.log("Data user: ", data)})
+          .catch(error => console.error('Error fetching user data:', error));
+      }
+      catch(error){
+        console.error("Error fetching user data:", error);
+      }
+    };
+    fetchProfile();
   }, [id]);
   
   const [activeFilter, setActiveFilter] = useState("Tous");
@@ -306,6 +338,62 @@ function filterMenu(filter?: string, menuData?: any): Item[] {
 
 console.log(paymentDetails);
     const [heart, toggleHeart] = useState(false);
+
+    const addToFavoris = async (id) => {
+      try{
+        const token = await getToken();
+        if (!token) {
+          console.error("No access token found");
+          return;
+        }
+        const response = await fetch(`https://cafesansfil-api-r0kj.onrender.com/api/users/@me/cafes?cafe_id=${id}`, {
+          method: 'PUT',
+          headers: {
+            'accept': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        console.log("Added to favoris:", data);
+        // Update local state or provide user feedback as needed
+        toggleHeart(true);
+        
+      }
+      catch(error){
+        console.error("Error adding to favoris:", error);
+    }
+
+    }
+
+    const removeFromFavoris = async (id) => {
+      try{
+        const token = await getToken();
+        if (!token) {
+          console.error("No access token found");
+          return;
+        }
+        const response = await fetch(`https://cafesansfil-api-r0kj.onrender.com/api/users/@me/cafes?cafe_id=${id}`, {
+          method: 'DELETE',
+          headers: {
+            'accept': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        console.log("Removed from favoris:", data);
+        // Update local state or provide user feedback as needed
+        toggleHeart(false);
+      }
+      catch(error){
+        console.error("Error removing from favoris:", error);
+      }
+    }
     
     // Search bar animation states
     const [isSearchExpanded, setIsSearchExpanded] = useState(false);
@@ -500,7 +588,7 @@ console.log(paymentDetails);
                     />
                     <IconButton
                       Icon={Heart}
-                      onPress={() => toggleHeart(!heart)}
+                      onPress={() => { heart ? removeFromFavoris(id) : addToFavoris(id)}}
                       iconColor={heart ? COLORS.status.red : COLORS.black}
                       fill={heart ? "red" : "none"}
                       style={styles.cafeHeaderIconButtons}
@@ -776,7 +864,7 @@ console.log(paymentDetails);
         </View>
       </View>      
 
-      {/* Cafés similaires */}
+      {/* Cafés similaires 
       <Text 
         style={{
           marginVertical: SPACING["xl"], 
@@ -807,7 +895,7 @@ console.log(paymentDetails);
             paddingBottom: SPACING["md"],
           }}
         />
-
+        */}
 
         {/* TODO: IMPLÉMENTER LA FLATLIST */}
 
