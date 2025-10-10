@@ -12,6 +12,7 @@ import {
   ScrollView,
   StatusBar,
   Switch,
+  Alert,
   ActivityIndicator
 } from "react-native";
 
@@ -489,24 +490,56 @@ export default function ParametreScreen() {
     navigation.push("/first-onboarding");
   };
 
-  const deletethisaccount = async () =>{
-
+  const deletethisaccount = async () => {
+    // Get token first to check if user is logged in
     const token = await getToken();
-    if (token) {
-      const isDeleted = await deleteAccount(token);
-      if (isDeleted) {
-        setAccountModalVisible(false);
-        navigation.push("/first-onboarding");
-      } else {
-        alert("Erreur lors de la suppression du compte. Veuillez réessayer plus tard.");
-      }
-    }
-    else {
-      alert("Vous devez être connecté pour supprimer votre compte.");
-    }
-  setAccountModalVisible(false);
-
     
+    if (!token) {
+      alert("Vous devez être connecté pour supprimer votre compte.");
+      setAccountModalVisible(false);
+      return;
+    }
+
+    // Show confirmation alert
+    Alert.alert(
+      "Êtes-vous sûr?", 
+      "La suppression de votre compte est irréversible. Toutes vos données seront perdues.", 
+      [
+        {
+          text: "Annuler",
+          style: "cancel",
+          onPress: () => {
+            console.log("Account deletion cancelled");
+          }
+        },
+        {
+          text: "Supprimer",
+          style: "destructive",
+          onPress: async () => {
+            // This is where the actual deletion happens after confirmation
+            try {
+              const isDeleted = await deleteAccount(token);
+              
+              if (isDeleted) {
+                // Clear all user data
+                await clearTokens();
+                setAccountModalVisible(false);
+                
+                // Navigate to onboarding
+                navigation.push("/first-onboarding");
+                
+                alert("Votre compte a été supprimé avec succès.");
+              } else {
+                alert("Erreur lors de la suppression du compte. Veuillez réessayer plus tard.");
+              }
+            } catch (error) {
+              console.error("Error deleting account:", error);
+              alert("Erreur lors de la suppression du compte. Veuillez réessayer plus tard.");
+            }
+          }
+        }
+      ]
+    );
   }
 
 

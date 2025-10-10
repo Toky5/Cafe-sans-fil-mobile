@@ -144,7 +144,7 @@ export const deleteAccount = async (token: string) => {
 
   const id = userInfo.id;
   try{
-    const response = await fetch(`https://cafesansfil-api-r0kj.onrender.com/api/users/${id}`, {
+    const response = await fetch(`https://cafesansfil-api-r0kj.onrender.com/api/users/@me`, {
       method: 'DELETE',
       headers: {
         'accept': 'application/json',
