@@ -687,20 +687,12 @@ export default function EventsPage() {
             )}
             <Modal visible={showModal}
               animationType="slide"
-              transparent={true}
               onRequestClose={() => setShowModal(false)}
+              presentationStyle="pageSheet"
             >
-              <View style={{
-                flex: 1,
-                justifyContent: 'flex-end',
-                backgroundColor: 'rgba(0, 0, 0, 0.5)',
-              }}>
                 <View style={{
-                  width: '100%',
-                  height: '90%',
+                  flex: 1,
                   backgroundColor: COLORS.white,
-                  borderTopLeftRadius: 24,
-                  borderTopRightRadius: 24,
                 }}>
                   {/* Modal Header */}
                   <View style={{
@@ -990,7 +982,6 @@ export default function EventsPage() {
                     </ScrollView>
                   )}
                 </View>
-              </View>
             </Modal>
 
             

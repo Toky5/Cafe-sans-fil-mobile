@@ -13,10 +13,11 @@ import {
   StatusBar,
   Switch,
   Alert,
-  ActivityIndicator
+  ActivityIndicator,
+  Pressable,
+  Dimensions
 } from "react-native";
 import Constants from 'expo-constants';
-
 import React, { useState } from 'react'
 import ScrollableLayout from "@/components/layouts/ScrollableLayout";
 import {
@@ -96,6 +97,8 @@ export default function ParametreScreen() {
   //const [darkModeEnabled, setDarkModeEnabled] = useState(false);
   //const [languagePreference, setLanguagePreference] = useState('french');
 
+
+  const { width, height } = Dimensions.get('screen');
   const orders = [
     {
       id: 1,
@@ -719,13 +722,13 @@ export default function ParametreScreen() {
         */}
 
         <Modal
-        animationType="slide"
-          transparent={true}
+          animationType="slide"
           visible={remmerciementsModalVisible}
           onRequestClose={() => setRemerciementsModalVisible(false)}
-        >
+          presentationStyle="pageSheet"
           
-<View style={styles.modalOverlay}>
+          
+        >
     <View style={styles.modalContainer}>
       <View style={styles.modalHeader}>
         <Text style={styles.modernModalTitle}>Remerciements</Text>
@@ -807,18 +810,14 @@ export default function ParametreScreen() {
 
       </ScrollView>
     </View>
-    </View>
-              
-
         </Modal>
 
         <Modal
           animationType="slide"
-          transparent={true}
           visible={accountModalVisible}
           onRequestClose={() => setAccountModalVisible(false)}
+          presentationStyle="pageSheet"
         >
-          <View style={styles.modalOverlay}>
             <View style={styles.modalContainer}>
               {/* Header */}
               <View style={styles.modalHeader}>
@@ -993,16 +992,14 @@ export default function ParametreScreen() {
                 </View>
               </ScrollView>
             </View>
-          </View>
         </Modal>
 
         <Modal
   animationType="slide"
-  transparent={true}
   visible={modalVisible}
   onRequestClose={() => setModalVisible(false)}
+  presentationStyle="pageSheet"
 >
-  <View style={styles.modalOverlay}>
     <View style={styles.modalContainer}>
       <View style={styles.modalHeader}>
         <Text style={styles.modernModalTitle}>À propos</Text>
@@ -1051,16 +1048,14 @@ export default function ParametreScreen() {
         </View>
       </ScrollView>
     </View>
-  </View>
 </Modal>
 
 <Modal
   animationType="slide"
-  transparent={true}
   visible={prferencesModalVisible}
   onRequestClose={() => setPreferencesModalVisible(false)}
+  presentationStyle="pageSheet"
 >
-  <View style={styles.modalOverlay}>
     <View style={styles.modalContainer}>
       <View style={styles.modalHeader}>
         <Text style={styles.modernModalTitle}>Mes préférences</Text>
@@ -1249,17 +1244,15 @@ export default function ParametreScreen() {
         */}
       </ScrollView>
     </View>
-  </View>
 </Modal>
         
         
         <Modal
           animationType="slide"
-          transparent={true}
           visible={ordersModalVisible}
           onRequestClose={() => setOrdersModalVisible(false)}
+          presentationStyle="pageSheet"
         >
-          <View style={styles.modalOverlay}>
             <View style={styles.modalContainer}>
               <View style={styles.modalHeader}>
                 <Text style={styles.modalTitle}>Mes Commandes</Text>
@@ -1281,7 +1274,6 @@ export default function ParametreScreen() {
               ))}
               </View>
             </View>
-          </View>
         </Modal>
 
         
@@ -1394,19 +1386,9 @@ const styles = StyleSheet.create({
   systemStatusSubtext: {
     color: COLORS.subtuleDark,
   },
-  modalOverlay: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
   modalContainer: {
-    width: '100%',
-    height: '90%',
+    flex: 1,
     backgroundColor: COLORS.white,
-    borderRadius: 24,
-    overflow: 'hidden',
-    marginTop: '20%',
   },
   modalHeader: {
     flexDirection: 'row',
