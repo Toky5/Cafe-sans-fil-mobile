@@ -14,7 +14,7 @@ type FilterButtonsProps = {
 
 export default function FilterButtons({
   closeButtonText="Appliquer",
-  resetButtonText="Réinitialiser",
+  resetButtonText="Fermer",
   handleApplyFilter,
   handleResetFilter,
 }: FilterButtonsProps) {
