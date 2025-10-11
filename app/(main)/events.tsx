@@ -437,7 +437,7 @@ export default function EventsPage() {
         <View>
           
 
-          {/* Tab Buttons */}
+          {/* Tab Buttons 
           <View style={{
             flexDirection: 'row',
             marginHorizontal: SPACING["md"],
@@ -496,8 +496,8 @@ export default function EventsPage() {
               }}>Annonces</Text>
             </TouchableOpacity>
           </View>
-
-          <View style={{flex: 1, marginHorizontal: SPACING["md"]}}>
+          */}
+          <View style={{flex: 1, marginHorizontal: SPACING["md"], marginTop: SPACING["md"]}}>
             {activeTab === 'events' ? (
               isEventsLoading ? (
                 <View style={{alignItems: 'center', marginTop: SPACING["xl"]}}>

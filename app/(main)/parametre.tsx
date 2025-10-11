@@ -15,6 +15,7 @@ import {
   Alert,
   ActivityIndicator
 } from "react-native";
+import Constants from 'expo-constants';
 
 import React, { useState } from 'react'
 import ScrollableLayout from "@/components/layouts/ScrollableLayout";
@@ -33,6 +34,7 @@ import {
   Lock,
   LogOut,
   Trash2,
+  HeartHandshake
 } from "lucide-react-native";
 import COLORS from "@/constants/Colors";
 import SPACING from "@/constants/Spacing";
@@ -66,6 +68,8 @@ export default function ParametreScreen() {
   const [userProfilePicture, setUserProfilePicture] = React.useState<string | null>(null);
   const [isLoading, setIsLoading] = React.useState(true);
   const [userEmail, setUserEmail] = React.useState<string>("");
+
+  const [remmerciementsModalVisible, setRemerciementsModalVisible] = useState(false);
   
   // Form state for editing
   const [editFirstName, setEditFirstName] = React.useState<string>("");
@@ -605,7 +609,7 @@ export default function ParametreScreen() {
       subtitle: "Consultez vos commandes et transactions passées.",
       onPress:() => setOrdersModalVisible(true),
     },
-    */
+    
     {
       icon: <Settings2 size={26} strokeWidth={2.5} color={COLORS.black} />,
       title: "Mes préférences",
@@ -621,9 +625,15 @@ export default function ParametreScreen() {
     },
     */
     {
+      icon:  <HeartHandshake size={26} strokeWidth={2.5} color={COLORS.black} />,
+      title: "Remerciements",
+      subtitle: "Découvrez l'équipe derrière cette application.",
+      onPress: () => setRemerciementsModalVisible(true),
+    },
+    {
       icon: <Info size={26} strokeWidth={2.5} color={COLORS.black} />,
       title: "À propos",
-      subtitle: "En savoir plus sur nous et notre mission.",
+      subtitle: "En savoir plus l'application.",
       onPress: () => setModalVisible(true),
     },
   ];
@@ -681,7 +691,7 @@ export default function ParametreScreen() {
 
         <Divider marginTop={16} marginBottom={4}></Divider>
 
-        {/* System Status */}
+        {/* System Status 
         <View style={styles.systemStatus}>
           <Text style={[TYPOGRAPHY.body.normal.semiBold, styles.systemStatusTitle]}>
             État du système
@@ -706,6 +716,102 @@ export default function ParametreScreen() {
             Le système fonctionne correctement.
           </Text>
         </View>
+        */}
+
+        <Modal
+        animationType="slide"
+          transparent={true}
+          visible={remmerciementsModalVisible}
+          onRequestClose={() => setRemerciementsModalVisible(false)}
+        >
+          
+<View style={styles.modalOverlay}>
+    <View style={styles.modalContainer}>
+      <View style={styles.modalHeader}>
+        <Text style={styles.modernModalTitle}>Remerciements</Text>
+        <TouchableOpacity onPress={() => setRemerciementsModalVisible(false)}>
+          <AntDesign name="close" size={24} color={COLORS.black} />
+        </TouchableOpacity>
+      </View>
+      
+      <ScrollView 
+        style={styles.modernModalContent}
+        showsVerticalScrollIndicator={false}
+      >
+       <View style={styles.aboutSection}>
+  <View style={styles.sectionIcon}>
+    <FontAwesome name="users" size={22} color={COLORS.white} />
+  </View>
+  <Text style={styles.sectionTitle}>À propos du CADUM</Text>
+  <Text style={styles.sectionContent}>
+    Le Club de développement d'applications de l'Université de Montréal (CADUM) est un club étudiant fondé à l'automne 2024. Nous rassemblons des étudiants passionnés par le développement mobile qui souhaitent apprendre, créer et collaborer sur des projets concrets.
+  </Text>
+</View>
+
+<View style={styles.divider} />
+
+<View style={styles.aboutSection}>
+  <View style={styles.sectionIcon}>
+    <FontAwesome name="heart" size={22} color={COLORS.white} />
+  </View>
+  <Text style={styles.sectionTitle}>Contributeurs</Text>
+  <Text style={styles.sectionContent}>
+    Cette application mobile a été développée avec passion par les membres du CADUM. Un immense merci à tous ceux qui ont contribué à donner vie à ce projet :
+  </Text>
+  
+  <View style={styles.contributorsList}>
+    <Text style={styles.contributorName}>• Jalal Fatouaki</Text>
+    <Text style={styles.contributorName}>• William Hayward</Text>
+    <Text style={styles.contributorName}>• Thierno Diallo</Text>
+    <Text style={styles.contributorName}>• Flora Kang</Text>
+    <Text style={styles.contributorName}>• Ding Wen Li</Text>
+    <Text style={styles.contributorName}>• Trung Nguyen</Text>
+    <Text style={styles.contributorName}>• Lyna Benkherouf</Text>
+    <Text style={styles.contributorName}>• Udeme-Obong Itoro Samuel</Text>
+    <Text style={styles.contributorName}>• Louis Edouard Lafontant et l'équipe Café Sans-fil web</Text>
+  </View>
+</View>
+
+<View style={styles.divider} />
+
+<View style={styles.aboutSection}>
+  <View style={styles.sectionIcon}>
+    <FontAwesome6 name="share-nodes"   size={20} color={COLORS.white} />
+  </View>
+  <Text style={styles.sectionTitle}>Rejoignez-nous</Text>
+  <Text style={styles.sectionContent}>
+    Suivez nos actualités, participez à nos ateliers et contribuez à nos projets open source. Rejoignez notre communauté pour apprendre et grandir avec nous !
+  </Text>
+  
+  <View style={styles.socialIcons}>
+    <TouchableOpacity 
+      style={styles.socialButton}
+      onPress={() => navigation.push("https://discord.gg/DvJWz9hwWF")}>
+      <FontAwesome6 name="discord" size={24} color={COLORS.white} />
+    </TouchableOpacity>
+    
+    <TouchableOpacity 
+      style={styles.socialButton}
+      onPress={() => navigation.push("https://github.com/CADUM-UdeM")}>
+      <AntDesign name="github" size={24} color={COLORS.white} />
+    </TouchableOpacity>
+    
+    <TouchableOpacity 
+      style={styles.socialButton}
+      onPress={() => navigation.push("https://cadum.aediroum.ca")}>
+      <FontAwesome name="globe" size={24} color={COLORS.white} />
+    </TouchableOpacity>
+  </View>
+</View>
+
+        <View style={styles.divider} />
+
+      </ScrollView>
+    </View>
+    </View>
+              
+
+        </Modal>
 
         <Modal
           animationType="slide"
@@ -910,9 +1016,10 @@ export default function ParametreScreen() {
         style={styles.modernModalContent}
         showsVerticalScrollIndicator={false}
       >
+        {/*}
         <View style={styles.aboutSection}>
           <View style={styles.sectionIcon}>
-            <Info size={24} color={COLORS.black} />
+            <Info size={24} color={COLORS.white} />
           </View>
           <Text style={styles.sectionTitle}>Bienvenue!</Text>
           <Text style={styles.sectionContent}>
@@ -923,52 +1030,13 @@ export default function ParametreScreen() {
           </Text>
         </View>
 
+
         <View style={styles.divider} />
+        */}
 
         <View style={styles.aboutSection}>
           <View style={styles.sectionIcon}>
-            <FontAwesome name="users" size={22} color={COLORS.black} />
-          </View>
-          <Text style={styles.sectionTitle}>Club</Text>
-          <Text style={styles.sectionContent}>
-            L'idée de ce club est venue en hiver 2024. Les étudiants de l'Université de Montréal dans le programme d'informatique voulaient appliquer leurs connaissances acquises dans les cours d'informatique dans la vie réelle.
-            Pour cela, ils ont voulu créer un club sur le développement d'applications mobiles pour s'ouvrir à des technologies de pointe.
-            Grâce à cela, l'idée a été mise au point en automne 2024. À l'automne 2024, les étudiants ont décidé de développer une application mobile sur la commande de repas à partir des cafétérias de votre université.
-          </Text>
-        </View>
-
-        <View style={styles.divider} />
-
-        <View style={styles.aboutSection}>
-          <View style={styles.sectionIcon}>
-            <FontAwesome6 name="discord" size={22} color={COLORS.black} />
-          </View>
-          <Text style={styles.sectionTitle}>Réseaux sociaux</Text>
-          <Text style={styles.sectionContent}>
-            Comme toute autre compagnie, nous sommes aussi présents sur les réseaux sociaux. Là-bas, vous pouvez suivre toutes les nouvelles dont des activités et même des nouveautés sur l'application mobile en soi.
-            Les réseaux sociaux que nous sommes présents sont Instagram et Discord. Cependant, si vous voulez voir les nouveautés qui viennent de sortir, allez sur Discord. N'oubliez pas d'activer les notifications pour d'autres types de nouveautés.
-          </Text>
-          <View style={styles.socialIcons}>
-            <TouchableOpacity style={styles.socialButton}>
-              <FontAwesome6 name="discord" size={24} color={COLORS.black} onPress={() => 
-              navigation.push("https://discord.gg/DvJWz9hwWF")}/>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.socialButton}>
-              <AntDesign name="github" size={24} color={COLORS.black} onPress={() => 
-              navigation.push("https://github.com/CADUM-UdeM")}/>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.socialButton} onPress={() => 
-              navigation.push("https://cadum.aediroum.ca")}>
-              <FontAwesome name="globe" size={24} color={COLORS.black} />
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        <View style={styles.divider} />
-
-        <View style={styles.aboutSection}>
-          <View style={styles.sectionIcon}>
-            <FontAwesome name="user-secret" size={22} color={COLORS.black} />
+            <FontAwesome name="user-secret" size={22} color={COLORS.white} />
           </View>
           <Text style={styles.sectionTitle}>Politiques et confidentalité</Text>
           <Text style={styles.sectionContent}>
@@ -979,7 +1047,7 @@ export default function ParametreScreen() {
         </View>
         
         <View style={styles.footerSection}>
-          <Text style={styles.versionText}>Version 1.0.0</Text>
+          <Text style={styles.versionText}>Version {Constants.expoConfig?.version}</Text>
           <Text style={styles.copyrightText}>© 2025 CADUM. Tous droits réservés.</Text>
         </View>
       </ScrollView>
@@ -1247,12 +1315,12 @@ const styles = StyleSheet.create({
     gap: SPACING.md,
   },
   profileImage: {
-    width: SPACING["9xl"],
-    height: SPACING["9xl"],
+    width: SPACING["8xl"],
+    height: SPACING["8xl"],
     borderRadius: 100,
-    borderWidth: 4,
+    borderWidth: 2,
     // borderColor: "rgba(0, 0, 0, 0.1)", // Not from any university
-    borderColor: "rgba(0, 87, 172, .2)", // From University of Montreal
+    borderColor: COLORS.darkWhite, // From University of Montreal
     // borderColor: "rgba(237, 27, 47, .2)", // From McGill University
   },
   profileInfo: {
@@ -1402,6 +1470,16 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: COLORS.black,
   },
+  contributorsList: {
+    marginTop: 12,
+    paddingLeft: 8,
+  },
+  contributorName: {
+    fontSize: 14,
+    color: COLORS.black,
+    marginBottom: 6,
+    lineHeight: 20,
+  },
   closeButton: {
     width: 40,
     height: 40,
@@ -1429,8 +1507,8 @@ const styles = StyleSheet.create({
     width: 120,
     height: 120,
     borderRadius: 60,
-    borderWidth: 4,
-    borderColor: 'rgba(3, 172, 0, 0.2)',
+    borderWidth: 2,
+    borderColor: COLORS.darkWhite,
   },
   cameraButton: {
     position: 'absolute',
@@ -1439,7 +1517,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#00ac28ff',
+    backgroundColor: COLORS.black,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 3,
@@ -1692,7 +1770,7 @@ sectionIcon: {
   width: 40,
   height: 40,
   borderRadius: 20,
-  backgroundColor: 'rgba(0, 87, 172, 0.1)', // UdeM blue with transparency
+  backgroundColor: COLORS.black, // UdeM blue with transparency
   alignItems: 'center',
   justifyContent: 'center',
   marginBottom: 15,
@@ -1713,7 +1791,7 @@ socialButton: {
   width: 45,
   height: 45,
   borderRadius: 22.5,
-  backgroundColor: 'rgba(0, 87, 172, 0.1)', // UdeM blue with transparency
+  backgroundColor: COLORS.black, // UdeM blue with transparency
   
   alignItems: 'center',
   justifyContent: 'center',
@@ -1920,4 +1998,6 @@ uploadImageButtonText: {
   fontSize: 15,
   fontWeight: '600',
 },
+
+
 });

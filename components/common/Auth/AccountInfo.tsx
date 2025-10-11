@@ -113,8 +113,8 @@ const styles = StyleSheet.create({
     width: SPACING["8xl"],
     height: SPACING["8xl"],
     borderRadius: 100,
-    borderWidth: 4,
-    borderColor: "rgba(0, 87, 172, .4)", // From University of Montreal
+    borderWidth: 2,
+    borderColor: COLORS.darkWhite,
   },
   welcomeText: {},
   userFullName: {
