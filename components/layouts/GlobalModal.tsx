@@ -4,7 +4,7 @@ import React, {
   useContext,
   useRef,
 } from "react";
-import { Modal, StyleSheet, Pressable, Animated } from "react-native";
+import { Modal, StyleSheet, Pressable, Animated, Easing, View } from "react-native";
 
 import COLORS from "@/constants/Colors";
 import SPACING from "@/constants/Spacing";
@@ -26,64 +26,50 @@ export const GlobalModalProvider = ({
 }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [customBody, setCustomBody] = useState<React.ReactNode>(null);
-  const slideAnim = useRef(new Animated.Value(300)).current;
 
   const openModal = (body: React.ReactNode) => {
     setCustomBody(body);
     setIsVisible(true);
-    Animated.timing(slideAnim, {
-      toValue: 0,
-      duration: 300,
-      useNativeDriver: true,
-    }).start();
   };
 
   const closeModal = () => {
-    Animated.timing(slideAnim, {
-      toValue: 300,
-      duration: 300,
-      useNativeDriver: true,
-    }).start(() => {
-      setCustomBody(null);
+    
       setIsVisible(false);
-    });
+    
   };
 
   return (
     <ModalContext.Provider value={{ openModal, closeModal }}>
       {children}
-      <Modal visible={isVisible} transparent animationType="none">
-        <Pressable style={styles.modalOverlay} onPress={closeModal}></Pressable>
-        <Animated.View
-          style={[
-            styles.modalContainer,
-            { transform: [{ translateY: slideAnim }] },
-          ]}
-        >
-          {customBody}
-        </Animated.View>
+      <Modal visible={isVisible} transparent animationType="slide" statusBarTranslucent>
+        <View style={styles.modalWrapper}>
+          <Pressable style={styles.modalOverlay} onPress={closeModal} />
+          <View style={styles.modalContainer}>
+            {customBody}
+          </View>
+        </View>
       </Modal>
     </ModalContext.Provider>
   );
 };
 
 const styles = StyleSheet.create({
-  modalOverlay: {
+  modalWrapper: {
     flex: 1,
+    justifyContent: "flex-end",
+  },
+  modalOverlay: {
+    ...StyleSheet.absoluteFillObject,
     backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
   modalContainer: {
-    position: "absolute",
-    bottom: 0,
     width: "100%",
-    alignSelf: "center",
     backgroundColor: COLORS.white,
     borderTopRightRadius: SPACING["4xl"],
     borderTopLeftRadius: SPACING["4xl"],
     paddingHorizontal: SPACING.xl,
     paddingTop: SPACING["3xl"],
     paddingBottom: SPACING["5xl"],
-    zIndex: 99,
   },
   closeButton: {
     marginTop: SPACING.md,
