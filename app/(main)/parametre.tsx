@@ -766,7 +766,6 @@ export default function ParametreScreen() {
     <Text style={styles.contributorName}>• Flora Kang</Text>
     <Text style={styles.contributorName}>• Ding Wen Li</Text>
     <Text style={styles.contributorName}>• Trung Nguyen</Text>
-    <Text style={styles.contributorName}>• Lyna Benkherouf</Text>
     <Text style={styles.contributorName}>• Udeme-Obong Itoro Samuel</Text>
     <Text style={styles.contributorName}>• Louis Edouard Lafontant et l'équipe Café Sans-fil web</Text>
   </View>

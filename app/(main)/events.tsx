@@ -8,6 +8,7 @@ import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import AntDesign from '@expo/vector-icons/AntDesign'; 
 import COLORS from "@/constants/Colors";
 import { useFocusEffect } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function EventsPage() {
 
@@ -166,26 +167,67 @@ export default function EventsPage() {
   const [isPaginationLoading, setIsPaginationLoading] = React.useState(false);
   const ITEMS_PER_PAGE = 4; // Match API size parameter
   
-  // Use focus effect to clean up when navigating away
+  // Cache management
+  const [lastEventsFetch, setLastEventsFetch] = React.useState<number>(0);
+  const [lastAnnouncementsFetch, setLastAnnouncementsFetch] = React.useState<number>(0);
+  const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes in milliseconds
+  
+  // Load cached data on focus
   useFocusEffect(
     useCallback(() => {
       // When screen comes into focus
       setIsFocused(true);
-      console.log('Events page focused - loading data');
+      console.log('Events page focused - loading cached data');
+      
+      // Load cached data and timestamps
+      const loadCache = async () => {
+        try {
+          const [cachedEvents, cachedAnnouncements, cachedCafes, eventsTimestamp, announcementsTimestamp] = await Promise.all([
+            AsyncStorage.getItem('events_cache'),
+            AsyncStorage.getItem('announcements_cache'),
+            AsyncStorage.getItem('cafes_cache'),
+            AsyncStorage.getItem('events_cache_timestamp'),
+            AsyncStorage.getItem('announcements_cache_timestamp')
+          ]);
+          
+          if (cachedEvents) {
+            setEvents(JSON.parse(cachedEvents));
+            setIsEventsLoading(false);
+            console.log('✅ Loaded cached events');
+          }
+          
+          if (cachedAnnouncements) {
+            setLaliste(JSON.parse(cachedAnnouncements));
+            setIsLoading(false);
+            console.log('✅ Loaded cached announcements');
+          }
+          
+          if (cachedCafes) {
+            setListeCafes(JSON.parse(cachedCafes));
+            setIsCafesLoading(false);
+            console.log('✅ Loaded cached cafes');
+          }
+          
+          if (eventsTimestamp) {
+            setLastEventsFetch(parseInt(eventsTimestamp));
+          }
+          
+          if (announcementsTimestamp) {
+            setLastAnnouncementsFetch(parseInt(announcementsTimestamp));
+          }
+        } catch (error) {
+          console.error('Error loading cache:', error);
+        }
+      };
+      
+      loadCache();
       
       return () => {
-        // When screen loses focus, clean up everything
-        console.log('Events page unfocused - cleaning up');
+        // When screen loses focus
+        console.log('Events page unfocused');
         setIsFocused(false);
         setShowModal(false);
         setModalData(null);
-        setLaliste(null);
-        setEvents(null);
-        setListeCafes(null);
-        setIsLoading(true);
-        setIsEventsLoading(true);
-        setIsCafesLoading(true);
-        setCurrentPage(1);
       };
     }, [])
   );
@@ -220,7 +262,7 @@ export default function EventsPage() {
     const fetchCafes = async () => {
       // Skip if already loaded
       if (ListeCafes && ListeCafes.items && ListeCafes.items.length > 0) {
-        console.log('Cafes already loaded, skipping fetch');
+        console.log('☕ Cafes already loaded, skipping fetch');
         return;
       }
       
@@ -230,9 +272,11 @@ export default function EventsPage() {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
-        console.log('Cafes fetched:', data.items?.[0]);
+        console.log('☕ Cafes fetched from API');
         setListeCafes(data);
         setIsCafesLoading(false);
+        // Cache cafes
+        await AsyncStorage.setItem('cafes_cache', JSON.stringify(data));
       } catch (error) {
         console.error('Error fetching cafes:', error);
         setIsCafesLoading(false);
@@ -242,25 +286,50 @@ export default function EventsPage() {
 
     // Only fetch data for the active tab
     const fetchActiveTabData = async () => {
-      console.log(`📄 Fetching ${activeTab} - Page ${currentPage}`);
+      const now = Date.now();
+      
+      // Check if we need to fetch based on cache validity
+      if (activeTab === 'events') {
+        const cacheAge = now - lastEventsFetch;
+        if (cacheAge < CACHE_DURATION && events && events.items && events.items.length > 0) {
+          console.log(`📄 Events cache still valid (${Math.round(cacheAge / 1000)}s old), skipping fetch`);
+          setIsRequestingData(false);
+          return;
+        }
+        console.log(`📄 Fetching events - Page ${currentPage} (cache expired or empty)`);
+      } else {
+        const cacheAge = now - lastAnnouncementsFetch;
+        if (cacheAge < CACHE_DURATION && laliste && laliste.items && laliste.items.length > 0) {
+          console.log(`📢 Announcements cache still valid (${Math.round(cacheAge / 1000)}s old), skipping fetch`);
+          setIsRequestingData(false);
+          return;
+        }
+        console.log(`📢 Fetching announcements (cache expired or empty)`);
+      }
       
       if (activeTab === 'events') {
         // Fetch events with pagination
         try {
           setIsPaginationLoading(true);
           const url = `https://cafesansfil-api-r0kj.onrender.com/api/events/?page=${currentPage}&size=${ITEMS_PER_PAGE}`;
-          console.log('Fetching events from:', url);
           const response = await fetchWithTimeout(url);
           if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
           }
           const data = await response.json();
-          console.log('Events fetched:', data.items?.[0]);
-          console.log('Total events:', data.total, 'Page:', data.page, 'Size:', data.size);
+          const fetchTime = Date.now();
+          
+          console.log('✅ Events fetched from API:', data.items?.length, 'items');
           setEvents(data);
           setTotalPages(Math.ceil((data.total || 0) / ITEMS_PER_PAGE));
           setIsEventsLoading(false);
           setIsPaginationLoading(false);
+          setLastEventsFetch(fetchTime);
+          
+          // Cache events and timestamp
+          await AsyncStorage.setItem('events_cache', JSON.stringify(data));
+          await AsyncStorage.setItem('events_cache_timestamp', fetchTime.toString());
+          
           // Clear announcements to free memory
           setLaliste(null);
         } catch (error) {
@@ -274,15 +343,22 @@ export default function EventsPage() {
         // Fetch ALL announcements (no pagination)
         try {
           const url = `https://cafesansfil-api-r0kj.onrender.com/api/announcements/`;
-          console.log('Fetching all announcements from:', url);
           const response = await fetchWithTimeout(url);
           if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
           }
           const data = await response.json();
-          console.log('Announcements fetched:', data.items?.length, 'total');
+          const fetchTime = Date.now();
+          
+          console.log('✅ Announcements fetched from API:', data.items?.length, 'items');
           setLaliste(data);
           setIsLoading(false);
+          setLastAnnouncementsFetch(fetchTime);
+          
+          // Cache announcements and timestamp
+          await AsyncStorage.setItem('announcements_cache', JSON.stringify(data));
+          await AsyncStorage.setItem('announcements_cache_timestamp', fetchTime.toString());
+          
           // Clear events to free memory
           setEvents(null);
         } catch (error) {
