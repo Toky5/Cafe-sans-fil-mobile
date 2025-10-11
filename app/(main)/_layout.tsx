@@ -3,15 +3,25 @@ import TYPOGRAPHY from "@/constants/Typography";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import HeaderLayout from "@/components/layouts/HeaderLayout";
 import { Home, Settings, ShoppingBasket, UserRound, Newspaper, UserRoundPen} from "lucide-react-native";
-import { Platform, View, ActivityIndicator } from "react-native";
+import { Platform, View, ActivityIndicator, Dimensions } from "react-native";
 import { getInfoFromToken, getToken, getRefreshToken, clearTokens, updateToken } from "@/utils/tokenStorage";
 import { useEffect, useState } from "react";
 import COLORS from "@/constants/Colors";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function TabLayout() {
   const [isSignedIn, setIsSignedIn] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-
+  const insets = useSafeAreaInsets();
+  const getTabBarHeight = () => {
+    if (Platform.OS === 'android') {
+      // If bottom inset is 0, device uses button navigation
+      // If bottom inset > 0, device uses gesture navigation
+      const hasButtonNavigation = insets.bottom === 0;
+      return hasButtonNavigation ? 60 : 70 + insets.bottom;
+    }
+    return undefined; // Let iOS handle it automatically
+  };
   useEffect(() => {
 
     const checkTokens = async () => {
@@ -76,8 +86,7 @@ export default function TabLayout() {
   if (!isSignedIn) {
     return <Redirect href="/first-onboarding" />;
   }
-
-
+  
   return (
     <Tabs
       detachInactiveScreens={false}
@@ -87,7 +96,7 @@ export default function TabLayout() {
         tabBarStyle: {
           ...Platform.select({
             ios: { padding: 6 , height: "10%"},
-            android: { padding: 8, height: "11%" }
+            android: { padding: 8, height: getTabBarHeight(),paddingBottom: insets.bottom > 0 ? insets.bottom : 8 }
           })
         },
       }}

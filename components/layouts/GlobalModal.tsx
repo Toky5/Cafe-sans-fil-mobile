@@ -41,12 +41,15 @@ export const GlobalModalProvider = ({
   return (
     <ModalContext.Provider value={{ openModal, closeModal }}>
       {children}
-      <Modal visible={isVisible} transparent animationType="slide" statusBarTranslucent>
-        <View style={styles.modalWrapper}>
-          <Pressable style={styles.modalOverlay} onPress={closeModal} />
-          <View style={styles.modalContainer}>
-            {customBody}
-          </View>
+      <Modal 
+        visible={isVisible} 
+        animationType="slide" 
+        presentationStyle="pageSheet"
+        onRequestClose={closeModal}
+        
+      >
+        <View style={styles.modalContainer}>
+          {customBody}
         </View>
       </Modal>
     </ModalContext.Provider>
@@ -54,19 +57,9 @@ export const GlobalModalProvider = ({
 };
 
 const styles = StyleSheet.create({
-  modalWrapper: {
-    flex: 1,
-    justifyContent: "flex-end",
-  },
-  modalOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-  },
   modalContainer: {
-    width: "100%",
+    flex: 1,
     backgroundColor: COLORS.white,
-    borderTopRightRadius: SPACING["4xl"],
-    borderTopLeftRadius: SPACING["4xl"],
     paddingHorizontal: SPACING.xl,
     paddingTop: SPACING["3xl"],
     paddingBottom: SPACING["5xl"],
