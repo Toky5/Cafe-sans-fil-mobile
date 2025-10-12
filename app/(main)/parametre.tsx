@@ -624,7 +624,7 @@ export default function ParametreScreen() {
       icon: <HelpCircle size={26} strokeWidth={2.5} color={COLORS.black} />,
       title: "Aide et support",
       subtitle: "Obtenez de l'aide et contactez le support.",
-      onPress: () => console.log("Support pressed"),
+      onPress: () => setHelpModalVisible(true),
     },
     */
     {
@@ -741,17 +741,6 @@ export default function ParametreScreen() {
         style={styles.modernModalContent}
         showsVerticalScrollIndicator={false}
       >
-       <View style={styles.aboutSection}>
-  <View style={styles.sectionIcon}>
-    <FontAwesome name="users" size={22} color={COLORS.white} />
-  </View>
-  <Text style={styles.sectionTitle}>À propos du CADUM</Text>
-  <Text style={styles.sectionContent}>
-    Le Club de développement d'applications de l'Université de Montréal (CADUM) est un club étudiant fondé à l'automne 2024. Nous rassemblons des étudiants passionnés par le développement mobile qui souhaitent apprendre, créer et collaborer sur des projets concrets.
-  </Text>
-</View>
-
-<View style={styles.divider} />
 
 <View style={styles.aboutSection}>
   <View style={styles.sectionIcon}>
@@ -759,7 +748,7 @@ export default function ParametreScreen() {
   </View>
   <Text style={styles.sectionTitle}>Contributeurs</Text>
   <Text style={styles.sectionContent}>
-    Cette application mobile a été développée avec passion par les membres du CADUM. Un immense merci à tous ceux qui ont contribué à donner vie à ce projet :
+    Cette application mobile a été développée avec passion par les membres du CADUM. Un immense merci à toutes les personnes qui ont contribué à donner vie à ce projet :
   </Text>
   
   <View style={styles.contributorsList}>
@@ -775,38 +764,6 @@ export default function ParametreScreen() {
 </View>
 
 <View style={styles.divider} />
-
-<View style={styles.aboutSection}>
-  <View style={styles.sectionIcon}>
-    <FontAwesome6 name="share-nodes"   size={20} color={COLORS.white} />
-  </View>
-  <Text style={styles.sectionTitle}>Rejoignez-nous</Text>
-  <Text style={styles.sectionContent}>
-    Suivez nos actualités, participez à nos ateliers et contribuez à nos projets open source. Rejoignez notre communauté pour apprendre et grandir avec nous !
-  </Text>
-  
-  <View style={styles.socialIcons}>
-    <TouchableOpacity 
-      style={styles.socialButton}
-      onPress={() => navigation.push("https://discord.gg/DvJWz9hwWF")}>
-      <FontAwesome6 name="discord" size={24} color={COLORS.white} />
-    </TouchableOpacity>
-    
-    <TouchableOpacity 
-      style={styles.socialButton}
-      onPress={() => navigation.push("https://github.com/CADUM-UdeM")}>
-      <AntDesign name="github" size={24} color={COLORS.white} />
-    </TouchableOpacity>
-    
-    <TouchableOpacity 
-      style={styles.socialButton}
-      onPress={() => navigation.push("https://cadum.aediroum.ca")}>
-      <FontAwesome name="globe" size={24} color={COLORS.white} />
-    </TouchableOpacity>
-  </View>
-</View>
-
-        <View style={styles.divider} />
 
       </ScrollView>
     </View>
@@ -1032,14 +989,60 @@ export default function ParametreScreen() {
 
         <View style={styles.aboutSection}>
           <View style={styles.sectionIcon}>
+            <FontAwesome name="users" size={22} color={COLORS.white} />
+          </View>
+          <Text style={styles.sectionTitle}>À propos du CADUM</Text>
+          <Text style={styles.sectionContent}>
+          Le Club de développement d'applications de l'Université de Montréal (CADUM) est un club étudiant fondé à 
+          l'automne 2024. Nous rassemblons des étudiants passionnés par le développement mobile qui souhaitent 
+          apprendre, créer et collaborer sur des projets concrets.
+          </Text>
+        </View>
+
+        <View style={styles.divider} />
+
+        <View style={styles.aboutSection}>
+          <View style={styles.sectionIcon}>
             <FontAwesome name="user-secret" size={22} color={COLORS.white} />
           </View>
           <Text style={styles.sectionTitle}>Politiques et confidentalité</Text>
           <Text style={styles.sectionContent}>
-            En termes de politique et de confidentalité, nous respectons la vie privée de chaque individu. Donc, les informations personnelles comme les mots de passe sont confidentielles. 
-            Aucun utilisateur peut avoir accès aux informations personnelles de d'autres utilisateurs et même chose avec les développeurs de l'application mobile. 
+            Nous respectons la vie privée de chaque utilisateur. Toutes les informations personnelles, y compris les mots de passe sont strictement confidentielles. 
+            Aucun utilisateur ni même développeur ne peut avoir accès aux données personnelles d'autres comptes. 
             En cas de fuites de données ou de piratage de votre compte, veuillez nous contacter immédiatement.
           </Text>
+        </View>
+
+        <View style={styles.divider} />
+        
+        <View style={styles.aboutSection}>
+          <View style={styles.sectionIcon}>
+            <FontAwesome6 name="share-nodes"   size={20} color={COLORS.white} />
+          </View>
+          <Text style={styles.sectionTitle}>Rejoignez-nous</Text>
+          <Text style={styles.sectionContent}>
+            Suivez nos actualités, participez à nos ateliers et contribuez à nos projets open source. Rejoignez notre communauté pour apprendre et grandir avec nous !
+          </Text>
+          
+          <View style={styles.socialIcons}>
+            <TouchableOpacity 
+              style={styles.socialButton}
+              onPress={() => navigation.push("https://discord.gg/DvJWz9hwWF")}>
+              <FontAwesome6 name="discord" size={24} color={COLORS.white} />
+            </TouchableOpacity>
+            
+            <TouchableOpacity 
+              style={styles.socialButton}
+              onPress={() => navigation.push("https://github.com/CADUM-UdeM")}>
+              <AntDesign name="github" size={24} color={COLORS.white} />
+            </TouchableOpacity>
+            
+            <TouchableOpacity 
+              style={styles.socialButton}
+              onPress={() => navigation.push("https://cadum.aediroum.ca")}>
+              <FontAwesome name="globe" size={24} color={COLORS.white} />
+            </TouchableOpacity>
+          </View>
         </View>
         
         <View style={styles.footerSection}>
@@ -1275,6 +1278,70 @@ export default function ParametreScreen() {
               </View>
             </View>
         </Modal>
+
+        {/*<Modal
+          animationType ="slide"
+          transparent={true}
+          visible={modalVisible}
+          onRequestClose={() => setModalVisible(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContainer}>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modernModalTitle}>Aide et Support</Text>
+                <TouchableOpacity onPress={() => setModalVisible(false)}>
+                  <AntDesign name="close" size={24} color={COLORS.black} />
+                </TouchableOpacity>
+              </View>
+
+              <ScrollView 
+              style={styles.modernModalContent}
+              showsVerticalScrollIndicator={false}
+              >
+                <View style={styles.helpSection}>
+                  <Text style={styles.sectionTitle}>Contactez-nous</Text>
+                  <Text style={styles.sectionContent}>
+                    Vous avez des questions ou besoin d'aide? {"\n"}
+                    Ecrivez-nous sur notre adresse e-mail : blablabla@gmail.com {"\n"}
+                    Ou contactez-nous sur Discord
+                  </Text>
+                  <View style={styles.socialIcons}>
+                    <TouchableOpacity style={styles.socialButton}>
+                      <FontAwesome6 name="discord" size={24} color="white" />
+                    </TouchableOpacity>
+                  </View>
+
+                  <View style={styles.divider} />
+                  
+                  <Text style={styles.sectionTitle}>FAQ</Text>
+                  <Text style={styles.sectionSubtitle}>Vous ne recevez pas vos notifications?</Text>
+                  <Text style={styles.sectionContent}>
+                    Assurez-vous que les autorisations de notification sont activées dans les paramètres de votre téléphone. {"\n"}
+                  </Text>
+                  <Text style={styles.sectionSubtitle}>Vous ne pouvez pas vous connecter?</Text>
+                  <Text style={styles.sectionContent}>
+                    Essayez de réinitialiser votre mot de passe via l'écran de connexion.
+                  </Text>
+                  
+                  <View style={styles.divider} />
+                  
+                  <Text style={styles.sectionTitle}>Conseils d'utilisation</Text>
+                  <Text style={styles.sectionContent}>
+                    - Gardez vos notifications activées pour ne jamais rater une mise à jour.{"\n"}{"\n"}
+                    - Vérifiez régulièrement l'onglet commandes pour vos suivis.
+                  </Text>
+                  
+                </View>
+                <View style={styles.footerSection}>
+                  <Text style={styles.versionText}>Version 1.0.0</Text>
+                  <Text style={styles.copyrightText}>© 2025 CADUM. Tous droits réservés.</Text>
+                </View>
+              </ScrollView>
+                
+            </View>
+          </View>
+        </Modal>*/}
+        
 
         
       </SafeAreaView>
@@ -1736,11 +1803,20 @@ modernModalContent: {
 aboutSection: {
   marginBottom: 25,
 },
+helpSection: {
+  marginBottom: 25,
+},
 sectionTitle: {
   fontSize: 18,
   fontWeight: '600',
   marginBottom: 12,
   color: COLORS.black,
+},
+sectionSubtitle: {
+  fontSize: 15,
+  fontWeight: '600',
+  lineHeight: 24,
+  color: '#222'
 },
 sectionContent: {
   fontSize: 15,
@@ -1779,6 +1855,7 @@ socialButton: {
 },
 footerSection: {
   marginTop: 20,
+  marginBottom: 20,
   alignItems: 'center',
   paddingVertical: 15,
 },
