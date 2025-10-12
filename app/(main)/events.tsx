@@ -1,4 +1,4 @@
-import { View, Text, Touchable, TouchableOpacity, Modal, Platform, Linking, Alert, Image, StatusBar, FlatList, ScrollView, ActivityIndicator } from 'react-native';
+import { View, Text, Touchable, TouchableOpacity, Modal, Platform, Linking, Alert, Image, StatusBar, FlatList, ScrollView, ActivityIndicator, SafeAreaView } from 'react-native';
 import React, { use, useEffect, useMemo, useCallback, memo } from 'react';
 import ScrollableLayout from '@/components/layouts/ScrollableLayout';
 import SPACING from '@/constants/Spacing';
@@ -12,8 +12,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function EventsPage() {
 
-  const [laliste, setLaliste] = React.useState<any>(null);
-  const [isLoading, setIsLoading] = React.useState(true);
   const [isRequestingData, setIsRequestingData] = React.useState(false);
 
   const [ListeCafes, setListeCafes] = React.useState<any>(null);
@@ -22,7 +20,6 @@ export default function EventsPage() {
 
   const [isCafesLoading, setIsCafesLoading] = React.useState(true);
   const [modalData, setModalData] = React.useState<any>(null);
-  const [activeTab, setActiveTab] = React.useState<'events' | 'announcements'>('events');
 
   const [setCafeRegion, setSetCafeRegion] = React.useState<any>(null);
 
@@ -169,7 +166,7 @@ export default function EventsPage() {
   
   // Cache management
   const [lastEventsFetch, setLastEventsFetch] = React.useState<number>(0);
-  const [lastAnnouncementsFetch, setLastAnnouncementsFetch] = React.useState<number>(0);
+  const [cachedPage, setCachedPage] = React.useState<number>(0); // Track which page is cached
   const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes in milliseconds
   
   // Load cached data on focus
@@ -182,24 +179,17 @@ export default function EventsPage() {
       // Load cached data and timestamps
       const loadCache = async () => {
         try {
-          const [cachedEvents, cachedAnnouncements, cachedCafes, eventsTimestamp, announcementsTimestamp] = await Promise.all([
+          const [cachedEvents, cachedCafes, eventsTimestamp, cachedPageNum] = await Promise.all([
             AsyncStorage.getItem('events_cache'),
-            AsyncStorage.getItem('announcements_cache'),
             AsyncStorage.getItem('cafes_cache'),
             AsyncStorage.getItem('events_cache_timestamp'),
-            AsyncStorage.getItem('announcements_cache_timestamp')
+            AsyncStorage.getItem('events_cache_page')
           ]);
           
           if (cachedEvents) {
             setEvents(JSON.parse(cachedEvents));
             setIsEventsLoading(false);
             console.log('✅ Loaded cached events');
-          }
-          
-          if (cachedAnnouncements) {
-            setLaliste(JSON.parse(cachedAnnouncements));
-            setIsLoading(false);
-            console.log('✅ Loaded cached announcements');
           }
           
           if (cachedCafes) {
@@ -212,8 +202,8 @@ export default function EventsPage() {
             setLastEventsFetch(parseInt(eventsTimestamp));
           }
           
-          if (announcementsTimestamp) {
-            setLastAnnouncementsFetch(parseInt(announcementsTimestamp));
+          if (cachedPageNum) {
+            setCachedPage(parseInt(cachedPageNum));
           }
         } catch (error) {
           console.error('Error loading cache:', error);
@@ -231,11 +221,6 @@ export default function EventsPage() {
       };
     }, [])
   );
-
-  // Reset to page 1 when switching tabs
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [activeTab]);
 
   useEffect(() => {
     // Only fetch data when screen is focused
@@ -284,100 +269,63 @@ export default function EventsPage() {
       }
     };
 
-    // Only fetch data for the active tab
-    const fetchActiveTabData = async () => {
+    // Fetch events data
+    const fetchEventsData = async () => {
       const now = Date.now();
+      const cacheAge = now - lastEventsFetch;
       
-      // Check if we need to fetch based on cache validity
-      if (activeTab === 'events') {
-        const cacheAge = now - lastEventsFetch;
-        if (cacheAge < CACHE_DURATION && events && events.items && events.items.length > 0) {
-          console.log(`📄 Events cache still valid (${Math.round(cacheAge / 1000)}s old), skipping fetch`);
-          setIsRequestingData(false);
-          return;
-        }
-        console.log(`📄 Fetching events - Page ${currentPage} (cache expired or empty)`);
-      } else {
-        const cacheAge = now - lastAnnouncementsFetch;
-        if (cacheAge < CACHE_DURATION && laliste && laliste.items && laliste.items.length > 0) {
-          console.log(`📢 Announcements cache still valid (${Math.round(cacheAge / 1000)}s old), skipping fetch`);
-          setIsRequestingData(false);
-          return;
-        }
-        console.log(`📢 Fetching announcements (cache expired or empty)`);
+      // Check if we need to fetch based on cache validity AND page match
+      // Only use cache if: 1) cache is fresh, 2) we have data, 3) it's the same page
+      if (cacheAge < CACHE_DURATION && events && events.items && events.items.length > 0 && cachedPage === currentPage) {
+        console.log(`📄 Events cache still valid (${Math.round(cacheAge / 1000)}s old, page ${currentPage}), skipping fetch`);
+        setIsRequestingData(false);
+        setIsPaginationLoading(false);
+        return;
       }
       
-      if (activeTab === 'events') {
-        // Fetch events with pagination
-        try {
-          setIsPaginationLoading(true);
-          const url = `https://cafesansfil-api-r0kj.onrender.com/api/events/?page=${currentPage}&size=${ITEMS_PER_PAGE}`;
-          const response = await fetchWithTimeout(url);
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-          }
-          const data = await response.json();
-          const fetchTime = Date.now();
-          
-          console.log('✅ Events fetched from API:', data.items?.length, 'items');
-          setEvents(data);
-          setTotalPages(Math.ceil((data.total || 0) / ITEMS_PER_PAGE));
-          setIsEventsLoading(false);
-          setIsPaginationLoading(false);
-          setLastEventsFetch(fetchTime);
-          
-          // Cache events and timestamp
-          await AsyncStorage.setItem('events_cache', JSON.stringify(data));
-          await AsyncStorage.setItem('events_cache_timestamp', fetchTime.toString());
-          
-          // Clear announcements to free memory
-          setLaliste(null);
-        } catch (error) {
-          console.error('Error fetching events:', error);
-          setIsEventsLoading(false);
-          setIsPaginationLoading(false);
-          setEvents({ items: [], total: 0 });
-          setTotalPages(1);
+      console.log(`📄 Fetching events - Page ${currentPage} (cache expired, empty, or different page)`);
+      
+      // Fetch events with pagination
+      try {
+        setIsPaginationLoading(true);
+        const url = `https://cafesansfil-api-r0kj.onrender.com/api/events/?page=${currentPage}&size=${ITEMS_PER_PAGE}`;
+        const response = await fetchWithTimeout(url);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
-      } else {
-        // Fetch ALL announcements (no pagination)
-        try {
-          const url = `https://cafesansfil-api-r0kj.onrender.com/api/announcements/`;
-          const response = await fetchWithTimeout(url);
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-          }
-          const data = await response.json();
-          const fetchTime = Date.now();
-          
-          console.log('✅ Announcements fetched from API:', data.items?.length, 'items');
-          setLaliste(data);
-          setIsLoading(false);
-          setLastAnnouncementsFetch(fetchTime);
-          
-          // Cache announcements and timestamp
-          await AsyncStorage.setItem('announcements_cache', JSON.stringify(data));
-          await AsyncStorage.setItem('announcements_cache_timestamp', fetchTime.toString());
-          
-          // Clear events to free memory
-          setEvents(null);
-        } catch (error) {
-          console.error('Error fetching announcements:', error);
-          setIsLoading(false);
-          setLaliste({ items: [] });
-        }
+        const data = await response.json();
+        const fetchTime = Date.now();
+        
+        console.log('✅ Events fetched from API:', data.items?.length, 'items');
+        setEvents(data);
+        setTotalPages(Math.ceil((data.total || 0) / ITEMS_PER_PAGE));
+        setIsEventsLoading(false);
+        setIsPaginationLoading(false);
+        setLastEventsFetch(fetchTime);
+        setCachedPage(currentPage);
+        
+        // Cache events, timestamp, and page number
+        await AsyncStorage.setItem('events_cache', JSON.stringify(data));
+        await AsyncStorage.setItem('events_cache_timestamp', fetchTime.toString());
+        await AsyncStorage.setItem('events_cache_page', currentPage.toString());
+      } catch (error) {
+        console.error('Error fetching events:', error);
+        setIsEventsLoading(false);
+        setIsPaginationLoading(false);
+        setEvents({ items: [], total: 0 });
+        setTotalPages(1);
       }
     };
 
     // Execute requests
-    Promise.all([fetchCafes(), fetchActiveTabData()])
+    Promise.all([fetchCafes(), fetchEventsData()])
       .finally(() => {
         setIsRequestingData(false);
       });
 
-  }, [activeTab, currentPage, isFocused]); // Note: currentPage only affects events, announcements ignore it
+  }, [currentPage, isFocused]);
 
-  // Memoized event card component for better performance
+  // Memoized event card component for better performance with image optimization
   const EventCard = memo(({ event }: { event: any }) => {
     return (
       <TouchableOpacity onPress={() => openModalWithData(event)}>
@@ -434,70 +382,6 @@ export default function EventsPage() {
             </View>
             <Text style={{...TYPOGRAPHY.body.small.base, color: '#999'}}>
               {new Date(event.start_date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
-            </Text>
-          </View>
-        </View>
-      </TouchableOpacity>
-    );
-  });
-
-  // Memoized announcement card component for better performance
-  const AnnouncementCard = memo(({ announcement }: { announcement: any }) => {
-    return (
-      <TouchableOpacity onPress={() => openModalWithData(announcement)}>
-        <View style={{
-          backgroundColor: COLORS.white,
-          borderRadius: 16,
-          padding: SPACING["lg"],
-          marginBottom: SPACING["md"],
-          // Use simpler shadow on Android for better performance
-          ...(Platform.OS === 'android' ? {
-            elevation: 2,
-          } : {
-            shadowColor: COLORS.black,
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.1,
-            shadowRadius: 4,
-          }),
-          borderWidth: 1,
-          borderColor: '#F0F0F0'
-        }}>
-          <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: SPACING["sm"]}}>
-            <Text style={{...TYPOGRAPHY.body.large.semiBold, flex: 1, marginRight: SPACING["sm"]}}>{announcement.title}</Text>
-            {announcement.tags && announcement.tags.length > 0 && (
-              <View style={{
-                backgroundColor: '#E8F4FD',
-                paddingHorizontal: SPACING["sm"],
-                paddingVertical: 4,
-                borderRadius: 12,
-              }}>
-                <Text style={{...TYPOGRAPHY.body.small.base, color: '#1976D2', fontSize: 10}}>
-                  {announcement.tags[0]}
-                </Text>
-              </View>
-            )}
-          </View>
-          <Text 
-            style={{...TYPOGRAPHY.body.normal.base, color: '#666', marginBottom: SPACING["sm"], lineHeight: 18}}
-            numberOfLines={2}
-          >
-            {announcement.content}
-          </Text>
-          <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
-              <View style={{
-                width: 6,
-                height: 6,
-                borderRadius: 3,
-                backgroundColor: '#4CAF50',
-                marginRight: SPACING["xs"]
-              }} />
-              <Text style={{...TYPOGRAPHY.body.small.base, color: '#666'}}>
-                {getCafeNameById(announcement.cafe_id)}
-              </Text>
-            </View>
-            <Text style={{...TYPOGRAPHY.body.small.base, color: '#999'}}>
-              {new Date(announcement.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
             </Text>
           </View>
         </View>
@@ -574,123 +458,102 @@ export default function EventsPage() {
           </View>
           */}
           <View style={{flex: 1, marginHorizontal: SPACING["md"], marginTop: SPACING["md"]}}>
-            {activeTab === 'events' ? (
-              isEventsLoading ? (
-                <View style={{alignItems: 'center', marginTop: SPACING["xl"]}}>
-                  <ActivityIndicator size="large" color={COLORS.black} />
-                  <Text style={{...TYPOGRAPHY.body.normal.base, color: '#666', marginTop: SPACING["md"]}}>Chargement des événements...</Text>
-                </View>
-              ) : isPaginationLoading ? (
-                <View style={{alignItems: 'center', marginTop: SPACING["xl"]}}>
-                  <ActivityIndicator size="large" color={COLORS.black} />
-                  <Text style={{...TYPOGRAPHY.body.normal.base, color: '#666', marginTop: SPACING["md"]}}>Chargement...</Text>
-                </View>
-              ) : (
-                events && events.items && events.items.length > 0 ? (
-                  <>
-                    <FlatList
-                      data={events.items}
-                      renderItem={({ item }) => <EventCard event={item} />}
-                      keyExtractor={(item) => item.id}
-                      scrollEnabled={false}
-                      removeClippedSubviews={true}
-                      maxToRenderPerBatch={ITEMS_PER_PAGE}
-                      windowSize={3}
-                      initialNumToRender={ITEMS_PER_PAGE}
-                    />
-                    
-                    {/* Pagination Controls */}
-                    {totalPages > 1 && (
-                      <View style={{
-                        flexDirection: 'row',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        marginTop: SPACING["lg"],
-                        marginBottom: SPACING["xl"],
-                        paddingHorizontal: SPACING["md"]
-                      }}>
-                        <TouchableOpacity
-                          onPress={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                          disabled={currentPage === 1 || isPaginationLoading}
-                          style={{
-                            backgroundColor: (currentPage === 1 || isPaginationLoading) ? COLORS.darkWhite : COLORS.black,
-                            paddingHorizontal: SPACING["lg"],
-                            paddingVertical: SPACING["sm"],
-                            borderRadius: 8,
-                            flex: 1,
-                            marginRight: SPACING["sm"],
-                            opacity: isPaginationLoading ? 0.5 : 1
-                          }}
-                        >
-                          <Text style={{
-                            ...TYPOGRAPHY.body.normal.semiBold,
-                            color: (currentPage === 1 || isPaginationLoading) ? '#999' : COLORS.white,
-                            textAlign: 'center'
-                          }}>← Précédent</Text>
-                        </TouchableOpacity>
-                        
-                        <Text style={{
-                          ...TYPOGRAPHY.body.normal.base,
-                          color: '#666',
-                          marginHorizontal: SPACING["md"]
-                        }}>
-                          {isPaginationLoading ? '...' : `${currentPage} / ${totalPages}`}
-                        </Text>
-                        
-                        <TouchableOpacity
-                          onPress={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-                          disabled={currentPage >= totalPages || isPaginationLoading}
-                          style={{
-                            backgroundColor: (currentPage >= totalPages || isPaginationLoading) ? COLORS.darkWhite : COLORS.black,
-                            paddingHorizontal: SPACING["lg"],
-                            paddingVertical: SPACING["sm"],
-                            borderRadius: 8,
-                            flex: 1,
-                            marginLeft: SPACING["sm"],
-                            opacity: isPaginationLoading ? 0.5 : 1
-                          }}
-                        >
-                          <Text style={{
-                            ...TYPOGRAPHY.body.normal.semiBold,
-                            color: (currentPage >= totalPages || isPaginationLoading) ? '#999' : COLORS.white,
-                            textAlign: 'center'
-                          }}>Suivant →</Text>
-                        </TouchableOpacity>
-                      </View>
-                    )}
-                  </>
-                ) : (
-                  <Text style={{...TYPOGRAPHY.body.normal.base, color: '#666', textAlign: 'center', marginTop: SPACING["xl"]}}>Aucun événement disponible</Text>
-                )
-              )
+            {isEventsLoading ? (
+              <View style={{alignItems: 'center', marginTop: SPACING["xl"]}}>
+                <ActivityIndicator size="large" color={COLORS.black} />
+                <Text style={{...TYPOGRAPHY.body.normal.base, color: '#666', marginTop: SPACING["md"]}}>Chargement des événements...</Text>
+              </View>
+            ) : isPaginationLoading ? (
+              <View style={{alignItems: 'center', marginTop: SPACING["xl"]}}>
+                <ActivityIndicator size="large" color={COLORS.black} />
+                <Text style={{...TYPOGRAPHY.body.normal.base, color: '#666', marginTop: SPACING["md"]}}>Chargement...</Text>
+              </View>
             ) : (
-              isLoading ? (
-                <View style={{alignItems: 'center', marginTop: SPACING["xl"]}}>
-                  <ActivityIndicator size="large" color={COLORS.black} />
-                  <Text style={{...TYPOGRAPHY.body.normal.base, color: '#666', marginTop: SPACING["md"]}}>Chargement des annonces...</Text>
-                </View>
-              ) : (
-                laliste && laliste.items && laliste.items.length > 0 ? (
+              events && events.items && events.items.length > 0 ? (
+                <>
                   <FlatList
-                    data={laliste.items}
-                    renderItem={({ item }) => <AnnouncementCard announcement={item} />}
+                    data={events.items}
+                    renderItem={({ item }) => <EventCard event={item} />}
                     keyExtractor={(item) => item.id}
                     scrollEnabled={false}
                     removeClippedSubviews={true}
-                    maxToRenderPerBatch={10}
-                    windowSize={5}
+                    maxToRenderPerBatch={ITEMS_PER_PAGE}
+                    windowSize={3}
+                    initialNumToRender={ITEMS_PER_PAGE}
                   />
-                ) : (
-                  <Text style={{...TYPOGRAPHY.body.normal.base, color: '#666', textAlign: 'center', marginTop: SPACING["xl"]}}>Aucune annonce disponible</Text>
-                )
+                  
+                  {/* Pagination Controls */}
+                  {totalPages > 1 && (
+                    <View style={{
+                      flexDirection: 'row',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      marginTop: SPACING["lg"],
+                      marginBottom: SPACING["xl"],
+                      paddingHorizontal: SPACING["md"]
+                    }}>
+                      <TouchableOpacity
+                        onPress={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                        disabled={currentPage === 1 || isPaginationLoading}
+                        style={{
+                          backgroundColor: (currentPage === 1 || isPaginationLoading) ? COLORS.darkWhite : COLORS.black,
+                          paddingHorizontal: SPACING["lg"],
+                          paddingVertical: SPACING["sm"],
+                          borderRadius: 8,
+                          flex: 1,
+                          marginRight: SPACING["sm"],
+                          opacity: isPaginationLoading ? 0.5 : 1
+                        }}
+                      >
+                        <Text style={{
+                          ...TYPOGRAPHY.body.normal.semiBold,
+                          color: (currentPage === 1 || isPaginationLoading) ? '#999' : COLORS.white,
+                          textAlign: 'center'
+                        }}>← Précédent</Text>
+                      </TouchableOpacity>
+                      
+                      <Text style={{
+                        ...TYPOGRAPHY.body.normal.base,
+                        color: '#666',
+                        marginHorizontal: SPACING["md"]
+                      }}>
+                        {isPaginationLoading ? '...' : `${currentPage} / ${totalPages}`}
+                      </Text>
+                      
+                      <TouchableOpacity
+                        onPress={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                        disabled={currentPage >= totalPages || isPaginationLoading}
+                        style={{
+                          backgroundColor: (currentPage >= totalPages || isPaginationLoading) ? COLORS.darkWhite : COLORS.black,
+                          paddingHorizontal: SPACING["lg"],
+                          paddingVertical: SPACING["sm"],
+                          borderRadius: 8,
+                          flex: 1,
+                          marginLeft: SPACING["sm"],
+                          opacity: isPaginationLoading ? 0.5 : 1
+                        }}
+                      >
+                        <Text style={{
+                          ...TYPOGRAPHY.body.normal.semiBold,
+                          color: (currentPage >= totalPages || isPaginationLoading) ? '#999' : COLORS.white,
+                          textAlign: 'center'
+                        }}>Suivant →</Text>
+                      </TouchableOpacity>
+                    </View>
+                  )}
+                </>
+              ) : (
+                <Text style={{...TYPOGRAPHY.body.normal.base, color: '#666', textAlign: 'center', marginTop: SPACING["xl"]}}>Aucun événement disponible</Text>
               )
             )}
-            <Modal visible={showModal}
-              animationType="slide"
-              onRequestClose={() => setShowModal(false)}
-              presentationStyle="pageSheet"
-            >
-                <View style={{
+            {showModal && (
+              <Modal 
+                visible={showModal}
+                animationType="slide"
+                onRequestClose={() => setShowModal(false)}
+                presentationStyle="pageSheet"
+              >
+                <SafeAreaView style={{
                   flex: 1,
                   backgroundColor: COLORS.white,
                 }}>
@@ -700,10 +563,11 @@ export default function EventsPage() {
                     justifyContent: 'space-between',
                     alignItems: 'center',
                     paddingHorizontal: SPACING["lg"],
-                    paddingTop: SPACING["lg"],
+                    paddingTop: Platform.OS === 'android' ? SPACING["xl"] : SPACING["lg"],
                     paddingBottom: SPACING["md"],
                     borderBottomWidth: 1,
-                    borderBottomColor: '#F0F0F0'
+                    borderBottomColor: '#F0F0F0',
+                    backgroundColor: COLORS.white
                   }}>
                     <Text style={{...TYPOGRAPHY.heading.small.bold}}>
                       {modalData && modalData.name ? 'Détails de l\'événement' : 'Détails de l\'annonce'}
@@ -981,8 +845,9 @@ export default function EventsPage() {
                       </View>
                     </ScrollView>
                   )}
-                </View>
-            </Modal>
+                </SafeAreaView>
+              </Modal>
+            )}
 
             
            

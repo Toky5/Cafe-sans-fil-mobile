@@ -33,6 +33,7 @@ export default function SignInScreen() {
   const [isNumberValid, setIsNumberValid] = React.useState(false);
   const [isSpecialCharValid, setIsSpecialCharValid] = React.useState(false);
   const [isVisible, setIsVisible] = React.useState(true);
+  const [isVisibleConfirm, setIsVisibleConfirm] = React.useState(true);
 
 
   const signup = async (username: string, first_name: string, last_name: string, matricule: number ,email : string , password : string) => {
@@ -223,7 +224,7 @@ export default function SignInScreen() {
     setIsLengthValid(password.length >= 6);
     setIsUppercaseValid(/[A-Z]/.test(password));
     setIsNumberValid(/\d/.test(password));
-    setIsSpecialCharValid(/[@$!%*?&]/.test(password));
+    setIsSpecialCharValid(/[@$!%*?&#]/.test(password));
   }
 
   const validateMatricule = (matricule: { toString: () => string; } ) => {
@@ -502,7 +503,7 @@ export default function SignInScreen() {
           onSubmitEditing={() => {
             checkMatch(password, passwordConf);
           }}
-          secureTextEntry={isVisible}
+          secureTextEntry={isVisibleConfirm}
           onFocus={() => {
   setTimeout(() => {
     passwordConfInputRef.current?.measureLayout(
@@ -524,10 +525,10 @@ export default function SignInScreen() {
 
         <TouchableOpacity 
           style={styles.showPasswordButton}
-          onPress={() => setIsVisible(!isVisible)}
+          onPress={() => setIsVisibleConfirm(!isVisibleConfirm)}
         >
           <Ionicons 
-            name={isVisible ? 'eye-off' : 'eye'} 
+            name={isVisibleConfirm ? 'eye-off' : 'eye'} 
             size={24} 
             color="#A1A1A1" 
           />
