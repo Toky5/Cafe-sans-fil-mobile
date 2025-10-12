@@ -10,7 +10,7 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "buildNumber": "11",
+      "buildNumber": "12",
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "This app uses the location to find cafes near you."
       },
@@ -22,7 +22,7 @@
         "backgroundColor": "#fbfaf7"
       },
       "package": "com.cadum.cafesansfil",
-      "versionCode": 11,
+      "versionCode": 12,
       "config": {
         "googleMaps": {
           "apiKey": "AIzaSyBLPZng6Gr0UCGxWrovmdbBaVmptRQEUHs"
