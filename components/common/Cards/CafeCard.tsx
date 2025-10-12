@@ -77,7 +77,7 @@ export default function CafeCard({
   name,
   location,
   priceRange,
-  rating,
+  //rating,
   image,
   id,
   size = "medium",
@@ -90,7 +90,7 @@ export default function CafeCard({
                       console.log(slug);
       }}
       style={{ width: cardDimensions[size].width, 
-        shadowColor: "#000",                       // Black shadow
+        shadowColor: COLORS.black ,                       // Black shadow
         shadowOffset: { width: 5, height: 5 },     // Offset shadow towards bottom-right 
         shadowOpacity: 0.25,                        // Half opaque
         shadowRadius: 6,                          // Smoothness of the shadow
@@ -107,6 +107,7 @@ export default function CafeCard({
           style={{borderRadius:10}}
           testID="image"
         />
+        {/*}
         <Text
           style={[
             TYPOGRAPHY.body.small.bold,
@@ -117,6 +118,7 @@ export default function CafeCard({
         >
           {rating}
         </Text>
+        */}
       </View>
       <View style={styles.caption}>
         <View style={styles.cafeInfo}>
@@ -184,7 +186,7 @@ const styles = StyleSheet.create({
     top: SPACING.sm,
   },
   wrapper: {
-    shadowColor: "#000",                       // Black shadow
+    shadowColor: COLORS.black ,                       // Black shadow
     shadowOffset: { width: 5, height: 5 },     // Offset shadow towards bottom-right 
     shadowOpacity: 0.25,                        // Half opaque
     shadowRadius: 5,                          // Smoothness of the shadow

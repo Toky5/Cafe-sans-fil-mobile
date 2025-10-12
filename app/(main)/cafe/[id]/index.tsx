@@ -9,6 +9,7 @@ import COLORS from "@/constants/Colors";
 import SPACING from "@/constants/Spacing";
 import TYPOGRAPHY from "@/constants/Typography";
 import { Link, router, useLocalSearchParams } from "expo-router";
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import {
   ArrowLeft,
   CakeSlice,
@@ -36,11 +37,15 @@ import {
   ScrollView,
   FlatList,
   Linking,
-  ActivityIndicator
+  ActivityIndicator,
+  Animated,
+  TextInput,
+  Dimensions
 } from "react-native";
 import { Cafe, Category, Item } from "@/constants/types/GET_cafe";
 import { allCafe } from '@/constants/types/GET_list_cafe';
 import ScrollableLayout from '@/components/layouts/ScrollableLayout';
+import { getToken } from '@/utils/tokenStorage';
 const { Platform } = require('react-native');
 const ActionSheetIOS = require('react-native').ActionSheetIOS;
 const { Alert } = require('react-native');
@@ -56,8 +61,11 @@ export default function CafeScreen() {
   
   // list of items to display
   const [itemList, setItemList] = useState<Item[]>();
+  const [filteredItemList, setFilteredItemList] = useState<Item[]>();
+  const [isSearchActive, setIsSearchActive] = useState(false);
 
   const [cafe, setCafe] = useState<Cafe>(); // set social media as empty object
+  /*
   const [data, setData] = useState<allCafe | any>([]);
   useEffect(() => {
       setIsLoading(true);
@@ -68,13 +76,18 @@ export default function CafeScreen() {
           // console.log(json)
         })
         .catch((error) => console.error(error))
-        .finally(() => setIsLoading(false));;
+        .finally(() => setIsLoading(false));
+        
+        
+        ;
     }, []);
-
+  */
   // Have an openable link
   const openLink = (url: string) => {
     Linking.openURL(url).catch(err => console.error("Failed to open URL:", err));
   };
+
+  
 
   // function qui donne la plateform et le lien
   // const getSocialMediaLinks = (socialMediaObjet) => {
@@ -122,15 +135,53 @@ export default function CafeScreen() {
         setIsLoading(false);
       }
     };
+
     fetchCafe();
+
+    const fetchProfile = async () => {
+      try{
+        const token = await getToken();
+        if (!token) {
+          console.error("No access token found");
+          return;
+        }
+        fetch(`https://cafesansfil-api-r0kj.onrender.com/api/users/@me`, {
+          method: 'GET',
+          headers: {
+            'accept': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        })
+          .then(response => response.json())
+          .then(data => {if (data.cafe_favs.includes(id)){ toggleHeart(true)} else {toggleHeart(false)}; console.log("Data user: ", data)})
+          .catch(error => console.error('Error fetching user data:', error));
+      }
+      catch(error){
+        console.error("Error fetching user data:", error);
+      }
+    };
+    fetchProfile();
   }, [id]);
   
   const [activeFilter, setActiveFilter] = useState("Tous");
+  const formatPrice = (price: string) => {
+  if (price.charAt(price.length - 2) == ".") {
+    return price + "0";
+  }
+  else{
+    return price
+  }
+}
 
   // filter the menu based on argument filter
 function filterMenu(filter?: string, menuData?: any): Item[] {
   let menu = menuData ? menuData : ((cafe && cafe.menu) ? cafe.menu.categories : []);
   let itemList: Item[] = [];
+
+  // Clear search when using category filters
+  setIsSearchActive(false);
+  setFilteredItemList(undefined);
+  setSearchText("");
 
   // if no filter --> all items to be displayed
   if (filter) {
@@ -170,7 +221,7 @@ function filterMenu(filter?: string, menuData?: any): Item[] {
     };
     return methodTranslated.method || method;
   };
-  const openLocation = (location) => {
+  const openLocation = (location : any) => {
     console.log("Location: ", location);
     
     // Extract latitude and longitude from the location array
@@ -286,7 +337,149 @@ function filterMenu(filter?: string, menuData?: any): Item[] {
     method : translationPaymentMethod(method), minimum })) : [];
 
 console.log(paymentDetails);
-  
+    const [heart, toggleHeart] = useState(false);
+
+    const addToFavoris = async (id) => {
+      try{
+        const token = await getToken();
+        if (!token) {
+          console.error("No access token found");
+          return;
+        }
+        const response = await fetch(`https://cafesansfil-api-r0kj.onrender.com/api/users/@me/cafes?cafe_id=${id}`, {
+          method: 'PUT',
+          headers: {
+            'accept': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        console.log("Added to favoris:", data);
+        // Update local state or provide user feedback as needed
+        toggleHeart(true);
+        
+      }
+      catch(error){
+        console.error("Error adding to favoris:", error);
+    }
+
+    }
+
+    const removeFromFavoris = async (id) => {
+      try{
+        const token = await getToken();
+        if (!token) {
+          console.error("No access token found");
+          return;
+        }
+        const response = await fetch(`https://cafesansfil-api-r0kj.onrender.com/api/users/@me/cafes?cafe_id=${id}`, {
+          method: 'DELETE',
+          headers: {
+            'accept': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        console.log("Removed from favoris:", data);
+        // Update local state or provide user feedback as needed
+        toggleHeart(false);
+      }
+      catch(error){
+        console.error("Error removing from favoris:", error);
+      }
+    }
+    
+    // Search bar animation states
+    const [isSearchExpanded, setIsSearchExpanded] = useState(false);
+    const [searchText, setSearchText] = useState("");
+    const searchWidth = useState(new Animated.Value(0))[0];
+    const { width: screenWidth } = Dimensions.get('window');
+    
+    // Header background animation based on scroll
+    const [isScrolledPastImage, setIsScrolledPastImage] = useState(false);
+    const headerBackgroundOpacity = useState(new Animated.Value(0))[0];
+    const IMAGE_HEIGHT = 350; // Should match cafeBackgroundImage height
+    
+    const toggleSearch = () => {
+      const isExpanding = !isSearchExpanded;
+      setIsSearchExpanded(isExpanding);
+      
+      // Calculate search width based on available space
+      let targetWidth = 0;
+      if (isExpanding) {
+        targetWidth = screenWidth - 20;
+      }
+      
+      Animated.timing(searchWidth, {
+        toValue: targetWidth,
+        duration: 300,
+        useNativeDriver: false,
+      }).start();
+      
+      if (!isExpanding) {
+        setSearchText(""); // Clear search text when closing
+        setFilteredItemList(undefined); // Clear filtered results
+        setIsSearchActive(false); // Deactivate search
+        setActiveFilter("Tous"); // Reset filter to "Tous"
+      }
+    };
+
+    // Handle search text changes
+    const handleSearchChange = (text: string) => {
+      setSearchText(text);
+      
+      if (!text.trim()) {
+        // If search is empty, clear filtered results
+        setFilteredItemList(undefined);
+        setIsSearchActive(false);
+        return;
+      }
+
+      // Scroll to menu section when user starts typing
+      if (!isSearchActive && scrollViewRef.current) {
+        setIsSearchActive(true);
+        // Scroll to menu section (adjust offset as needed based on your layout)
+        scrollViewRef.current.scrollTo({ y: 600, animated: true });
+      }
+
+      // Get all menu items from all categories
+      const allItems: Item[] = [];
+      cafe?.menu.categories.forEach(category => {
+        allItems.push(...category.items);
+      });
+
+      // Filter items based on search text
+      const filtered = allItems.filter(item => 
+        item.name.toLowerCase().includes(text.toLowerCase()) ||
+        item.description?.toLowerCase().includes(text.toLowerCase())
+      );
+
+      setFilteredItemList(filtered);
+      setActiveFilter(""); // Clear active filter when searching
+    };
+
+    // Handle scroll to change header background
+    const handleScroll = (event: any) => {
+      const scrollY = event.nativeEvent.contentOffset.y;
+      const shouldShowBackground = scrollY > IMAGE_HEIGHT - 100; // Start transition 100px before image ends
+      
+      if (shouldShowBackground !== isScrolledPastImage) {
+        setIsScrolledPastImage(shouldShowBackground);
+        
+        Animated.timing(headerBackgroundOpacity, {
+          toValue: shouldShowBackground ? 1 : 0,
+          duration: 200,
+          useNativeDriver: false,
+        }).start();
+      }
+    };
+    
 
   if(isLoading){
     return(
@@ -300,38 +493,132 @@ console.log(paymentDetails);
   }
 
   return (
+    <SafeAreaView style={{ flex: 1 }}>
+      {/* Sticky Header */}
+      <Animated.View style={[
+        styles.stickyHeader,
+        {
+          backgroundColor: headerBackgroundOpacity.interpolate({
+            inputRange: [0, 1],
+            outputRange: ['transparent', 'rgba(255, 255, 255, 1)'],
+          }),
+          borderBottomWidth: headerBackgroundOpacity.interpolate({
+            inputRange: [0, 1],
+            outputRange: [0, 1],
+          }),
+          borderBottomColor: 'rgba(0, 0, 0, 0.1)',
+          shadowColor: COLORS.black ,
+          shadowOffset: {
+            width: 0,
+            height: 2,
+          },
+          shadowOpacity: headerBackgroundOpacity.interpolate({
+            inputRange: [0, 1],
+            outputRange: [0, 0.1],
+          }),
+          shadowRadius: 4,
+          elevation: headerBackgroundOpacity.interpolate({
+            inputRange: [0, 1],
+            outputRange: [0, 5],
+          }),
+        }
+      ]}>
+        <View style={styles.cafeHeaderButtons}>
+          {/* Expanded Search Bar (spans full width when active) */}
+          {isSearchExpanded && (
+            <Animated.View style={[styles.searchContainer, { width: searchWidth }]}>
+              <TextInput
+                style={styles.searchInput}
+                placeholder="Rechercher dans le menu..."
+                value={searchText}
+                onChangeText={handleSearchChange}
+                autoFocus={true}
+                placeholderTextColor={COLORS.subtuleDark}
+                onBlur={() => {
+                  // Close search bar when focus is lost
+                  toggleSearch();
+                }}
+              />
+            </Animated.View>
+          )}
 
-    <SafeAreaView style={{ backgroundColor: '#000' }}>
+          {/* Normal header layout when search is not expanded */}
+          {!isSearchExpanded && (
+            <>
+              {/* Left side - Back button */}
+              <View style={styles.cafeHeaderButtonsLeft}>
+                <IconButton
+                  Icon={ArrowLeft}
+                  onPress={() => router.back()}
+                  style={styles.cafeHeaderIconButtons}
+                />
+              </View>
+
+              {/* Center - Cafe title (only when scrolled past image) */}
+              <Animated.View style={[
+                styles.cafeHeaderTitle,
+                {
+                  opacity: headerBackgroundOpacity,
+                  transform: [{
+                    translateY: headerBackgroundOpacity.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [10, 0],
+                    })
+                  }]
+                }
+              ]}>
+                <Text style={styles.cafeHeaderTitleText} numberOfLines={1}>
+                  {cafe?.name || ""}
+                </Text>
+              </Animated.View>
+
+              {/* Right side - Search and Location buttons */}
+              <View style={styles.cafeHeaderButtonsRight}>
+                <IconButton 
+                  Icon={Search} 
+                  style={styles.cafeHeaderIconButtons} 
+                  onPress={toggleSearch}
+                />
+                {!isScrolledPastImage && (
+                  <View style={{ flexDirection: "row", gap: 8 }}>
+                    <IconButton 
+                      Icon={Locate} 
+                      style={styles.cafeHeaderIconButtons} 
+                      onPress={() => cafe?.location && openLocation(cafe.location.geometry.coordinates)} 
+                    />
+                    <IconButton
+                      Icon={Heart}
+                      onPress={() => { heart ? removeFromFavoris(id) : addToFavoris(id)}}
+                      iconColor={heart ? COLORS.status.red : COLORS.black}
+                      fill={heart ? "red" : "none"}
+                      style={styles.cafeHeaderIconButtons}
+                    />
+                  </View>
+                )}
+              </View>
+            </>
+          )}
+        </View>
+      </Animated.View>
       
-    <ScrollView
-      ref={scrollViewRef}
-      showsVerticalScrollIndicator={false}
-      showsHorizontalScrollIndicator={false}
-      style={{backgroundColor: "#f4f4f4"}} >
+      {/* Scrollable Content */}
+      <ScrollView
+        ref={scrollViewRef}
+        showsVerticalScrollIndicator={false}
+        showsHorizontalScrollIndicator={false}
+        style={{backgroundColor: "#f4f4f4", flex: 1}} 
+        contentContainerStyle={{ paddingTop: 0 }}
+        onScroll={handleScroll}
+        scrollEventThrottle={16}
+      >
       <View>
         <Image
           style={styles.cafeBackgroundImage}
           source={isLoading ? require("@/assets/images/placeholder/image2xl.png") : {uri: cafe?.banner_url}}
         />
-        <View style={styles.cafeHeaderButtons}>
-          <IconButton
-            Icon={ArrowLeft}
-            onPress={() => router.back()}
-            style={styles.cafeHeaderIconButtons}
-          />
-            <View style={styles.cafeHeaderButtonsRight}>
-            <IconButton Icon={Search} style={styles.cafeHeaderIconButtons} />
-            <IconButton 
-              Icon={Locate} 
-              style={styles.cafeHeaderIconButtons} 
-              onPress={() => cafe?.location && openLocation(cafe.location.geometry.coordinates)} 
-            />
-            <IconButton Icon={Heart} style={styles.cafeHeaderIconButtons} />
-            </View>
-        </View>
 
         <View style={styles.cafeHeaderOpenStatus}>
-          <Tooltip label={"Ouvert"} showChevron={true} status={cafe?.is_open ? "green" : "red"} />
+          <Tooltip label={"Ouvert"} showChevron={false} status={cafe?.is_open ? "green" : "red"} />
         </View>
       </View>
 
@@ -390,8 +677,8 @@ console.log(paymentDetails);
               <Tooltip
                 key={`${method}-${minimum}`}
                 label={`${method}`}
-                showChevron={true }
-                color="white"
+                showChevron={false }
+                color={COLORS.white}
                 description={`Minimum: ${minimum}`}
                 Icon={CreditCard}
                 /> 
@@ -403,7 +690,7 @@ console.log(paymentDetails);
                 key={method} 
                   label={method}
                   showChevron={false}
-                  color="white"
+                  color={COLORS.white}
                   Icon={DollarSign}/>
               </View>    
               )
@@ -413,111 +700,171 @@ console.log(paymentDetails);
 
       </View>
       {/* Horaires du café */}
-<View style={styles.hoursContainer}>
-  <Text style={styles.hoursTitle}>Horaires</Text>
-  <FlatList 
-    data={cafe?.opening_hours} 
+<View style={styles.hoursSection}>
+  <Text style={styles.sectionTitle}>Horaires d'ouverture</Text>
+  <ScrollView 
     horizontal
     showsHorizontalScrollIndicator={false}
-    keyExtractor={item => item.day}
-    contentContainerStyle={styles.hoursListContent}
-    renderItem={({ item }) => (
-      <View style={styles.dayCard}>
-        <Text style={styles.dayName}>
-          {item.day.slice(0, 3)}
-        </Text>
-        <View style={styles.timeBlocks}>
-          {item.blocks.map((block, index) => (
-            <View key={index} style={styles.timeBlock}>
-              <Text style={styles.timeText}>{block.start} - {block.end}</Text>
+    contentContainerStyle={styles.hoursScrollContent}
+  >
+    {(() => {
+      // Map English days to French
+      const dayMapping: { [key: string]: string } = {
+        'monday': 'lundi',
+        'tuesday': 'mardi',
+        'wednesday': 'mercredi',
+        'thursday': 'jeudi',
+        'friday': 'vendredi',
+        'saturday': 'samedi',
+        'sunday': 'dimanche'
+      };
+
+      // Get today's day in French
+      const todayFrench = new Date().toLocaleDateString('fr-FR', { weekday: 'long' }).toLowerCase();
+      
+      // Find today's index in the opening_hours array
+      const hours = cafe?.opening_hours || [];
+      const todayIndex = hours.findIndex(item => {
+        const itemDayFrench = dayMapping[item.day.toLowerCase()] || item.day.toLowerCase();
+        return itemDayFrench === todayFrench;
+      });
+
+      // Reorder array to start from today
+      const reorderedHours = todayIndex >= 0 
+        ? [...hours.slice(todayIndex), ...hours.slice(0, todayIndex)]
+        : hours;
+
+      return reorderedHours.map((item, index) => {
+        const isToday = index === 0 && todayIndex >= 0;
+        const itemDayFrench = dayMapping[item.day.toLowerCase()] || item.day.toLowerCase();
+        
+        return (
+          <View 
+            key={item.day} 
+            style={[
+              styles.modernDayCard,
+              isToday && styles.modernDayCardToday
+            ]}
+          >
+            <View style={styles.dayHeader}>
+              <Text style={[
+                styles.modernDayName,
+                isToday && styles.modernDayNameToday
+              ]}>
+                {isToday ? "Aujourd'hui" : itemDayFrench.charAt(0).toUpperCase() + itemDayFrench.slice(1)}
+              </Text>
             </View>
-          ))}
-          {item.blocks.length === 0 && (
-            <Text style={styles.closedText}>Fermé</Text>
-          )}
-        </View>
-      </View>
-    )}
-    ItemSeparatorComponent={() => <View style={styles.daySeparator} />}
-  />
+            <View style={styles.modernTimeBlocks}>
+              {item.blocks.length > 0 ? (
+                item.blocks.map((block, blockIndex) => (
+                  <View key={blockIndex} style={styles.modernTimeBlock}>
+                    <Text style={[
+                      styles.modernTimeText,
+                      isToday && styles.modernTimeTextToday
+                    ]}>
+                      {block.start}
+                    </Text>
+                    <Text style={[styles.timeSeparator, isToday && styles.timeSeparatorToday]}>-</Text>
+                    <Text style={[
+                      styles.modernTimeText,
+                      isToday && styles.modernTimeTextToday
+                    ]}>
+                      {block.end}
+                    </Text>
+                  </View>
+                ))
+              ) : (
+                <View style={styles.closedContainer}>
+                  <Text style={[styles.modernClosedText, isToday && styles.modernClosedTextToday]}>Fermé</Text>
+                </View>
+              )}
+            </View>
+          </View>
+        );
+      });
+    })()}
+  </ScrollView>
 </View>
 
-      {/* Menu */}
-      <Text 
-        style={{
-          marginVertical: SPACING["xl"], 
-          marginHorizontal: SPACING["md"], 
-          alignSelf: 'center',
-          ...TYPOGRAPHY.heading.large.bold
-        }}>Menu
-        </Text>
+      {/* Menu Section */}
+      <View style={styles.menuSection}>
+        <Text style={styles.sectionTitle}>Notre Menu</Text>
+        
+        {/* Catégories */}
+        <ScrollView 
+          horizontal 
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.modernFilterScrollContainer}
+          style={styles.modernFilterScrollView}
+        >
+          {/* "Tous" filter */}
+          <TouchableOpacity 
+            style={[
+              styles.modernFilterChip,
+              activeFilter === "Tous" && styles.modernFilterChipActive
+            ]}
+            onPress={() => setItemList(filterMenu())}
+          >
+            <Text style={[
+              styles.modernFilterChipText,
+              activeFilter === "Tous" && styles.modernFilterChipTextActive
+            ]}>
+              Tous
+            </Text>
+          </TouchableOpacity>
 
+          {/* Category filters */}
+          {cafe?.menu.categories.map((item: Category) => (
+            <TouchableOpacity 
+              key={item.id}
+              style={[
+                styles.modernFilterChip,
+                activeFilter === item.name && styles.modernFilterChipActive
+              ]}
+              onPress={() => setItemList(filterMenu(item.name))}
+            >
+              <Text style={[
+                styles.modernFilterChipText,
+                activeFilter === item.name && styles.modernFilterChipTextActive
+              ]}>
+                {item.name}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
 
-      {/* Catégories */}
-      <View>
-          <Text 
-            style={{
-              marginHorizontal: SPACING["md"], 
-              ...TYPOGRAPHY.heading.small.bold
-            }}>
-            Filtres 
-          </Text>
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignContent: 'center', justifyContent: 'center', padding: 8 }}>
-            {cafe? [
-              ...cafe.menu.categories.map((item : Category) => (
-                <View 
-                  key={item.id} 
-                  style={{marginRight: SPACING["sm"], marginTop: SPACING["sm"]}}
-                >
-                  <Tooltip
-                    key={item.id}
-                    label={item.name}
-                    showChevron={false}
-                    color="white"
-                    textColor="black"
-                    status={activeFilter == item.name ? "black" : "white"}
-                    onPress={() => setItemList(filterMenu(item.name))}
-                  />
-                </View>
-              )),
-              <TouchableOpacity 
-                  key={"all"} 
-                  style={{marginRight: SPACING["sm"], marginTop: SPACING["sm"]}}
-                >
-                  <Tooltip
-                    label={"Tous"}
-                    showChevron={false}
-                    color="white"
-                    textColor="black"
-                    status={activeFilter == "Tous" ? "black" : "white"}
-                    onPress={() => setItemList(filterMenu())}
-                  />
-                </TouchableOpacity>
-            ]: []}
-          </View>
-
+        {/* Menu Items Grid */}
+        <View style={styles.menuGrid}>
+          {(() => {
+            // Use filtered list if search is active, otherwise use regular itemList
+            const displayItems = isSearchActive ? filteredItemList : itemList;
+            
+            return displayItems && displayItems.length > 0 ? (
+              displayItems.map((item) => (
+                <ArticleCard
+                  key={item.id}
+                  cafeSlug={cafe?.slug}
+                  slug={item.id}
+                  name={item.name} 
+                  price={"$" + item.price} 
+                  status={item.in_stock ? "En Stock" : "En Rupture"}
+                  image={item.image_url}
+                  calories={item.description}
+                  size="large"
+                />
+              ))
+            ) : (
+              <View style={styles.emptyMenuContainer}>
+                <Text style={styles.emptyMenuText}>
+                  {isSearchActive ? `Aucun résultat pour "${searchText}"` : "Aucun article disponible"}
+                </Text>
+              </View>
+            );
+          })()}
         </View>
+      </View>      
 
-      {/* Menu */}
-      <FlatList 
-      data={itemList? itemList : []}  
-      keyExtractor={item => item.id}
-      renderItem={({item}) => <ArticleCard
-                                cafeSlug={cafe?.slug}
-                                slug={item.id}
-                                name={item.name} 
-                                price={"$" + item.price} 
-                                status={item.in_stock? "In Stock" : "Out of Stock"}
-                                image={item.image_url}
-                                style={{alignItems: 'center', width: "45%", margin: SPACING["md"]}}
-                              />
-                              }
-      scrollEnabled={false}
-      style={{marginTop: SPACING['md']}}
-      numColumns={2}
-      />      
-
-      {/* Cafés similaires */}
+      {/* Cafés similaires 
       <Text 
         style={{
           marginVertical: SPACING["xl"], 
@@ -534,20 +881,21 @@ console.log(paymentDetails);
               image={item.banner_url}
               location={item.location.pavillon}
               priceRange="$$"
-              rating={4.8}
+              rating={4.5}
               status={item.is_open}
               id={item.id}
             />
           )}
           keyExtractor={(item) => item.id}
           horizontal
-          ItemSeparatorComponent={() => <View style={{ width: SPACING["md"] }} />}
+          showsHorizontalScrollIndicator={false}
+          ItemSeparatorComponent={() => <View style={{ width: SPACING["sm"] }} />}
           style={{
             paddingHorizontal: SPACING["sm"],
             paddingBottom: SPACING["md"],
           }}
         />
-
+        */}
 
         {/* TODO: IMPLÉMENTER LA FLATLIST */}
 
@@ -557,26 +905,46 @@ console.log(paymentDetails);
 }
 
 const styles = StyleSheet.create({
+  stickyHeader: {
+    position: "absolute",
+    top: Platform.OS === 'ios' ? 0 : 0, // Position under status bar/notch
+    left: 0,
+    right: 0,
+    zIndex: 1000,
+    paddingTop: Platform.OS === 'ios' ? "16%" : 30,
+    paddingBottom: 12,
+    
+  },
   cafeBackgroundImage: {
     width: "100%",  // Fill width
     height: 250,    // Fixed height, adjust as needed
   },
   cafeHeaderButtons: {
-    position: "absolute",
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     width: "100%",
     paddingHorizontal: 16,
-    marginTop: SPACING["sm"],
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
+  },
+  cafeHeaderButtonsLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    minWidth: 40, // Ensure consistent left space
+  },
+  cafeHeaderTitle: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 16,
+  },
+  cafeHeaderTitleText: {
+    ...TYPOGRAPHY.heading.small.bold,
+    color: COLORS.black,
+    textAlign: "center",
+  },
+  stickyHeaderSpacer: {
+    height: 50, // Height to push content below the sticky header
+    backgroundColor: "transparent",
   },
   cafeHeaderButtonsRight: {
     
@@ -585,7 +953,23 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   cafeHeaderIconButtons: {
-    backgroundColor: "white",
+    backgroundColor: COLORS.white,
+  },
+  searchContainer: {
+    backgroundColor: COLORS.lightGray,
+    borderRadius: 25,
+    height: 40,
+    overflow: "hidden",
+    marginLeft: -6,
+
+  },
+  searchInput: {
+    flex: 1,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    fontSize: 16,
+    color: COLORS.black,
+    backgroundColor: "transparent",
   },
   cafeHeaderOpenStatus: {
     position: "absolute",
@@ -605,62 +989,125 @@ const styles = StyleSheet.create({
     marginTop: SPACING["xs"],
     textAlign: "center",
   },
-  hoursContainer: {
-    marginHorizontal: 16,
-    marginTop: 20,
-    backgroundColor: '#fff',
-    borderRadius: 15,
-    padding: 20,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  hoursTitle: {
-    ...TYPOGRAPHY.heading.medium.bold,
+  // Section Titles
+  sectionTitle: {
+    ...TYPOGRAPHY.body.large.semiBold,
     color: COLORS.black,
-    marginBottom: 15,
-    textAlign: "center",
-  },
-  hoursListContent: {
-    paddingVertical: 8,
-    paddingHorizontal: 4,
-  },
-  dayCard: {
-    backgroundColor: '#f9f9f9',
-    borderRadius: 12,
-    padding: 12,
-    minWidth: 90,
-    alignItems: 'center',
-  },
-  dayName: {
-    ...TYPOGRAPHY.body.normal.semiBold,
-    color: COLORS.black,
+    marginBottom: 12,
+    fontSize: 18,
     textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
+  // Modern Hours Styles
+  hoursSection: {
+    marginTop: 24,
+    paddingHorizontal: 16,
+  },
+  hoursScrollContent: {
+    paddingRight: 16,
+  },
+  modernDayCard: {
+    backgroundColor: COLORS.white,
+    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    minWidth: 100,
+    borderWidth: 1,
+    borderColor: '#E8E8E8',
+    marginRight: 10,
+  },
+  modernDayCardToday: {
+    backgroundColor: COLORS.black ,
+    borderColor: COLORS.black ,
+  },
+  dayHeader: {
     marginBottom: 8,
   },
-  timeBlocks: {
-    width: '100%',
+  modernDayName: {
+    ...TYPOGRAPHY.body.normal.semiBold,
+    color: COLORS.black,
+    fontSize: 13,
+    fontWeight: '600',
   },
-  timeBlock: {
-    marginVertical: 3,
+  modernDayNameToday: {
+    color: COLORS.white,
   },
-  timeText: {
+  modernTimeBlocks: {
+    gap: 4,
+  },
+  modernTimeBlock: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  modernTimeText: {
     ...TYPOGRAPHY.body.small.base,
+    color: '#666',
+    fontSize: 12,
+  },
+  modernTimeTextToday: {
+    color: COLORS.white,
+  },
+  timeSeparator: {
+    color: '#999',
+    fontSize: 12,
+  },
+  timeSeparatorToday: {
+    color:COLORS.white,
+  },
+  closedContainer: {
+    paddingVertical: 4,
+  },
+  modernClosedText: {
+    ...TYPOGRAPHY.body.small.base,
+    color: '#999',
+    fontSize: 12,
+  },
+  modernClosedTextToday: {
+    color: COLORS.white,
+  },
+  // Modern Menu Styles
+  menuSection: {
+    marginTop: 24,
+    paddingHorizontal: 16,
+    marginBottom: 24,
+  },
+  modernFilterScrollView: {
+    flexGrow: 0,
+    marginBottom: 16,
+  },
+  modernFilterScrollContainer: {
+    gap: 8,
+    paddingRight: 16,
+  },
+  modernFilterChip: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: '#ffffffff',
+  },
+  modernFilterChipActive: {
+    backgroundColor: COLORS.black ,
+  },
+  modernFilterChipText: {
+    ...TYPOGRAPHY.body.normal.semiBold,
+    color: '#666',
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  modernFilterChipTextActive: {
+    color: COLORS.white,
+  },
+  menuGrid: {
+    gap: 12,
+  },
+  emptyMenuContainer: {
+    width: '100%',
+    paddingVertical: 40,
+    alignItems: 'center',
+  },
+  emptyMenuText: {
+    ...TYPOGRAPHY.body.normal.base,
     color: COLORS.subtuleDark,
-    textAlign: 'center',
-  },
-  closedText: {
-    ...TYPOGRAPHY.body.small.semiBold,
-    color: COLORS.status.red,
-    textAlign: 'center',
-    marginTop: 4,
-  },
-  daySeparator: {
-    width: 10,
   },
 });

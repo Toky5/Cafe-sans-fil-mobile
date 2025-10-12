@@ -16,6 +16,7 @@ import { deleteSecurely, fetchSync, saveSync } from '@/scripts/storage';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import { fetchPannier } from '../../scripts/pannier';
 import { router } from 'expo-router';
+import COLORS from '@/constants/Colors';
 
 const Panier = () => {
 
@@ -130,10 +131,10 @@ const Panier = () => {
                 </View>
                 <View style={styles.actionContainer}>
                   <TouchableOpacity onPress={() => increaseQuantity(panierItem.id)}>
-                    <Feather name="plus" size={20} color="#000" />
+                    <Feather name="plus" size={20} color={COLORS.black} />
                   </TouchableOpacity>
                   <TouchableOpacity onPress={() => decreaseQuantity(panierItem.id)}>
-                    <Feather name="minus" size={20} color="#000" />
+                    <Feather name="minus" size={20} color={COLORS.black}  />
                   </TouchableOpacity>
                   <TouchableOpacity onPress={() => removeItem(panierItem.id)}>
                     <Feather name="trash" size={20} color="red" />
@@ -198,7 +199,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: '#fff',
+    backgroundColor: COLORS.white,
   },
   title: {
     fontSize: 20,
@@ -252,12 +253,12 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   checkoutButton: {
-    backgroundColor: '#000',
+    backgroundColor: COLORS.black ,
     paddingVertical: 12,
     borderRadius: 8,
   },
   checkoutButtonText: {
-    color: '#fff',
+    color: COLORS.white,
     fontSize: 16,
     textAlign: 'center',
   },

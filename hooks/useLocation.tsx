@@ -14,20 +14,24 @@ type LocationType = Location.LocationObject | null;
  *
  * #### Usage
  * ```tsx
- * const [location, getCurrentLocation] = useLocation();
+ * const [location, getCurrentLocation, locationPermissionDenied] = useLocation();
  * ```
  *
- * @returns [`location`, `getCurrentLocation`]
+ * @returns [`location`, `getCurrentLocation`, `locationPermissionDenied`]
  *
  * `location`: The current location of the device.
  *
  * `getCurrentLocation`: Function to get the current location of the device.
  * You can pass `true` to get the location object as a return value.
  *
+ * `locationPermissionDenied`: Boolean indicating if location permission was denied.
+ *
  */
 export default function useLocation() {
   // State to store the current location
   const [location, setLocation] = useState<LocationType>(null);
+  // State to track if permission was denied
+  const [locationPermissionDenied, setLocationPermissionDenied] = useState(false);
 
   /**
    * Function to get the current location of the device.
@@ -41,12 +45,29 @@ export default function useLocation() {
     // Request permission to access the location
     let { status } = await Location.requestForegroundPermissionsAsync();
 
-    // If permission is denied, log a message and return. 
-    // FIXME: In production, you can show an error message to the user.
+    // If permission is denied, log a message and set the flag
     if (status !== "granted") {
       console.info("Permission to access location was denied");
+      setLocationPermissionDenied(true);
+      // Set a mock location object so the app can still function
+      // This prevents the app from being stuck in loading state
+      setLocation({
+        coords: {
+          latitude: 0,
+          longitude: 0,
+          altitude: null,
+          accuracy: null,
+          altitudeAccuracy: null,
+          heading: null,
+          speed: null,
+        },
+        timestamp: Date.now(),
+      } as Location.LocationObject);
       return;
     }
+
+    // Permission granted, reset the denied flag
+    setLocationPermissionDenied(false);
 
     // Get the current location of the device
     let position = await Location.getCurrentPositionAsync({});
@@ -68,5 +89,5 @@ export default function useLocation() {
     getCurrentLocation();
   }, []);
 
-  return [location, getCurrentLocation] as const;
+  return [location, getCurrentLocation, locationPermissionDenied] as const;
 }

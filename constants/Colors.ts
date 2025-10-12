@@ -9,6 +9,7 @@ type ColorsType = {
       orange: string;
       red: string;
   };
+  darkWhite: string;
   statusbarInactive: string;
 };
 
@@ -27,6 +28,7 @@ type ColorsType = {
  * @property {string} status.orange - Hex code for orange status color.
  * @property {string} status.red - Hex code for red status color.
  * @property {string} statusbarInactive - Hex code for inactive status bar color.
+ * @pr
  */
 const COLORS: ColorsType = {
   white: "#FFFFFF",
@@ -35,6 +37,8 @@ const COLORS: ColorsType = {
   black45: "rgba(0, 0, 0, 0.45)",
   subtuleDark: "#424242",
   lightGray: "#F2F2F7",
+
+  darkWhite: '#E0E0E0',
 
   status: {
     green: "#3E9C66",

@@ -1,10 +1,10 @@
-import { View, Text } from "react-native";
+import { View, Text, Platform} from "react-native";
 import React, { useEffect, useState } from "react";
 import * as Location from "expo-location";
 import COLORS from "@/constants/Colors";
 import SPACING from "@/constants/Spacing";
 import TYPOGRAPHY from "@/constants/Typography";
-import MapView, { Marker, Callout } from "react-native-maps";
+import MapView, { Marker, Callout, PROVIDER_GOOGLE } from "react-native-maps";
 import FilterModalLayout from "./FilterModalLayout";
 
 export default function MapModalLayout({
@@ -73,6 +73,7 @@ export default function MapModalLayout({
           borderRadius: 20,
           marginTop: 16,
         }}
+        provider={Platform.OS === 'android' ? PROVIDER_GOOGLE : undefined}
         initialRegion={{
           latitude: location.coords.latitude,
           longitude: location.coords.longitude,

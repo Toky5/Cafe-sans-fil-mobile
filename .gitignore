@@ -3,6 +3,10 @@
 # dependencies
 node_modules/
 
+# Coverage
+html/
+coverage/
+
 # Expo
 .expo/
 dist/
@@ -37,3 +41,4 @@ yarn-error.*
 .env
 app-example
 .env
+eas.local.json

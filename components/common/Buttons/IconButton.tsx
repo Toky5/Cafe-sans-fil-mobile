@@ -8,7 +8,9 @@ type BasketButtonProps = {
   Icon?: LucideIcon;
   onPress?: () => void;
   accessibilityLabel?: string;
-  style?: StyleProp<ViewStyle>,
+  style?: StyleProp<ViewStyle>;
+  iconColor?: string;
+  fill?: string;
 };
 
 export default function IconButton({
@@ -16,6 +18,8 @@ export default function IconButton({
   Icon = ShoppingBasket,
   onPress,
   accessibilityLabel="Shopping Basket",
+  iconColor = COLORS.black,
+  fill = "none",
 }: BasketButtonProps) {
   return (
     <TouchableOpacity
@@ -28,7 +32,8 @@ export default function IconButton({
         width={SPACING["xl"]}
         height={SPACING["xl"]}
         strokeWidth={2.2}
-        color={COLORS.black}
+        color={iconColor}
+        fill={fill}
         accessibilityLabel={accessibilityLabel}
       />
     </TouchableOpacity>

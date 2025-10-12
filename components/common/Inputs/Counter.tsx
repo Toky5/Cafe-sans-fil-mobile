@@ -1,25 +1,38 @@
 import COLORS from "@/constants/Colors";
 import TYPOGRAPHY from "@/constants/Typography";
+import { useFocusEffect } from "expo-router";
 import { Minus, Plus } from "lucide-react-native";
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 
-export default function Counter() {
-  const [count, setCount] = useState(1);
+interface CounterProps {
+  count: number;
+  setCount: React.Dispatch<React.SetStateAction<number>>;
+}
+
+export default function Counter({count, setCount} : CounterProps ){
+  // const [count, setCount] = useState(1);
   // TODO: Add a max prop to limit the counter to a certain number
   const increment = () => setCount((prev) => prev + 1);
   const decrement = () => setCount((prev) => Math.max(1, prev - 1));
+  
+  // reset counter to one 
+  useFocusEffect(
+    useCallback(() => {
+      setCount(1);
+    }, [])
+  ); 
 
   return (
     <View style={styles.textInput}>
       <TouchableOpacity onPress={decrement} style={styles.button}>
-        <Minus width={15} strokeWidth={3} color={"black"}></Minus>
+        <Minus width={15} strokeWidth={3} color={COLORS.black}></Minus>
       </TouchableOpacity>
 
       <Text style={TYPOGRAPHY.body.normal.medium}>{count}</Text>
 
       <TouchableOpacity onPress={increment} style={styles.button}>
-        <Plus width={15} strokeWidth={3} color={"black"}></Plus>
+        <Plus width={15} strokeWidth={3} color={COLORS.black}></Plus>
       </TouchableOpacity>
     </View>
   );
@@ -33,7 +46,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#EDF1F3",
     boxShadow: "0px 1px 2px 0px rgba(228, 229, 231, 0.24)",
-    color: "#000000",
+    color: COLORS.black,
     flexDirection: "row",
     justifyContent: "space-around",
     alignItems: "center",

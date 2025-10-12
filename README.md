@@ -2,7 +2,7 @@
 <br/>
 <p align="center">
   <a href="https://cafesansfil.onrender.com/">
-    <img src="logo.png" width="300">
+    <img src="logoold.png" width="300">
   </a>
 </p>
 <br/>
@@ -45,13 +45,13 @@ L'application mobile est développée avec:
 
 ## 🔄 Lien avec Café sans-fil Web
 
-Cette application mobile partage la même base de données et API que la [version web](https://cafesansfil.onrender.com/), permettant une expérience cohérente sur tous les appareils. Les utilisateurs peuvent alterner entre les plateformes selon leurs besoins, avec une synchronisation complète des données.
+Cette application mobile partage la même base de données et API que la [version web](https://cafesansfil-ig3a.onrender.com), permettant une expérience cohérente sur tous les appareils. Les utilisateurs peuvent alterner entre les plateformes selon leurs besoins, avec une synchronisation complète des données.
 
 ## 🚀 Installation
 
 ```bash
 # Cloner le répertoire
-git clone https://github.com/Griselda15/Cafe-sans-fil-mobile.git
+git clone https://github.com/CADUM-UdeM/Cafe-sans-fil-mobile.git
 
 # Installer les dépendances
 cd Cafe-sans-fil-mobile
@@ -73,6 +73,6 @@ Le développement de cette application mobile est le fruit du travail des membre
 - [Flora Kang](https://github.com/flower-png) 
 - [Ding Wen Li](https://github.com/echobat88) 
 - [Trung Nguyen](https://github.com/likeskymore) 
-- [Kevin Wang](https://github.com/Kevin-Wang78) 
-- [Louis Edouard Lafontant](https://github.com/lelafontant) 
+- [Udeme-Obong Itoro Samuel](https://github.com/udeme-sml)
+- [Louis Edouard Lafontant](https://github.com/lelafontant)
 

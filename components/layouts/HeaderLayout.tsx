@@ -1,4 +1,4 @@
-import { Button, Modal, StyleSheet, TouchableOpacity, View, Text, TouchableHighlight,Animated } from "react-native";
+import { Button, Modal, StyleSheet, TouchableOpacity, View, ScrollView ,Text, TouchableHighlight,Animated } from "react-native";
 
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Redirect, Tabs, useRouter } from "expo-router";
@@ -69,14 +69,14 @@ export default function HeaderLayout({fullName, profilePicture}: HeaderLayoutPro
       extrapolate: 'clamp',
     });
 
-    const width = dragX.interpolate({
-      inputRange: [-0, 0],
-      outputRange: [0, 10],
+    const translateX = dragX.interpolate({
+      inputRange: [-10, 0],
+      outputRange: [0, 100],
       extrapolate: 'clamp',
     });
 
     return (
-      <Animated.View style={[styles.deleteButton, {transform: [{ translateX: width }]}]}>
+      <Animated.View style={[styles.deleteButton, { opacity, transform: [{ translateX }] }]}>
         <TouchableOpacity onPress={() => handleDelete(id)}>
           <Text style={styles.deleteButtonText}>Effacer</Text>
         </TouchableOpacity>
@@ -85,19 +85,13 @@ export default function HeaderLayout({fullName, profilePicture}: HeaderLayoutPro
   };
   const renderLeftActions = (dragX : any, id : any) => {
     const opacity = dragX.interpolate({
-      inputRange: [-100, 0],
-      outputRange: [1, 0],
-      extrapolate: 'clamp',
-    });
-
-    const width = dragX.interpolate({
-      inputRange: [-0, 0],
-      outputRange: [0, 10],
+      inputRange: [0, 100],
+      outputRange: [0, 1],
       extrapolate: 'clamp',
     });
 
     return (
-      <Animated.View style={[styles.toggleButton, {transform: [{ translateX: width }]}]}>
+      <Animated.View style={[styles.toggleButton, { opacity }]}>
         <TouchableOpacity onPress={() => handleUpdate(id)}>
             <Text style={styles.toggleButtonText}>
             {notifs.find((notif) => notif.id === id)?.status ? "Marquer comme non lu" : "Marquer comme lu"}
@@ -106,6 +100,7 @@ export default function HeaderLayout({fullName, profilePicture}: HeaderLayoutPro
       </Animated.View>
     );
   };
+  /*
   const [notifs, setNotifs] = useState([
       {
         id: 1,
@@ -127,6 +122,10 @@ export default function HeaderLayout({fullName, profilePicture}: HeaderLayoutPro
       },
       // Add more notifications as needed
     ]);
+    */
+    // a desac pr le test
+    const [notifs, setNotifs] = useState([]);
+    
     const handleReadAll = () => {
       setNotifs(notifs.map((notif) => ({ ...notif, status: true })));
     };
@@ -157,7 +156,7 @@ export default function HeaderLayout({fullName, profilePicture}: HeaderLayoutPro
               <Text style={styles.modalTitle}>Mes Notifications</Text>
               <Button title="Fermer" onPress={() => setNotifModal(false)} />
             </View>
-            <View style={styles.modalContent}>
+            <ScrollView style={styles.modalContent}>
             {notifs.length === 0 ? (
                   <Text style={styles.noNotificationsText}>Aucune notification</Text>
                 ) : (
@@ -186,7 +185,7 @@ export default function HeaderLayout({fullName, profilePicture}: HeaderLayoutPro
                 </GestureHandlerRootView>
               )))}
               
-            </View>
+            </ScrollView>
             {unreadCount > 0 && (
               <TouchableOpacity style={styles.readAllButton} onPress={handleReadAll}>
               <Text style={styles.readAllButtonText}>✓</Text>
@@ -224,8 +223,8 @@ const styles = StyleSheet.create({
   modalContainer: {
     width: '100%',
     height: '90%',
-    backgroundColor: '#fff',
-    borderRadius: 10,
+    backgroundColor: COLORS.white,
+    borderRadius: 24,
     overflow: 'hidden',
     marginTop: '20%',
   },
@@ -253,7 +252,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 16,
     marginBottom: 12,
-    shadowColor: '#000',
+    shadowColor: COLORS.black ,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -296,11 +295,11 @@ const styles = StyleSheet.create({
   toggleButtonText: {
     fontSize: 12,
     textAlign: 'center',
-    color: '#000',
+    color: COLORS.black ,
     fontWeight: 'bold',
   },
   deleteButtonText: {
-    color: '#fff',
+    color: COLORS.white,
     fontWeight: 'bold',
   },
   noNotificationsText: {
@@ -321,7 +320,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   notificationBadgeText: {
-    color: 'white',
+    color: COLORS.white,
     fontSize: 12,
     fontWeight: 'bold',
   },
@@ -338,7 +337,7 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   readAllButtonText: {
-    color: 'white',
+    color: COLORS.white,
     fontSize: 24,
     fontWeight: 'bold',
   },
