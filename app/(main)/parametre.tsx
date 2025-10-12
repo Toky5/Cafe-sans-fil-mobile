@@ -15,7 +15,8 @@ import {
   Alert,
   ActivityIndicator,
   Pressable,
-  Dimensions
+  Dimensions,
+  Linking
 } from "react-native";
 import Constants from 'expo-constants';
 import React, { useState } from 'react'
@@ -1007,10 +1008,14 @@ export default function ParametreScreen() {
           </View>
           <Text style={styles.sectionTitle}>Politiques et confidentalité</Text>
           <Text style={styles.sectionContent}>
-            Nous respectons la vie privée de chaque utilisateur. Toutes les informations personnelles, y compris les mots de passe sont strictement confidentielles. 
-            Aucun utilisateur ni même développeur ne peut avoir accès aux données personnelles d'autres comptes. 
-            En cas de fuites de données ou de piratage de votre compte, veuillez nous contacter immédiatement.
-          </Text>
+  Vous pouvez consulter notre politique de confidentialité et nos conditions d'utilisation en détails sur notre site web:{' '}
+  <Text 
+    style={{ color: '#007AFF', textDecorationLine: 'underline' }}
+    onPress={() => Linking.openURL('https://cadum.aediroum.ca/politique.html')}
+  >
+    https://cadum.aediroum.ca/politique.html
+  </Text>
+</Text>
         </View>
 
         <View style={styles.divider} />

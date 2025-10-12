@@ -869,7 +869,8 @@ function filterMenu(filter?: string, menuData?: any): Item[] {
                   image={item.image_url}
                   calories={item.description}
                   size="large"
-                  onPress={() => openArticleModal(item.id)}
+
+                  onPress={Platform.OS === 'ios' ? () => openArticleModal(item.id) : undefined}
                 />
               ))
             ) : (
@@ -920,40 +921,43 @@ function filterMenu(filter?: string, menuData?: any): Item[] {
     </ScrollView>
     
     {/* Article Detail Modal */}
-    <Modal
-      visible={isArticleModalVisible}
-      animationType="slide"
-      presentationStyle="pageSheet"
-      onRequestClose={closeArticleModal}
-    >
-      <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.white }}>
-        <View style={{ flex: 1 }}>
-          {/* Modal Header */}
-          <View style={{ 
-            flexDirection: 'row', 
-            alignItems: 'center', 
-            justifyContent: 'flex-start',
-            paddingHorizontal: 16,
-            paddingVertical: 12,
-            borderBottomWidth: 1,
-            borderBottomColor: '#E8E8E8'
-          }}>
-            <TouchableOpacity onPress={closeArticleModal}>
-              <ArrowLeft size={24} color={COLORS.black} />
-            </TouchableOpacity>
+    {isArticleModalVisible && (
+      <Modal
+        visible={isArticleModalVisible}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={closeArticleModal}
+      >
+        <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.white }}>
+          <View style={{ flex: 1 }}>
+            {/* Modal Header */}
+            <View style={{ 
+              flexDirection: 'row', 
+              alignItems: 'center', 
+              justifyContent: 'flex-start',
+              paddingHorizontal: 16,
+              paddingVertical: 12,
+              borderBottomWidth: 1,
+              borderBottomColor: '#E8E8E8',
+              backgroundColor: COLORS.white
+            }}>
+              <TouchableOpacity onPress={closeArticleModal}>
+                <ArrowLeft size={24} color={COLORS.black} />
+              </TouchableOpacity>
+            </View>
+            
+            {/* Modal Content */}
+            {selectedArticleId && id && (
+              <ArticleModalContent 
+                articleId={selectedArticleId} 
+                cafeId={String(id)}
+                onClose={closeArticleModal}
+              />
+            )}
           </View>
-          
-          {/* Modal Content */}
-          {selectedArticleId && id && (
-            <ArticleModalContent 
-              articleId={selectedArticleId} 
-              cafeId={String(id)}
-              onClose={closeArticleModal}
-            />
-          )}
-        </View>
-      </SafeAreaView>
-    </Modal>
+        </SafeAreaView>
+      </Modal>
+    )}
     </SafeAreaView>
   );
 }

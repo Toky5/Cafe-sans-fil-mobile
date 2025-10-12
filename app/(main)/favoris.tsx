@@ -1,4 +1,4 @@
-import { View, Text, FlatList, StatusBar, Image, Platform, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, StatusBar, Image, Platform, TouchableOpacity, Modal, SafeAreaView } from 'react-native';
 import React, { useEffect, useCallback } from 'react';
 import { useRouter } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
@@ -9,6 +9,9 @@ import HeaderLayout from '@/components/layouts/HeaderLayout';
 import { clearTokens, getInfoFromToken, getToken, deleteAccount } from "@/utils/tokenStorage";
 import CafeCard from "@/components/common/Cards/CafeCard";
 import ArticleCard from "@/components/common/Cards/ArticleCard";
+import ArticleModalContent from "@/components/common/ArticleModalContent";
+import IconButton from "@/components/common/Buttons/IconButton";
+import { X } from "lucide-react-native";
 import COLORS from '@/constants/Colors';
 
 
@@ -27,6 +30,11 @@ export default function FavorisScreen() {
   const [articlesFavoris, setArticlesFavoris] = React.useState<Array<any>>([]);
   const [articlesData, setArticlesData] = React.useState<Array<any>>([]);
   const [isArticlesLoading, setIsArticlesLoading] = React.useState<boolean>(false);
+  
+  // Modal state for article details
+  const [isArticleModalVisible, setIsArticleModalVisible] = React.useState(false);
+  const [selectedArticleId, setSelectedArticleId] = React.useState<string | null>(null);
+  const [selectedCafeId, setSelectedCafeId] = React.useState<string | null>(null);
   
   const formatPrice = (price: string) => {
     if (price.charAt(price.length - 2) == ".") {
@@ -209,6 +217,18 @@ export default function FavorisScreen() {
     }, [cafeFavoris, articlesFavoris])
   );
 
+  // Article modal handlers
+  const openArticleModal = (articleId: string, cafeId: string) => {
+    setSelectedArticleId(articleId);
+    setSelectedCafeId(cafeId);
+    setIsArticleModalVisible(true);
+  };
+  
+  const closeArticleModal = () => {
+    setIsArticleModalVisible(false);
+    setSelectedArticleId(null);
+    setSelectedCafeId(null);
+  };
 
   return (
     <>
@@ -296,13 +316,20 @@ export default function FavorisScreen() {
                 return (
                   <TouchableOpacity 
                     onPress={() => {
-                      // Navigate to article page
+                      // Navigate to article page or open modal based on platform
                       console.log('📱 article pressed', item);
                       console.log('📱 Article ID:', item.id, 'Type:', typeof item.id);
                       console.log('📱 Cafe ID:', item.cafe_id, 'Type:', typeof item.cafe_id);
                       if (item.cafe_id && item.id) {
-                        console.log('📱 Navigating to article:', `/cafe/${item.cafe_id}/${item.id}`);
-                        router.push(`/cafe/${item.cafe_id}/${item.id}`);
+                        if (Platform.OS === 'ios') {
+                          // iOS: Open modal
+                          console.log('📱 Opening modal for article:', item.id);
+                          openArticleModal(item.id, item.cafe_id);
+                        } else {
+                          // Android: Navigate to page
+                          console.log('📱 Navigating to article:', `/cafe/${item.cafe_id}/${item.id}`);
+                          router.push(`/cafe/${item.cafe_id}/${item.id}`);
+                        }
                       }
                     }}
                     activeOpacity={0.8}
@@ -431,6 +458,47 @@ export default function FavorisScreen() {
           ) : null}
         </View>
       </ScrollableLayout>
+      
+      {/* Article Detail Modal */}
+      {isArticleModalVisible && (
+        <Modal
+          visible={isArticleModalVisible}
+          animationType="slide"
+          presentationStyle="pageSheet"
+          onRequestClose={closeArticleModal}
+        >
+          <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.white }}>
+            <View style={{ flex: 1 }}>
+              {/* Modal Header */}
+              <View style={{ 
+                flexDirection: 'row', 
+                alignItems: 'center', 
+                justifyContent: 'flex-start',
+                paddingHorizontal: 16,
+                paddingVertical: 12,
+                borderBottomWidth: 1,
+                borderBottomColor: '#E8E8E8',
+                backgroundColor: COLORS.white
+              }}>
+                <IconButton
+                  Icon={X}
+                  onPress={closeArticleModal}
+                  style={{ backgroundColor: COLORS.lightGray }}
+                />
+              </View>
+              
+              {/* Article Content */}
+              {selectedArticleId && selectedCafeId && (
+                <ArticleModalContent 
+                  articleId={selectedArticleId} 
+                  cafeId={selectedCafeId}
+                  onClose={closeArticleModal}
+                />
+              )}
+            </View>
+          </SafeAreaView>
+        </Modal>
+      )}
     </>
   );
 }

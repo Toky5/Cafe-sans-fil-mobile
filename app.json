@@ -10,7 +10,7 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "buildNumber": "10",
+      "buildNumber": "11",
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "This app uses the location to find cafes near you."
       },
@@ -22,10 +22,10 @@
         "backgroundColor": "#fbfaf7"
       },
       "package": "com.cadum.cafesansfil",
-      "versionCode": 10,
+      "versionCode": 11,
       "config": {
         "googleMaps": {
-          "apiKey": "process.env.GOOGLE_MAPS_API_KEY"
+          "apiKey": "AIzaSyBLPZng6Gr0UCGxWrovmdbBaVmptRQEUHs"
         }
       }
     },
@@ -39,7 +39,7 @@
       [
         "expo-splash-screen",
         {
-          "image": "logo.png",
+          "image": "logoold.png",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
