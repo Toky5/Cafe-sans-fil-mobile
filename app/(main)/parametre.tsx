@@ -741,17 +741,6 @@ export default function ParametreScreen() {
         style={styles.modernModalContent}
         showsVerticalScrollIndicator={false}
       >
-       <View style={styles.aboutSection}>
-  <View style={styles.sectionIcon}>
-    <FontAwesome name="users" size={22} color={COLORS.white} />
-  </View>
-  <Text style={styles.sectionTitle}>À propos du CADUM</Text>
-  <Text style={styles.sectionContent}>
-    Le Club de développement d'applications de l'Université de Montréal (CADUM) est un club étudiant fondé à l'automne 2024. Nous rassemblons des étudiants passionnés par le développement mobile qui souhaitent apprendre, créer et collaborer sur des projets concrets.
-  </Text>
-</View>
-
-<View style={styles.divider} />
 
 <View style={styles.aboutSection}>
   <View style={styles.sectionIcon}>
@@ -775,38 +764,6 @@ export default function ParametreScreen() {
 </View>
 
 <View style={styles.divider} />
-
-<View style={styles.aboutSection}>
-  <View style={styles.sectionIcon}>
-    <FontAwesome6 name="share-nodes"   size={20} color={COLORS.white} />
-  </View>
-  <Text style={styles.sectionTitle}>Rejoignez-nous</Text>
-  <Text style={styles.sectionContent}>
-    Suivez nos actualités, participez à nos ateliers et contribuez à nos projets open source. Rejoignez notre communauté pour apprendre et grandir avec nous !
-  </Text>
-  
-  <View style={styles.socialIcons}>
-    <TouchableOpacity 
-      style={styles.socialButton}
-      onPress={() => navigation.push("https://discord.gg/DvJWz9hwWF")}>
-      <FontAwesome6 name="discord" size={24} color={COLORS.white} />
-    </TouchableOpacity>
-    
-    <TouchableOpacity 
-      style={styles.socialButton}
-      onPress={() => navigation.push("https://github.com/CADUM-UdeM")}>
-      <AntDesign name="github" size={24} color={COLORS.white} />
-    </TouchableOpacity>
-    
-    <TouchableOpacity 
-      style={styles.socialButton}
-      onPress={() => navigation.push("https://cadum.aediroum.ca")}>
-      <FontAwesome name="globe" size={24} color={COLORS.white} />
-    </TouchableOpacity>
-  </View>
-</View>
-
-        <View style={styles.divider} />
 
       </ScrollView>
     </View>
