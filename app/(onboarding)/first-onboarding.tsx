@@ -20,10 +20,10 @@ export default function FirstOnboardingScreen() {
 
       <View style={styles.contentContainer}>
         <Image
-          source={require("@/assets/images/onboarding/firstscreen.png")}
+          source={require("@/assets/images/onboarding/onboard1.png")}
           style={{
             alignSelf: "center",
-            marginLeft: SPACING["xl"],
+            marginLeft: SPACING["md"],
             width: 310,
             height: 260,
           }}

@@ -37,6 +37,9 @@ type ArticleCardProps = {
 
   /** Additional styles for the card */
   style?: StyleProp<ViewStyle>;
+  
+  /** Optional custom onPress handler (overrides default navigation) */
+  onPress?: () => void;
 };
 const formatPrice = (price: string) => {
   if (price.charAt(price.length - 2) == ".") {
@@ -94,10 +97,19 @@ export default function ArticleCard({
   cafeSlug = "INVALID_SLUG",
   slug = "INVALID_SLUG",
   style,
+  onPress,
 }: ArticleCardProps) {
+  const handlePress = () => {
+    if (onPress) {
+      onPress();
+    } else {
+      router.push(`/cafe/${cafeSlug}/${slug}`);
+    }
+  };
+  
   return (
     <Pressable
-      onPress={() => router.push(`/cafe/${cafeSlug}/${slug}`)}
+      onPress={handlePress}
       style={[styles.horizontalCard, style]}
     >
       <Image 

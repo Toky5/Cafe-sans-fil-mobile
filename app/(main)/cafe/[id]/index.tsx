@@ -5,6 +5,7 @@ import CafeCard from "@/components/common/Cards/CafeCard";
 import DayCard from "@/components/common/Cards/DayCard";
 import CategoryCard from "@/components/common/Cards/CategoryCard";
 import Tooltip from "@/components/common/Tooltip";
+import ArticleModalContent from "@/components/common/ArticleModalContent";
 import COLORS from "@/constants/Colors";
 import SPACING from "@/constants/Spacing";
 import TYPOGRAPHY from "@/constants/Typography";
@@ -40,7 +41,9 @@ import {
   ActivityIndicator,
   Animated,
   TextInput,
-  Dimensions
+  Dimensions,
+  Modal,
+  Pressable
 } from "react-native";
 import { Cafe, Category, Item } from "@/constants/types/GET_cafe";
 import { allCafe } from '@/constants/types/GET_list_cafe';
@@ -65,8 +68,12 @@ export default function CafeScreen() {
   const [isSearchActive, setIsSearchActive] = useState(false);
 
   const [cafe, setCafe] = useState<Cafe>(); // set social media as empty object
-  /*
+  
   const [data, setData] = useState<allCafe | any>([]);
+  
+  // Modal state for article details
+  const [isArticleModalVisible, setIsArticleModalVisible] = useState(false);
+  const [selectedArticleId, setSelectedArticleId] = useState<string | null>(null);
   useEffect(() => {
       setIsLoading(true);
       fetch("https://cafesansfil-api-r0kj.onrender.com/api/cafes")
@@ -81,7 +88,7 @@ export default function CafeScreen() {
         
         ;
     }, []);
-  */
+  
   // Have an openable link
   const openLink = (url: string) => {
     Linking.openURL(url).catch(err => console.error("Failed to open URL:", err));
@@ -336,7 +343,7 @@ function filterMenu(filter?: string, menuData?: any): Item[] {
   const paymentDetails = cafe?.payment_details ? cafe.payment_details.map(({method, minimum}) => ({
     method : translationPaymentMethod(method), minimum })) : [];
 
-console.log(paymentDetails);
+
     const [heart, toggleHeart] = useState(false);
 
     const addToFavoris = async (id) => {
@@ -394,6 +401,17 @@ console.log(paymentDetails);
         console.error("Error removing from favoris:", error);
       }
     }
+    
+    // Article modal handlers
+    const openArticleModal = (articleId: string) => {
+      setSelectedArticleId(articleId);
+      setIsArticleModalVisible(true);
+    };
+    
+    const closeArticleModal = () => {
+      setIsArticleModalVisible(false);
+      setSelectedArticleId(null);
+    };
     
     // Search bar animation states
     const [isSearchExpanded, setIsSearchExpanded] = useState(false);
@@ -851,6 +869,7 @@ console.log(paymentDetails);
                   image={item.image_url}
                   calories={item.description}
                   size="large"
+                  onPress={() => openArticleModal(item.id)}
                 />
               ))
             ) : (
@@ -864,7 +883,7 @@ console.log(paymentDetails);
         </View>
       </View>      
 
-      {/* Cafés similaires 
+      {/* Cafés similaires */}
       <Text 
         style={{
           marginVertical: SPACING["xl"], 
@@ -895,11 +914,46 @@ console.log(paymentDetails);
             paddingBottom: SPACING["md"],
           }}
         />
-        */}
-
+        
         {/* TODO: IMPLÉMENTER LA FLATLIST */}
 
     </ScrollView>
+    
+    {/* Article Detail Modal */}
+    <Modal
+      visible={isArticleModalVisible}
+      animationType="slide"
+      presentationStyle="pageSheet"
+      onRequestClose={closeArticleModal}
+    >
+      <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.white }}>
+        <View style={{ flex: 1 }}>
+          {/* Modal Header */}
+          <View style={{ 
+            flexDirection: 'row', 
+            alignItems: 'center', 
+            justifyContent: 'flex-start',
+            paddingHorizontal: 16,
+            paddingVertical: 12,
+            borderBottomWidth: 1,
+            borderBottomColor: '#E8E8E8'
+          }}>
+            <TouchableOpacity onPress={closeArticleModal}>
+              <ArrowLeft size={24} color={COLORS.black} />
+            </TouchableOpacity>
+          </View>
+          
+          {/* Modal Content */}
+          {selectedArticleId && id && (
+            <ArticleModalContent 
+              articleId={selectedArticleId} 
+              cafeId={String(id)}
+              onClose={closeArticleModal}
+            />
+          )}
+        </View>
+      </SafeAreaView>
+    </Modal>
     </SafeAreaView>
   );
 }
