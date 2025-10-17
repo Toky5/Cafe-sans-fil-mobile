@@ -1,5 +1,5 @@
 import { View, Text, Touchable, TouchableOpacity, Modal, Platform, Linking, Alert, Image, StatusBar, FlatList, ScrollView, ActivityIndicator, SafeAreaView } from 'react-native';
-import React, { use, useEffect, useMemo, useCallback, memo } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import ScrollableLayout from '@/components/layouts/ScrollableLayout';
 import SPACING from '@/constants/Spacing';
 import TYPOGRAPHY from "@/constants/Typography";
@@ -325,16 +325,14 @@ export default function EventsPage() {
 
   }, [currentPage, isFocused]);
 
-  // Memoized event card component for better performance with image optimization
-  const EventCard = memo(({ event }: { event: any }) => {
+  const renderEventCard = ({ item }: { item: any }) => {
     return (
-      <TouchableOpacity onPress={() => openModalWithData(event)}>
+      <TouchableOpacity onPress={() => openModalWithData(item)}>
         <View style={{
           backgroundColor: COLORS.white,
           borderRadius: 16,
           padding: SPACING["lg"],
           marginBottom: SPACING["md"],
-          // Use simpler shadow on Android for better performance
           ...(Platform.OS === 'android' ? {
             elevation: 2,
           } : {
@@ -346,9 +344,9 @@ export default function EventsPage() {
           borderWidth: 1,
           borderColor: '#F0F0F0'
         }}>
-          {event.image_url && (
+          {item.image_url && (
             <Image 
-              source={{ uri: event.image_url }}
+              source={{ uri: item.image_url }}
               style={{
                 width: '100%',
                 height: 120,
@@ -359,13 +357,13 @@ export default function EventsPage() {
             />
           )}
           <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: SPACING["sm"]}}>
-            <Text style={{...TYPOGRAPHY.body.large.semiBold, flex: 1, marginRight: SPACING["sm"]}}>{event.name}</Text>
+            <Text style={{...TYPOGRAPHY.body.large.semiBold, flex: 1, marginRight: SPACING["sm"]}}>{item.name}</Text>
           </View>
           <Text 
             style={{...TYPOGRAPHY.body.normal.base, color: '#666', marginBottom: SPACING["sm"], lineHeight: 18}}
             numberOfLines={2}
           >
-            {event.description}
+            {item.description}
           </Text>
           <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
@@ -377,17 +375,17 @@ export default function EventsPage() {
                 marginRight: SPACING["xs"]
               }} />
               <Text style={{...TYPOGRAPHY.body.small.base, color: '#666'}}>
-                {event.cafes && event.cafes.length > 0 ? event.cafes[0].name : 'Multiple Cafés'}
+                {item.cafes && item.cafes.length > 0 ? item.cafes[0].name : 'Multiple Cafés'}
               </Text>
             </View>
             <Text style={{...TYPOGRAPHY.body.small.base, color: '#999'}}>
-              {new Date(event.start_date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
+              {new Date(item.start_date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
             </Text>
           </View>
         </View>
       </TouchableOpacity>
     );
-  });
+  };
 
   return (
     <>
@@ -395,68 +393,6 @@ export default function EventsPage() {
     <HeaderLayout />
       <ScrollableLayout>
         <View>
-          
-
-          {/* Tab Buttons 
-          <View style={{
-            flexDirection: 'row',
-            marginHorizontal: SPACING["md"],
-            marginBottom: SPACING["lg"],
-            marginTop: SPACING["md"],
-            backgroundColor: '#F8F9FA',
-            borderRadius: 12,
-            padding: 4
-          }}>
-            <TouchableOpacity
-              onPress={() => {
-                setActiveTab('events');
-                setCurrentPage(1); // Reset to page 1 when switching tabs
-              }}
-              style={{
-                flex: 1,
-                paddingVertical: SPACING["sm"],
-                paddingHorizontal: SPACING["md"],
-                borderRadius: 8,
-                backgroundColor: activeTab === 'events' ? COLORS.white  : 'transparent',
-                shadowColor: activeTab === 'events' ? COLORS.black : 'transparent',
-                shadowOffset: { width: 0, height: 1 },
-                shadowOpacity: activeTab === 'events' ? 0.1 : 0,
-                shadowRadius: 2,
-                elevation: activeTab === 'events' ? 2 : 0,
-              }}
-            >
-              <Text style={{
-                ...TYPOGRAPHY.body.normal.semiBold,
-                color: activeTab === 'events' ? '#333' : '#666',
-                textAlign: 'center'
-              }}>Événements</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => {
-                setActiveTab('announcements');
-                setCurrentPage(1); // Reset to page 1 when switching tabs
-              }}
-              style={{
-                flex: 1,
-                paddingVertical: SPACING["sm"],
-                paddingHorizontal: SPACING["md"],
-                borderRadius: 8,
-                backgroundColor: activeTab === 'announcements' ? COLORS.white : 'transparent',
-                shadowColor: activeTab === 'announcements' ? COLORS.black : 'transparent',
-                shadowOffset: { width: 0, height: 1 },
-                shadowOpacity: activeTab === 'announcements' ? 0.1 : 0,
-                shadowRadius: 2,
-                elevation: activeTab === 'announcements' ? 2 : 0,
-              }}
-            >
-              <Text style={{
-                ...TYPOGRAPHY.body.normal.semiBold,
-                color: activeTab === 'announcements' ? '#333' : '#666',
-                textAlign: 'center'
-              }}>Annonces</Text>
-            </TouchableOpacity>
-          </View>
-          */}
           <View style={{flex: 1, marginHorizontal: SPACING["md"], marginTop: SPACING["md"]}}>
             {isEventsLoading ? (
               <View style={{alignItems: 'center', marginTop: SPACING["xl"]}}>
@@ -473,7 +409,7 @@ export default function EventsPage() {
                 <>
                   <FlatList
                     data={events.items}
-                    renderItem={({ item }) => <EventCard event={item} />}
+                    renderItem={renderEventCard}
                     keyExtractor={(item) => item.id}
                     scrollEnabled={false}
                     removeClippedSubviews={true}

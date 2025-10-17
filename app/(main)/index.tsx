@@ -414,6 +414,7 @@ export default function HomeScreen() {
                         style={{
                           paddingHorizontal: SPACING["sm"],
                           paddingBottom: SPACING["md"],
+                          
                         }}
                       />
                     </View>
@@ -459,7 +460,8 @@ export default function HomeScreen() {
                         keyExtractor={item => item.id}
                         horizontal
                         ItemSeparatorComponent={() => <View style={{ width: SPACING["md"] }} />}
-                        style={{
+                        showsHorizontalScrollIndicator={false}
+                        contentContainerStyle={{
                           paddingHorizontal: SPACING["sm"],
                           paddingBottom: SPACING["md"],
                         }}
