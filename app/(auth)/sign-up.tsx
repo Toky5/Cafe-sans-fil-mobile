@@ -18,7 +18,7 @@ export default function SignInScreen() {
   const [username, onChangeUsername] = React.useState('');
   const [firstName, onChangeFirstName] = React.useState('');
   const [lastName, onChangeLastName] = React.useState('');
-  const [matricule, onChangeMatricule] = React.useState<number | null>(null);
+  const [matricule, onChangeMatricule] = React.useState('');
   const emailInputRef = React.useRef<TextInput>(null);
   const passwordInputRef = React.useRef<TextInput>(null);
   const passwordConfInputRef = React.useRef<TextInput>(null);
@@ -36,7 +36,7 @@ export default function SignInScreen() {
   const [isVisibleConfirm, setIsVisibleConfirm] = React.useState(true);
 
 
-  const signup = async (username: string, first_name: string, last_name: string, matricule: number ,email : string , password : string) => {
+  const signup = async (username: string, first_name: string, last_name: string, matricule: string ,email : string , password : string) => {
     const url = 'https://cafesansfil-api-r0kj.onrender.com/api/auth/register';
 
     const formBody = {
@@ -401,7 +401,7 @@ export default function SignInScreen() {
       <TextInput
           style={styles.input}
           ref={matriculeInputRef}
-          onChangeText={(text) => onChangeMatricule(text ? parseInt(text, 10) : null)}
+          onChangeText={(text) => onChangeMatricule(text)}
           value={matricule !== null ? matricule.toString() : ''}
           placeholder="12345678"
           keyboardType="numeric"
@@ -598,7 +598,7 @@ const styles = {
     marginTop: 10,
     marginBottom: 15,
     borderColor: "#CCCCCC",
-    
+    color: "#000000",
   },
 
   inputR: {
@@ -610,7 +610,7 @@ const styles = {
     marginTop: 10,
     marginBottom: 15,
     borderColor: "#FF0000",
-    
+    color: "#000000",
   },
   buttonView:{
     marginTop: -10,
