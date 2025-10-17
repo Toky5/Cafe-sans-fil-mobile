@@ -63,6 +63,7 @@ export default function HomeScreen() {
   const [location, getCurrentLocation, locationPermissionDenied] = useLocation();
   const [originalData, setOriginalData] = useState<Cafe[]>();
   const [searched, setSearched] = useState(false);
+  const [isLoadingLocation, setIsLoadingLocation] = useState(true);
   const [selectedLocation, setSelectedLocation] = useState<{
     name: string,
     coords: { latitude: number, longitude: number }

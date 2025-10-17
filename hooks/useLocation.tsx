@@ -42,19 +42,96 @@ export default function useLocation() {
    */
   async function getCurrentLocation(returnLocation: boolean = false) {
 
-    // Request permission to access the location
-    let { status } = await Location.requestForegroundPermissionsAsync();
+    try {
+      // Request permission to access the location
+      let { status } = await Location.requestForegroundPermissionsAsync();
 
-    // If permission is denied, log a message and set the flag
-    if (status !== "granted") {
-      console.info("Permission to access location was denied");
-      setLocationPermissionDenied(true);
-      // Set a mock location object so the app can still function
-      // This prevents the app from being stuck in loading state
+      // If permission is denied, log a message and set the flag
+      if (status !== "granted") {
+        console.info("Permission to access location was denied");
+        setLocationPermissionDenied(true);
+        // Set a mock location object so the app can still function
+        // This prevents the app from being stuck in loading state
+        setLocation({
+          coords: {
+            latitude: 45.5017, // Montreal default
+            longitude: -73.5673,
+            altitude: null,
+            accuracy: null,
+            altitudeAccuracy: null,
+            heading: null,
+            speed: null,
+          },
+          timestamp: Date.now(),
+        } as Location.LocationObject);
+        return;
+      }
+
+      // Permission granted, reset the denied flag
+      setLocationPermissionDenied(false);
+
+      // Try to get last known position first (instant)
+      const lastKnown = await Location.getLastKnownPositionAsync({
+        maxAge: 30000, // 30 seconds
+        requiredAccuracy: 5000, // 5km - very loose
+      });
+
+      if (lastKnown) {
+        console.log("Using last known position:", lastKnown.coords);
+        setLocation(lastKnown);
+      }
+
+      // Get fresh location with timeout
+      const locationPromise = Location.getCurrentPositionAsync({ 
+        accuracy: Location.Accuracy.Lowest,
+        timeInterval: 10000, // Update interval
+      });
+
+      // Create a timeout promise
+      const timeoutPromise = new Promise<null>((_, reject) => 
+        setTimeout(() => reject(new Error('Location timeout')), 8000)
+      );
+
+      // Race between location fetch and timeout
+      try {
+        const position = await Promise.race([locationPromise, timeoutPromise]) as Location.LocationObject;
+        
+        if (position) {
+          console.log("Got fresh location:", position.coords);
+          setLocation(position);
+          if (returnLocation) return position;
+        }
+      } catch (timeoutError) {
+        console.warn("Location fetch timed out, using last known or default");
+        
+        // If we already have lastKnown, we're good
+        if (lastKnown) {
+          if (returnLocation) return lastKnown;
+        } else {
+          // Set default location
+          const defaultLocation = {
+            coords: {
+              latitude: 45.5017,
+              longitude: -73.5673,
+              altitude: null,
+              accuracy: null,
+              altitudeAccuracy: null,
+              heading: null,
+              speed: null,
+            },
+            timestamp: Date.now(),
+          } as Location.LocationObject;
+          setLocation(defaultLocation);
+          if (returnLocation) return defaultLocation;
+        }
+      }
+    } catch (error) {
+      console.error("Error in getCurrentLocation:", error);
+      // Always set a location to prevent app from being stuck
       setLocation({
         coords: {
-          latitude: 0,
-          longitude: 0,
+          latitude: 45.5017,
+          longitude: -73.5673,
           altitude: null,
           accuracy: null,
           altitudeAccuracy: null,
@@ -63,25 +140,7 @@ export default function useLocation() {
         },
         timestamp: Date.now(),
       } as Location.LocationObject);
-      return;
     }
-
-    // Permission granted, reset the denied flag
-    setLocationPermissionDenied(false);
-
-    // Get the current location of the device
-    let position = await Location.getCurrentPositionAsync({});
-    setLocation(position);
-
-    // FIXME: Remove this log after testing.
-    console.log(
-      "Current Location: ",
-      position.coords.longitude,
-      position.coords.latitude
-    );
-
-    // Return the location object if `returnLocation` is true
-    if (returnLocation) return position;
   }
 
   useEffect(() => {
