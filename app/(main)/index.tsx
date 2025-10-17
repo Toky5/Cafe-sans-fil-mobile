@@ -60,6 +60,7 @@ export default function HomeScreen() {
   const [isLoading, setIsLoading] = useState(true);
   const [showOnlyOrder, setShowOnlyOrder] = useState(false);
   const [showOpen, setShowOpen] = useState(false);
+  const [showClosed, setShowClosed] = useState(false);
   const [location, getCurrentLocation, locationPermissionDenied] = useLocation();
   const [originalData, setOriginalData] = useState<Cafe[]>();
   const [searched, setSearched] = useState(false);
@@ -201,7 +202,10 @@ export default function HomeScreen() {
     }
 
     if (showOpen) {
-      filteredCafesClose = filteredCafesClose.filter(cafe => cafe.is_open == true);
+      filteredCafesClose = filteredCafesClose.filter(cafe => isOpenOrNot(cafe) == true);
+    }
+    if (showClosed) {
+      filteredCafesClose = filteredCafesClose.filter(cafe => isOpenOrNot(cafe) == false);
     }
     return filteredCafesClose;
 
@@ -304,6 +308,13 @@ export default function HomeScreen() {
                 label="Ouvert"
                 status="green"
                 onPress={() => setShowOpen(!showOpen)}
+                showChevron={false}
+                changeColorOnPress
+              />
+              <Tooltip
+                label="Fermé"
+                status="red"
+                onPress={() => setShowClosed(!showClosed)}
                 showChevron={false}
                 changeColorOnPress
               />

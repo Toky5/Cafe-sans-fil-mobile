@@ -87,6 +87,7 @@ const styles = StyleSheet.create({
   buttonContainer: {
     paddingHorizontal: SPACING.md,
     gap: SPACING.xs,
-    marginTop: SPACING["9xl"]
+    marginTop: SPACING["9xl"],
+    paddingBottom: SPACING["xl"],
   },
 });

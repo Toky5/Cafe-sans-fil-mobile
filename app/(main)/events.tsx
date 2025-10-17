@@ -526,7 +526,7 @@ export default function EventsPage() {
                   {/* Modal Content */}
                   {modalData && (
                     <ScrollView 
-                      style={{flex: 1}} 
+                      style={{flex: 1, paddingBottom: SPACING["xl"]}} 
                       contentContainerStyle={{paddingHorizontal: SPACING["lg"], paddingBottom: SPACING["xl"]}}
                       showsVerticalScrollIndicator={true}
                     >

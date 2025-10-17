@@ -49,6 +49,7 @@ import FontAwesome from '@expo/vector-icons/FontAwesome'; // icone de user-secre
 import { useRouter, useFocusEffect } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { clearTokens, getInfoFromToken, getToken, deleteAccount, setUserFullname, setUserPhotoUrl, getUserFullname, getUserPhotoUrl} from "@/utils/tokenStorage";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 // Menu item interface for type safety
 interface MenuItem {
@@ -98,6 +99,17 @@ export default function ParametreScreen() {
   const [updatesEnabled, setUpdatesEnabled] = useState(false);
   //const [darkModeEnabled, setDarkModeEnabled] = useState(false);
   //const [languagePreference, setLanguagePreference] = useState('french');
+
+  const insets = useSafeAreaInsets();
+    const getTabBarHeight = () => {
+      if (Platform.OS === 'android') {
+        // If bottom inset is 0, device uses button navigation
+        // If bottom inset > 0, device uses gesture navigation
+        const hasButtonNavigation = insets.bottom === 0;
+        return hasButtonNavigation ? 60 : 70 + insets.bottom;
+      }
+      return undefined; // Let iOS handle it automatically
+    };
 
 
   const { width, height } = Dimensions.get('screen');
@@ -1420,6 +1432,7 @@ const styles = StyleSheet.create({
   modalText: {
     fontSize: 16,
     lineHeight: 24,
+
   },
   input: {
     height: 45,
@@ -1445,6 +1458,7 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 24,
     overflow: 'hidden',
     marginTop: 'auto',
+
   },
   accountModalHeader: {
     flexDirection: 'row',
@@ -1484,7 +1498,7 @@ const styles = StyleSheet.create({
   },
   accountModalContent: {
     paddingHorizontal: 20,
-    paddingBottom: 30,
+    paddingBottom: 70,
   },
   modalProfileSection: {
     alignItems: 'center',
@@ -1791,6 +1805,7 @@ footerSection: {
   marginTop: 20,
   alignItems: 'center',
   paddingVertical: 15,
+  paddingBottom: 90,
 },
 versionText: {
   fontSize: 14,

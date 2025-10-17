@@ -88,5 +88,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.md,
     gap: SPACING.xs,
     marginTop: SPACING["9xl"],
+    paddingBottom: SPACING["xl"],
   },
 });

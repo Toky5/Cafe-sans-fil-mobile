@@ -43,8 +43,17 @@ export default function useLocation() {
   async function getCurrentLocation(returnLocation: boolean = false) {
 
     try {
-      // Request permission to access the location
-      let { status } = await Location.requestForegroundPermissionsAsync();
+      // First, CHECK if we already have permission (don't request again)
+      let { status } = await Location.getForegroundPermissionsAsync();
+
+      // Only request permission if we don't have it yet
+      if (status !== "granted") {
+        console.log("Location permission not granted, requesting...");
+        const permissionResponse = await Location.requestForegroundPermissionsAsync();
+        status = permissionResponse.status;
+      } else {
+        console.log("Location permission already granted, skipping request");
+      }
 
       // If permission is denied, log a message and set the flag
       if (status !== "granted") {
@@ -83,8 +92,7 @@ export default function useLocation() {
 
       // Get fresh location with timeout
       const locationPromise = Location.getCurrentPositionAsync({ 
-        accuracy: Location.Accuracy.Lowest,
-        timeInterval: 10000, // Update interval
+        accuracy: Location.Accuracy.Low,
       });
 
       // Create a timeout promise
