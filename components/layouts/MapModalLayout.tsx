@@ -71,7 +71,7 @@ export default function MapModalLayout({
           width: "100%",
           height: 400,
           borderRadius: 20,
-          marginTop: 16,
+          marginTop: 16,  
         }}
         provider={Platform.OS === 'android' ? PROVIDER_GOOGLE : undefined}
         initialRegion={{

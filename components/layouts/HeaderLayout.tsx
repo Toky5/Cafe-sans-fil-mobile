@@ -1,4 +1,4 @@
-import { Button, Modal, StyleSheet, TouchableOpacity, View, ScrollView ,Text, TouchableHighlight,Animated } from "react-native";
+import { Button, Modal, StyleSheet, TouchableOpacity, View, ScrollView ,Text, TouchableHighlight,Animated, Platform } from "react-native";
 
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Redirect, Tabs, useRouter } from "expo-router";
@@ -245,7 +245,8 @@ const styles = StyleSheet.create({
     paddingBottom: 16,
     borderBottomWidth: 1,
     borderBottomColor: '#ddd',
-    padding:20
+    padding:20,
+    marginTop: Platform.OS === 'android' ? 40 : 0,
   },
   modalTitle: {
     fontSize: 20,

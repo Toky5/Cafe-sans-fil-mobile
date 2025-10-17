@@ -302,6 +302,7 @@ const styles = {
     flex: 1,
     height: 40,
     padding: 0,
+    color: COLORS.black,
   },
   passwordToggle: {
     padding: 4,

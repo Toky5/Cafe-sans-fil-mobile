@@ -503,7 +503,8 @@ export default function EventsPage() {
                     paddingBottom: SPACING["md"],
                     borderBottomWidth: 1,
                     borderBottomColor: '#F0F0F0',
-                    backgroundColor: COLORS.white
+                    backgroundColor: COLORS.white,
+                    marginTop: Platform.OS === 'android' ? 40 : 0,
                   }}>
                     <Text style={{...TYPOGRAPHY.heading.small.bold}}>
                       {modalData && modalData.name ? 'Détails de l\'événement' : 'Détails de l\'annonce'}

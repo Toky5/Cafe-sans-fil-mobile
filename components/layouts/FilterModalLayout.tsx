@@ -1,5 +1,5 @@
 import React from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { Platform, StyleSheet, Text, View } from "react-native";
 
 import SPACING from "@/constants/Spacing";
 import TYPOGRAPHY from "@/constants/Typography";
@@ -49,6 +49,7 @@ const styles = StyleSheet.create({
   title: {
     textAlign: "center",
     ...TYPOGRAPHY.heading.medium.bold,
+    marginTop: Platform.OS === 'android' ? 40 : 0,
   },
   description: {
     textAlign: "center",

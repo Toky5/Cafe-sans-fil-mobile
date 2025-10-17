@@ -16,7 +16,8 @@ import {
   ActivityIndicator,
   Pressable,
   Dimensions,
-  Linking
+  Linking,
+  Platform
 } from "react-native";
 import Constants from 'expo-constants';
 import React, { useState } from 'react'
@@ -1405,7 +1406,8 @@ const styles = StyleSheet.create({
     paddingBottom: 16,
     borderBottomWidth: 1,
     borderBottomColor: '#ddd',
-    padding:20
+    padding:20,
+    marginTop: Platform.OS === 'android' ? 40 : 0,
   },
   modalTitle: {
     fontSize: 20,
