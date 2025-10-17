@@ -124,6 +124,7 @@ export default function CafeCard({
         <View style={styles.cafeInfo}>
           <View style={styles.cafeInfoHeader}>
             <Text style={[TYPOGRAPHY.body.large.semiBold]}>{name}</Text>
+            
             <Circle
               width={12}
               height={12}
@@ -136,6 +137,7 @@ export default function CafeCard({
               }
               testID="tooltip-icon"
             />
+           
           </View>
           <Text
             style={[TYPOGRAPHY.body.normal.semiBold, styles.cafeInfoLocation]}

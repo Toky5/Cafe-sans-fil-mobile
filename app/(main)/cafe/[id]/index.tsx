@@ -228,6 +228,31 @@ function filterMenu(filter?: string, menuData?: any): Item[] {
     };
     return methodTranslated.method || method;
   };
+
+
+  const isOpenOrNot = (cafe) =>{
+    const currentDate = new Date();
+    const currentDay = currentDate.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
+    const currentTime = currentDate.toTimeString().slice(0,5); // "HH:MM"
+    let openStatus = false;
+    if (cafe && cafe.opening_hours) {
+      const todayHours = cafe.opening_hours.find((day) => day.day.toLowerCase() === currentDay);
+      console.log("today hours: ", todayHours);
+      if (todayHours) {
+        for (let block of todayHours.blocks) {
+          if (currentTime >= block.start && currentTime <= block.end) {
+            openStatus = true;
+            break;
+          }
+        }
+      }
+    }
+    console.log("lol", cafe.opening_hours);
+    console.log("open status de ", openStatus, currentDay, currentTime);
+    return openStatus;
+
+  }
+
   const openLocation = (location : any) => {
     console.log("Location: ", location);
     
@@ -636,7 +661,7 @@ function filterMenu(filter?: string, menuData?: any): Item[] {
         />
 
         <View style={styles.cafeHeaderOpenStatus}>
-          <Tooltip label={"Ouvert"} showChevron={false} status={cafe?.is_open ? "green" : "red"} />
+          <Tooltip label={isOpenOrNot(cafe) ? "Ouvert" : "Fermé"} showChevron={false} status={isOpenOrNot(cafe) ? "green" : "red"} />
         </View>
       </View>
 

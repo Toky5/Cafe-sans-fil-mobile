@@ -205,6 +205,28 @@ export default function HomeScreen() {
     return filteredCafesClose;
 
   };
+  const isOpenOrNot = (cafe) =>{
+    const currentDate = new Date();
+    const currentDay = currentDate.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
+    const currentTime = currentDate.toTimeString().slice(0,5); // "HH:MM"
+    let openStatus = false;
+    if (cafe && cafe.opening_hours) {
+      const todayHours = cafe.opening_hours.find((day) => day.day.toLowerCase() === currentDay);
+      console.log("today hours: ", todayHours);
+      if (todayHours) {
+        for (let block of todayHours.blocks) {
+          if (currentTime >= block.start && currentTime <= block.end) {
+            openStatus = true;
+            break;
+          }
+        }
+      }
+    }
+    console.log("lol", cafe.opening_hours);
+    console.log("open status de ", openStatus, currentDay, currentTime);
+    return openStatus;
+
+  }
 
   // Improved search function that correctly handles text changes
   function handleSearch(text: string): void {
@@ -309,7 +331,7 @@ export default function HomeScreen() {
                 location={item.location.pavillon}
                 priceRange="$$"
                 //rating={4.8}
-                status={item.is_open}
+                status={isOpenOrNot(item)}
                 id={item.id}
               />}
               keyExtractor={item => item.id}
@@ -371,6 +393,7 @@ export default function HomeScreen() {
                         }}>
                         {pavillonName}
                       </Text>
+                      
                       <FlatList
                         data={pavillonGroup}
                         renderItem={({ item }) => (
@@ -380,7 +403,7 @@ export default function HomeScreen() {
                             location={'L' + item.location.local.substring(1) || ""}
                             priceRange="$$"
                             //rating={4.8}
-                            status={item.is_open}
+                            status={isOpenOrNot(item)}
                             id={item.id}
                           />
                         )}
@@ -429,7 +452,7 @@ export default function HomeScreen() {
                             location={'L' + item.location.local.substring(1) || ""}
                             priceRange="$$"
                             //rating={4.8}
-                            status={item.is_open}
+                            status={isOpenOrNot(item)}
                             id={item.id}
                           />
                         )}
