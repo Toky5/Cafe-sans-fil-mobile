@@ -20,6 +20,7 @@ import {
 } from "lucide-react-native";
 import AccountInfo from "@/components/common/Auth/AccountInfo";
 import React, { useState , useRef} from "react";
+import { AntDesign } from "@expo/vector-icons";
 // FIXME: Replace with actual user data. This is just a placeholder.
 export const user = {
   fullName: "Darlene Robertson",
@@ -146,15 +147,26 @@ export default function HeaderLayout({fullName, profilePicture}: HeaderLayoutPro
         </View>
       <Modal
         animationType="slide"
-        transparent={true}
         visible={notifModal}
+        presentationStyle="pageSheet"
         onRequestClose={() => setNotifModal(false)}
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContainer}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Mes Notifications</Text>
-              <Button title="Fermer" onPress={() => setNotifModal(false)} />
+              <TouchableOpacity 
+                      onPress={() => setNotifModal(false)} 
+                      style={{
+                        width: 32,
+                        height: 32,
+                        borderRadius: 16,
+                        justifyContent: 'center',
+                        alignItems: 'center'
+                      }}
+                    >
+                      <AntDesign name="close" size={24} color={COLORS.black} />
+                    </TouchableOpacity>
             </View>
             <ScrollView style={styles.modalContent}>
             {notifs.length === 0 ? (
@@ -218,15 +230,13 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalContainer: {
     width: '100%',
-    height: '90%',
+    height: '100%',
     backgroundColor: COLORS.white,
-    borderRadius: 24,
-    overflow: 'hidden',
-    marginTop: '20%',
+  
+
   },
   modalHeader: {
     flexDirection: 'row',
