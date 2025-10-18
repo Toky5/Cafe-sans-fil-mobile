@@ -12,10 +12,15 @@
       "supportsTablet": true,
       "buildNumber": "15",
       "infoPlist": {
-        "NSLocationWhenInUseUsageDescription": "This app uses the location to find cafes near you."
+        "NSLocationWhenInUseUsageDescription": "This app uses the location to find cafes near you.",
+        "NSUserNotificationsUsageDescription": "Allow Café sans-fil to send you notifications about orders, events, and updates",
+        "ITSAppUsesNonExemptEncryption": false
       },
       "bundleIdentifier": "com.cadum.cafe-sans-fil",
-      "appleTeamId": "XY2S94A7AL"
+      "appleTeamId": "XY2S94A7AL",
+      "entitlements": {
+        "aps-environment": "production"
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -30,7 +35,6 @@
         }
       },
       "googleServicesFile": "./google-services.json"
-
     },
     "web": {
       "bundler": "metro",

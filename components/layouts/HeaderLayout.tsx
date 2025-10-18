@@ -9,6 +9,9 @@ import SPACING from "@/constants/Spacing";
 import COLORS from "@/constants/Colors";
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { GestureHandlerRootView } from "react-native-gesture-handler"; // Import GestureHandlerRootView
+import {getExpoPushToken} from '@/utils/notifications';
+import * as SecureStore from 'expo-secure-store';
+
 
 import {
   ChevronRight,
@@ -19,7 +22,7 @@ import {
   Info,
 } from "lucide-react-native";
 import AccountInfo from "@/components/common/Auth/AccountInfo";
-import React, { useState , useRef} from "react";
+import React, { useState , useRef, use, useEffect} from "react";
 import { AntDesign } from "@expo/vector-icons";
 // FIXME: Replace with actual user data. This is just a placeholder.
 export const user = {
@@ -32,6 +35,13 @@ type HeaderLayoutProps = {
   profilePicture?: any;
 };
 
+type Notification = {
+  id: number;
+  title: string;
+  content: string;
+  status: boolean;
+};
+
 /**
  * HeaderLayout component that renders a header layout with account info and icon button.
  */
@@ -39,8 +49,34 @@ export default function HeaderLayout({fullName, profilePicture}: HeaderLayoutPro
   
   const navigation = useRouter();
   const [notifModal, setNotifModal] = useState(false);
-
+  const [displayToken, setDisplayToken] = useState("");
+  const [isLoadingToken, setIsLoadingToken] = useState(true);
   
+  useEffect(() => {
+    const loadToken = async () => {
+      try {
+        setIsLoadingToken(true);
+        console.log("Attempting to load Expo push token...");
+        
+        // This will wait for initialization if needed, or return cached/stored token
+        const token = await getExpoPushToken();
+        
+        console.log("Token retrieved:", token);
+        if (token) {
+          setDisplayToken(token);
+        } else {
+          console.warn("No token available");
+          setDisplayToken("No token available - check permissions");
+        }
+      } catch (error) {
+        console.error("Error loading token:", error);
+        setDisplayToken("Error loading token");
+      } finally {
+        setIsLoadingToken(false);
+      }
+    };
+    loadToken();
+  }, []);
 
 
   const handleDelete = (id : any) => {
@@ -125,7 +161,7 @@ export default function HeaderLayout({fullName, profilePicture}: HeaderLayoutPro
     ]);
     */
     // a desac pr le test
-    const [notifs, setNotifs] = useState([]);
+    const [notifs, setNotifs] = useState<Notification[]>([]);
     
     const handleReadAll = () => {
       setNotifs(notifs.map((notif) => ({ ...notif, status: true })));
@@ -170,7 +206,24 @@ export default function HeaderLayout({fullName, profilePicture}: HeaderLayoutPro
             </View>
             <ScrollView style={styles.modalContent}>
             {notifs.length === 0 ? (
-                  <Text style={styles.noNotificationsText}>Aucune notification</Text>
+                  <View>
+                    <Text style={styles.noNotificationsText}>
+                      {isLoadingToken ? "Chargement du token..." : displayToken}
+                    </Text>
+                    {!isLoadingToken && displayToken && (
+                      <TouchableOpacity 
+                        onPress={() => {
+                          // Copy to clipboard functionality would go here
+                          console.log("Token:", displayToken);
+                        }}
+                        style={{ marginTop: 10, padding: 10, backgroundColor: '#f0f0f0', borderRadius: 5 }}
+                      >
+                        <Text style={{ fontSize: 10, textAlign: 'center', color: '#666' }}>
+                          Appuyez pour copier
+                        </Text>
+                      </TouchableOpacity>
+                    )}
+                  </View>
                 ) : (
               notifs.map((notif) => (
                 <GestureHandlerRootView key={notif.id} style={{ width: '100%', marginBottom: 12 }}>
