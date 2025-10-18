@@ -1,5 +1,5 @@
 import React from 'react';
-import {useEffect} from 'react';
+import {useEffect, useRef} from 'react';
 
 import { useFonts } from 'expo-font'; 
 import { Slot } from 'expo-router';
@@ -13,13 +13,15 @@ import { type TokenCache } from '@/lib/token-cache';
 import * as SecureStore from 'expo-secure-store'
 
 import { StatusBar } from 'react-native';
+import * as Notifications from 'expo-notifications';
+import { initializePushNotifications } from '@/utils/notifications';
 
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
 
-    
-
+    const notificationListener = useRef<Notifications.Subscription | undefined>(undefined);
+    const responseListener = useRef<Notifications.Subscription | undefined>(undefined);
 
     const [loaded, error] = useFonts({
         'Inter-Black': require("../assets/fonts/Inter/Inter-Black.ttf"),
@@ -65,6 +67,44 @@ export default function RootLayout() {
             SplashScreen.hideAsync();
         }
     }, [loaded, loaded]);
+
+    // Initialize push notifications when app loads
+    useEffect(() => {
+        // Initialize push notifications
+        initializePushNotifications();
+
+        const displayExpoPushToken = async () => {
+            const token = await SecureStore.getItemAsync('expoPushToken');
+            if (token) {
+                alert(`Expo Push Token: ${token}`);
+            }
+        };
+        displayExpoPushToken();
+        
+
+        // Listener for notifications received while app is in foreground
+        notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
+            console.log('📬 Notification received:', notification);
+            // You can add custom logic here when a notification is received
+        });
+
+        // Listener for when user taps on a notification
+        responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
+            console.log('👆 Notification tapped:', response);
+            // You can add navigation logic here based on notification data
+            // For example: router.push('/some-screen')
+        });
+
+        // Cleanup listeners on unmount
+        return () => {
+            if (notificationListener.current) {
+                notificationListener.current.remove();
+            }
+            if (responseListener.current) {
+                responseListener.current.remove();
+            }
+        };
+    }, []);
 
     if (!loaded || error) {
         return null;
