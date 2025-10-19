@@ -39,24 +39,52 @@ export default function HeaderLayout({fullName, profilePicture}: HeaderLayoutPro
   const [notifModal, setNotifModal] = useState(false);
   const [notifs, setNotifs] = useState<Notification[]>([]);
   const [isLoadingNotifications, setIsLoadingNotifications] = useState(true);
+  const [newNotifCount, setNewNotifCount] = useState(0);
   
   useEffect(() => {
     const loadNotifications = async () => {
       try {
         setIsLoadingNotifications(true);
+
+        const unparsed = await SecureStore.getItemAsync('notifications');
+        const localNotis = unparsed ? JSON.parse(unparsed) : null;
+        
+        
         
         // Fetch notifications from backend
         const notifications = await fetchNotificationsFromBackend();
+        
         setNotifs(notifications);
+
+        if (localNotis) {
+          console.log(localNotis.length + " vs " + notifications.length);
+          console.log("Fetched notifications:", notifications);
+          console.log("Local notifications:", localNotis);
+          if (notifications.length === localNotis.length) {
+            console.log("No new notifications");
+            setNewNotifCount(0);
+          }
+          else {
+            setNewNotifCount(notifications.length - localNotis.length);
+            await SecureStore.setItemAsync('notifications', JSON.stringify(notifications));
+          }
+        } else {
+          setNewNotifCount(notifications.length);
+          await SecureStore.setItemAsync('notifications', JSON.stringify(notifications));
+        }
+
+
       } catch (error) {
         console.error("Error loading notifications:", error);
       } finally {
+        
+
         setIsLoadingNotifications(false);
       }
     };
     
     loadNotifications();
-  }, []);
+  }, [notifModal]);
 
   // Since notifications from backend don't have status, we'll just display them
   return (
@@ -67,9 +95,9 @@ export default function HeaderLayout({fullName, profilePicture}: HeaderLayoutPro
       />
       <View style={{ position: 'relative' }}>
           <Bell size={26} strokeWidth={2.5} color={COLORS.black} onPress={() => setNotifModal(true)} />
-          {notifs.length > 0 && (
+          {newNotifCount > 0 && (
             <View style={styles.notificationBadge}>
-              <Text style={styles.notificationBadgeText}>{notifs.length}</Text>
+              <Text style={styles.notificationBadgeText}>{newNotifCount}</Text>
             </View>
           )}
         </View>
