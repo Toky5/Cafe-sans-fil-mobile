@@ -17,7 +17,10 @@
         "ITSAppUsesNonExemptEncryption": false
       },
       "bundleIdentifier": "com.cadum.cafe-sans-fil",
-      "appleTeamId": "XY2S94A7AL"
+      "appleTeamId": "XY2S94A7AL",
+      "entitlements" : {
+        "aps-environment": "production"
+      }
     },
     "android": {
       "adaptiveIcon": {

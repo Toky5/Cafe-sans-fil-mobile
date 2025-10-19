@@ -68,6 +68,34 @@ export default function RootLayout() {
         }
     }, [loaded, loaded]);
 
+    useEffect(() => {
+    async function registerForPushNotificationsAsync() {
+      // Request permissions for notifications
+      const { status: existingStatus } = await Notifications.getPermissionsAsync();
+      let finalStatus = existingStatus;
+      if (existingStatus !== 'granted') {
+        const { status } = await Notifications.requestPermissionsAsync();
+        finalStatus = status;
+      }
+      if (finalStatus !== 'granted') {
+        alert('Failed to get push token for push notification!');
+        return;
+      }
+
+      // Get the native device push token (APNs token for iOS)
+      const tokenData = await Notifications.getDevicePushTokenAsync();
+      try {
+        if (tokenData.data) {
+            alert('APNs Device Token:' + tokenData.data);
+        }
+      } catch (error) {
+        alert('Error retrieving APNs token: ' + error);
+      }
+    }
+
+    registerForPushNotificationsAsync();
+  }, []);
+
     /*
 
     // Initialize push notifications when app loads
