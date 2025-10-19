@@ -18,12 +18,11 @@ export default function SecondOnboardingScreen() {
 
       <View style={styles.contentContainer}>
         <Image
-          source={require("@/assets/images/onboarding/secondscreen.png")}
+          source={require("@/assets/images/onboarding/onboard1.png")}
           style={{
             alignSelf: "center",
-            width: 310,
-            height: 260,
-            objectFit: "contain",
+            width: 350,
+            height: 280,
           }}
         ></Image>
         <View style={styles.descriptionContainer}>
@@ -32,7 +31,7 @@ export default function SecondOnboardingScreen() {
           </Text>
           <Text style={[TYPOGRAPHY.body.large.base, styles.description]}>
             Planifiez mieux votre visite en consultant les horaires d'ouverture
-            et l’affluence.
+            et les emplacements des à proximité.
           </Text>
         </View>
       </View>
@@ -71,7 +70,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.black,
   },
   contentContainer: {
-    gap: 72,
+    gap: 30,
     paddingHorizontal: SPACING.md,
   },
   descriptionContainer: {

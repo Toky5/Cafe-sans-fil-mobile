@@ -10,7 +10,7 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "buildNumber": "15",
+      "buildNumber": "16",
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "This app uses the location to find cafes near you.",
         "NSUserNotificationsUsageDescription": "Allow Café sans-fil to send you notifications about orders, events, and updates",

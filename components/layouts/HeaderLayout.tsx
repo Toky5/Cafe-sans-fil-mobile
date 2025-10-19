@@ -11,6 +11,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { GestureHandlerRootView } from "react-native-gesture-handler"; // Import GestureHandlerRootView
 import {getExpoPushToken} from '@/utils/notifications';
 import * as SecureStore from 'expo-secure-store';
+import * as Clipboard from 'expo-clipboard';
 
 
 import {
@@ -49,36 +50,31 @@ export default function HeaderLayout({fullName, profilePicture}: HeaderLayoutPro
   
   const navigation = useRouter();
   const [notifModal, setNotifModal] = useState(false);
-  //const [displayToken, setDisplayToken] = useState("");
-  //const [isLoadingToken, setIsLoadingToken] = useState(true);
+  const [displayToken, setDisplayToken] = useState("");
+  const [isLoadingToken, setIsLoadingToken] = useState(true);
   
-  /*
   useEffect(() => {
     const loadToken = async () => {
       try {
         setIsLoadingToken(true);
-        console.log("Attempting to load Expo push token...");
         
-        // This will wait for initialization if needed, or return cached/stored token
+        // This will wait for initialization if needed, or return cached token
         const token = await getExpoPushToken();
         
-        console.log("Token retrieved:", token);
         if (token) {
           setDisplayToken(token);
         } else {
-          console.warn("No token available");
-          setDisplayToken("No token available - check permissions");
+          setDisplayToken("Aucune notification");
         }
       } catch (error) {
         console.error("Error loading token:", error);
-        setDisplayToken("Error loading token");
+        setDisplayToken("Aucune notification");
       } finally {
         setIsLoadingToken(false);
       }
     };
     loadToken();
   }, []);
-  */
 
 
   const handleDelete = (id : any) => {
@@ -207,6 +203,31 @@ export default function HeaderLayout({fullName, profilePicture}: HeaderLayoutPro
                     </TouchableOpacity>
             </View>
             <ScrollView style={styles.modalContent}>
+            {/* Token Display Section */}
+            <View style={styles.tokenContainer}>
+              <Text style={styles.tokenLabel}>Expo Push Token:</Text>
+              {isLoadingToken ? (
+                <Text style={styles.tokenText}>Chargement...</Text>
+              ) : (
+                <>
+                  <Text style={styles.tokenText} numberOfLines={1} ellipsizeMode="middle">
+                    {displayToken}
+                  </Text>
+                  {displayToken !== "Aucune notification" && (
+                    <TouchableOpacity 
+                      style={styles.copyButton}
+                      onPress={async () => {
+                        await Clipboard.setStringAsync(displayToken);
+                      }}
+                    >
+                      <Text style={styles.copyButtonText}>Copier</Text>
+                    </TouchableOpacity>
+                  )}
+                </>
+              )}
+            </View>
+
+            {/* Notifications List */}
             {notifs.length === 0 ? (
                   <View>
                     <Text style={styles.noNotificationsText}>Aucune notification disponible</Text>
@@ -217,7 +238,11 @@ export default function HeaderLayout({fullName, profilePicture}: HeaderLayoutPro
                   <Swipeable
                     renderLeftActions={(progress, dragX) => renderLeftActions(dragX, notif.id)}
                     renderRightActions={(progress, dragX) => renderRightActions(dragX, notif.id)}
-                    ref={(ref) => swipeableRefs.current.set(notif.id, ref)}
+                    ref={(ref) => {
+                      if (ref) {
+                        swipeableRefs.current.set(notif.id, ref);
+                      }
+                    }}
                   >
                     <View style={styles.orderBox}>
                       <View style={styles.orderDetails}>
@@ -390,6 +415,34 @@ const styles = StyleSheet.create({
   readAllButtonText: {
     color: COLORS.white,
     fontSize: 24,
+    fontWeight: 'bold',
+  },
+  tokenContainer: {
+    backgroundColor: '#f0f0f0',
+    padding: 16,
+    borderRadius: 8,
+    marginBottom: 20,
+  },
+  tokenLabel: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    marginBottom: 8,
+    color: COLORS.black,
+  },
+  tokenText: {
+    fontSize: 12,
+    color: '#666',
+    marginBottom: 8,
+  },
+  copyButton: {
+    backgroundColor: COLORS.black,
+    padding: 8,
+    borderRadius: 6,
+    alignItems: 'center',
+  },
+  copyButtonText: {
+    color: COLORS.white,
+    fontSize: 14,
     fontWeight: 'bold',
   },
 });

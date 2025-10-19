@@ -20,8 +20,8 @@ SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
 
-    //const notificationListener = useRef<Notifications.Subscription | undefined>(undefined);
-    //const responseListener = useRef<Notifications.Subscription | undefined>(undefined);
+    const notificationListener = useRef<Notifications.Subscription | undefined>(undefined);
+    const responseListener = useRef<Notifications.Subscription | undefined>(undefined);
 
     const [loaded, error] = useFonts({
         'Inter-Black': require("../assets/fonts/Inter/Inter-Black.ttf"),
@@ -68,6 +68,7 @@ export default function RootLayout() {
         }
     }, [loaded, loaded]);
 
+    /*
     useEffect(() => {
     async function registerForPushNotificationsAsync() {
       // Request permissions for notifications
@@ -95,8 +96,9 @@ export default function RootLayout() {
 
     registerForPushNotificationsAsync();
   }, []);
+  */
 
-    /*
+    
 
     // Initialize push notifications when app loads
     useEffect(() => {
@@ -141,7 +143,7 @@ export default function RootLayout() {
         };
     }, []);
 
-    */
+    
 
     if (!loaded || error) {
         return null;
