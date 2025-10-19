@@ -115,21 +115,14 @@ export async function sendPushTokenToBackend(token: string): Promise<boolean> {
     // Get the user's auth token
     const authToken = await getToken();
     
-    const response = await fetch('https://cafesansfil-api-r0kj.onrender.com/api/notifications/register', {
+    // The token already includes the format ExponentPushToken[...]
+    // We need to include it in the URL path
+    const response = await fetch(`https://cafesansfil-api-r0kj.onrender.com/api/notifications/register/${token}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        // Add authentication token if available
         ...(authToken && { 'Authorization': `Bearer ${authToken}` }),
       },
-      body: JSON.stringify({
-        expoPushToken: token,
-        platform: Platform.OS,
-        deviceId: Device.deviceName || 'unknown',
-        deviceModel: Device.modelName,
-        osVersion: Device.osVersion,
-      }),
     });
 
     if (!response.ok) {
@@ -137,12 +130,40 @@ export async function sendPushTokenToBackend(token: string): Promise<boolean> {
       return false;
     }
 
-    await response.json();
     console.log('Push token sent to backend successfully');
     return true;
   } catch (error) {
     console.error('Error sending push token to backend:', error);
     return false;
+  }
+}
+
+/**
+ * Fetch notifications from backend
+ * @returns Array of notifications or empty array
+ */
+export async function fetchNotificationsFromBackend(): Promise<Array<{id: string, title: string, body: string}>> {
+  try {
+    const authToken = await getToken();
+    
+    const response = await fetch('https://cafesansfil-api-r0kj.onrender.com/api/notifications', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(authToken && { 'Authorization': `Bearer ${authToken}` }),
+      },
+    });
+
+    if (!response.ok) {
+      console.error('Failed to fetch notifications:', response.status);
+      return [];
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error fetching notifications:', error);
+    return [];
   }
 }
 
@@ -171,6 +192,9 @@ export async function initializePushNotifications(): Promise<string | null> {
       
       if (token) {
         cachedToken = token; // Cache in memory only
+        
+        // Send token to backend
+        await sendPushTokenToBackend(token);
       }
 
       return token;
