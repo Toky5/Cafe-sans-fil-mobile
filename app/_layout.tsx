@@ -20,8 +20,8 @@ SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
 
-    const notificationListener = useRef<Notifications.Subscription | undefined>(undefined);
-    const responseListener = useRef<Notifications.Subscription | undefined>(undefined);
+    //const notificationListener = useRef<Notifications.Subscription | undefined>(undefined);
+    //const responseListener = useRef<Notifications.Subscription | undefined>(undefined);
 
     const [loaded, error] = useFonts({
         'Inter-Black': require("../assets/fonts/Inter/Inter-Black.ttf"),
@@ -68,19 +68,26 @@ export default function RootLayout() {
         }
     }, [loaded, loaded]);
 
+    /*
+
     // Initialize push notifications when app loads
     useEffect(() => {
-        // Initialize push notifications
-        initializePushNotifications();
-
-        const displayExpoPushToken = async () => {
-            const token = await SecureStore.getItemAsync('expoPushToken');
-            if (token) {
-                alert(`Expo Push Token: ${token}`);
+        // Initialize push notifications with error handling
+        const setupNotifications = async () => {
+            try {
+                const token = await initializePushNotifications();
+                if (token) {
+                    console.log('✅ Push notifications initialized successfully');
+                } else {
+                    console.warn('⚠️ Push token not obtained');
+                }
+            } catch (error) {
+                console.error('❌ Error during notification setup:', error);
+                alert(`Notification Setup Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
             }
         };
-        displayExpoPushToken();
         
+        setupNotifications();
 
         // Listener for notifications received while app is in foreground
         notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
@@ -105,6 +112,8 @@ export default function RootLayout() {
             }
         };
     }, []);
+
+    */
 
     if (!loaded || error) {
         return null;

@@ -49,9 +49,10 @@ export default function HeaderLayout({fullName, profilePicture}: HeaderLayoutPro
   
   const navigation = useRouter();
   const [notifModal, setNotifModal] = useState(false);
-  const [displayToken, setDisplayToken] = useState("");
-  const [isLoadingToken, setIsLoadingToken] = useState(true);
+  //const [displayToken, setDisplayToken] = useState("");
+  //const [isLoadingToken, setIsLoadingToken] = useState(true);
   
+  /*
   useEffect(() => {
     const loadToken = async () => {
       try {
@@ -77,6 +78,7 @@ export default function HeaderLayout({fullName, profilePicture}: HeaderLayoutPro
     };
     loadToken();
   }, []);
+  */
 
 
   const handleDelete = (id : any) => {
@@ -207,22 +209,7 @@ export default function HeaderLayout({fullName, profilePicture}: HeaderLayoutPro
             <ScrollView style={styles.modalContent}>
             {notifs.length === 0 ? (
                   <View>
-                    <Text style={styles.noNotificationsText}>
-                      {isLoadingToken ? "Chargement du token..." : displayToken}
-                    </Text>
-                    {!isLoadingToken && displayToken && (
-                      <TouchableOpacity 
-                        onPress={() => {
-                          // Copy to clipboard functionality would go here
-                          console.log("Token:", displayToken);
-                        }}
-                        style={{ marginTop: 10, padding: 10, backgroundColor: '#f0f0f0', borderRadius: 5 }}
-                      >
-                        <Text style={{ fontSize: 10, textAlign: 'center', color: '#666' }}>
-                          Appuyez pour copier
-                        </Text>
-                      </TouchableOpacity>
-                    )}
+                    <Text style={styles.noNotificationsText}>Aucune notification disponible</Text>
                   </View>
                 ) : (
               notifs.map((notif) => (
