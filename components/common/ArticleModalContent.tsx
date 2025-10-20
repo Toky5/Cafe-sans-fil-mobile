@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Image, ScrollView, ActivityIndicator, FlatList, Alert } from 'react-native';
+import { View, Text, StyleSheet, Image, ScrollView, ActivityIndicator, FlatList, Alert, TouchableOpacity } from 'react-native';
 import Button from "@/components/common/Buttons/Button";
 import IconButton from "@/components/common/Buttons/IconButton";
 import Tooltip from "@/components/common/Tooltip";
@@ -7,7 +7,7 @@ import Counter from "@/components/common/Inputs/Counter";
 import COLORS from "@/constants/Colors";
 import SPACING from "@/constants/Spacing";
 import TYPOGRAPHY from "@/constants/Typography";
-import { Heart } from "lucide-react-native";
+import { ArrowLeft, Heart } from "lucide-react-native";
 import { Item } from "@/constants/types/GET_item";
 import { getToken } from "@/utils/tokenStorage";
 import { router } from "expo-router";
@@ -196,6 +196,15 @@ export default function ArticleModalContent({ articleId, cafeId, onClose }: Arti
             style={styles.image}
             source={menuItem.image_url ? { uri: menuItem.image_url } : require("@/assets/images/placeholder/image2xl.png")}
           />
+
+          <View style={styles.closeButton}>
+            <IconButton
+              Icon={ArrowLeft}
+              onPress={onClose}
+              style={{ backgroundColor: COLORS.white }}
+            />
+          </View>
+        
           <View style={styles.heartButton}>
             <IconButton
               Icon={Heart}
@@ -205,6 +214,7 @@ export default function ArticleModalContent({ articleId, cafeId, onClose }: Arti
               style={{ backgroundColor: COLORS.white }}
             />
           </View>
+
           <View style={styles.statusBadge}>
             <Tooltip
               label={menuItem.in_stock ? "En Stock" : "En Rupture"}
@@ -319,6 +329,11 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 16,
     right: 16,
+  },
+  closeButton: {
+    position: 'absolute',
+    top: 16,
+    left: 16,
   },
   statusBadge: {
     position: 'absolute',

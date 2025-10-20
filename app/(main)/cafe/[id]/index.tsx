@@ -74,20 +74,30 @@ export default function CafeScreen() {
   // Modal state for article details
   const [isArticleModalVisible, setIsArticleModalVisible] = useState(false);
   const [selectedArticleId, setSelectedArticleId] = useState<string | null>(null);
+  
+  // Shuffle array function
+  const shuffleArray = (array: any[]) => {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+  };
+  
   useEffect(() => {
       setIsLoading(true);
       fetch("https://cafesansfil-api-r0kj.onrender.com/api/cafes")
         .then((response) => response.json())
         .then((json) => {
-          setData(json.items);
-          // console.log(json)
+          // Filter out the current cafe and shuffle the rest
+          const filteredCafes = json.items.filter((item: any) => item.id !== id);
+          const shuffledCafes = shuffleArray(filteredCafes);
+          setData(shuffledCafes);
         })
         .catch((error) => console.error(error))
         .finally(() => setIsLoading(false));
-        
-        
-        ;
-    }, []);
+    }, [id]);
   
   // Have an openable link
   const openLink = (url: string) => {
@@ -719,7 +729,7 @@ function filterMenu(filter?: string, menuData?: any): Item[] {
             <View key={method}>
               <Tooltip
                 key={`${method}-${minimum}`}
-                label={`${method}`}
+                label={`${method} : $${minimum}+`}
                 showChevron={false }
                 color={COLORS.white}
                 description={`Minimum: ${minimum}`}
@@ -956,20 +966,7 @@ function filterMenu(filter?: string, menuData?: any): Item[] {
         <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.white }}>
           <View style={{ flex: 1 }}>
             {/* Modal Header */}
-            <View style={{ 
-              flexDirection: 'row', 
-              alignItems: 'center', 
-              justifyContent: 'flex-start',
-              paddingHorizontal: 16,
-              paddingVertical: 12,
-              borderBottomWidth: 1,
-              borderBottomColor: '#E8E8E8',
-              backgroundColor: COLORS.white
-            }}>
-              <TouchableOpacity onPress={closeArticleModal}>
-                <ArrowLeft size={24} color={COLORS.black} />
-              </TouchableOpacity>
-            </View>
+            
             
             {/* Modal Content */}
             {selectedArticleId && id && (

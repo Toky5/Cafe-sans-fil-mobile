@@ -11,7 +11,7 @@ import CafeCard from "@/components/common/Cards/CafeCard";
 import ArticleCard from "@/components/common/Cards/ArticleCard";
 import ArticleModalContent from "@/components/common/ArticleModalContent";
 import IconButton from "@/components/common/Buttons/IconButton";
-import { X } from "lucide-react-native";
+import { ArrowBigDown, ArrowLeft, X } from "lucide-react-native";
 import COLORS from '@/constants/Colors';
 
 
@@ -470,22 +470,7 @@ export default function FavorisScreen() {
           <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.white }}>
             <View style={{ flex: 1 }}>
               {/* Modal Header */}
-              <View style={{ 
-                flexDirection: 'row', 
-                alignItems: 'center', 
-                justifyContent: 'flex-start',
-                paddingHorizontal: 16,
-                paddingVertical: 12,
-                borderBottomWidth: 1,
-                borderBottomColor: '#E8E8E8',
-                backgroundColor: COLORS.white
-              }}>
-                <IconButton
-                  Icon={X}
-                  onPress={closeArticleModal}
-                  style={{ backgroundColor: COLORS.lightGray }}
-                />
-              </View>
+              
               
               {/* Article Content */}
               {selectedArticleId && selectedCafeId && (
