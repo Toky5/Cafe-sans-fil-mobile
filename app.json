@@ -10,7 +10,7 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "buildNumber": "18",
+      "buildNumber": "20",
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "This app uses the location to find cafes near you.",
         "NSUserNotificationsUsageDescription": "Allow Café sans-fil to send you notifications about orders, events, and updates",
@@ -28,7 +28,7 @@
         "backgroundColor": "#fbfaf7"
       },
       "package": "com.cadum.cafesansfil",
-      "versionCode": 18,
+      "versionCode": 20,
       "config": {
         "googleMaps": {
           "apiKey": "AIzaSyBLPZng6Gr0UCGxWrovmdbBaVmptRQEUHs"
