@@ -372,14 +372,22 @@ export default function HomeScreen() {
               */}
               
             </CardScrollableLayout>
+            {filterCafes(data).length === 0 && (
+              <Text style={{ textAlign: 'center', marginTop: SPACING["lg"], color: COLORS.subtuleDark }}>
+              Aucun café trouvé.
+              </Text>
+            )}
 
-            <Text
+            {filterCafes(data).length > 0 && (
+              <Text
               style={{
                 marginVertical: SPACING["sm"],
                 marginHorizontal: SPACING["sm"],
                 ...TYPOGRAPHY.heading.small.bold
-              }}>{!searched ? "Tous les cafés" : `Résultats (${data.length})`}
-            </Text>
+              }}>
+              {!searched ? "Tous les cafés" : `Résultats (${data.length})`}
+              </Text>
+            )}
             <FlatList data={filterCafes(data)} renderItem={({ item }) =>
               <CafeCard
                 name={item.name}
