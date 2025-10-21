@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Image, ScrollView, ActivityIndicator, FlatList, Alert, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Image, ScrollView, ActivityIndicator, FlatList, Alert, TouchableOpacity, Platform } from 'react-native';
 import Button from "@/components/common/Buttons/Button";
 import IconButton from "@/components/common/Buttons/IconButton";
 import Tooltip from "@/components/common/Tooltip";
@@ -7,7 +7,7 @@ import Counter from "@/components/common/Inputs/Counter";
 import COLORS from "@/constants/Colors";
 import SPACING from "@/constants/Spacing";
 import TYPOGRAPHY from "@/constants/Typography";
-import { ArrowLeft, Heart } from "lucide-react-native";
+import { ArrowLeft, Heart, X } from "lucide-react-native";
 import { Item } from "@/constants/types/GET_item";
 import { getToken } from "@/utils/tokenStorage";
 import { router } from "expo-router";
@@ -197,9 +197,10 @@ export default function ArticleModalContent({ articleId, cafeId, onClose }: Arti
             source={menuItem.image_url ? { uri: menuItem.image_url } : require("@/assets/images/placeholder/image2xl.png")}
           />
 
+        
           <View style={styles.closeButton}>
             <IconButton
-              Icon={ArrowLeft}
+              Icon={X}
               onPress={onClose}
               style={{ backgroundColor: COLORS.white }}
             />
@@ -327,12 +328,13 @@ const styles = StyleSheet.create({
   },
   heartButton: {
     position: 'absolute',
-    top: 16,
+    top: Platform.OS === 'ios' ? 16 : 30,
     right: 16,
+
   },
   closeButton: {
     position: 'absolute',
-    top: 16,
+    top: Platform.OS === 'ios' ? 16 : 30,
     left: 16,
   },
   statusBadge: {
@@ -373,5 +375,6 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.white,
     borderTopWidth: 1,
     borderTopColor: COLORS.lightGray,
+    paddingBottom: Platform.OS === 'ios' ? 16 : 66,
   },
 });

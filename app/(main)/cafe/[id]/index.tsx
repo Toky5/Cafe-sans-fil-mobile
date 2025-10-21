@@ -905,7 +905,7 @@ function filterMenu(filter?: string, menuData?: any): Item[] {
                   calories={item.description}
                   size="large"
 
-                  onPress={Platform.OS === 'ios' ? () => openArticleModal(item.id) : undefined}
+                  onPress={() => openArticleModal(item.id)}
                 />
               ))
             ) : (

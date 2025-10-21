@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Redirect, router } from "expo-router";
 import * as Location from "expo-location";
 import { Activity, CreditCard, DollarSign, Star, Vegan } from "lucide-react-native";
-import { View, StyleSheet,StatusBar, Image, Text, FlatList, SafeAreaView, ActivityIndicator, TouchableOpacity } from "react-native";
+import { View, StyleSheet,StatusBar, Image, Text, FlatList, SafeAreaView, ActivityIndicator, TouchableOpacity, Platform } from "react-native";
 
 import useLocation from "@/hooks/useLocation";
 import useOnForegroundBack from "@/hooks/useOnForegroundBack";
@@ -302,7 +302,7 @@ export default function HomeScreen() {
     return (
       
       <SafeAreaView>
-        <StatusBar   barStyle="dark-content"/>
+        <StatusBar   barStyle={Platform.OS === "android" ? "dark-content" : undefined}/>
         <ScrollableLayout>
           <>
             {/* User Location and Search */}

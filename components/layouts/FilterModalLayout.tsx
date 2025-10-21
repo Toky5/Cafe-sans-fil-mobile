@@ -49,7 +49,7 @@ const styles = StyleSheet.create({
   title: {
     textAlign: "center",
     ...TYPOGRAPHY.heading.medium.bold,
-    marginTop: Platform.OS === 'android' ? 40 : 0,
+    marginTop: Platform.OS === 'android' ? 15 : 0,
   },
   description: {
     textAlign: "center",

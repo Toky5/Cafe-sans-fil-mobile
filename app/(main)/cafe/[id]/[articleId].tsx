@@ -374,7 +374,7 @@ const [error, setError] = useState<string | null>(null);
         <View style={styles.cafeHeaderButtons}>
           <IconButton
             Icon={ArrowLeft}
-            onPress={() => {router.replace(`/cafe/${id}`)}}
+            onPress={() => {router.back();}}
             style={styles.cafeHeaderIconButtons}
           />
           <View style={styles.cafeHeaderButtonsRight}>
@@ -531,7 +531,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     width: "100%",
     paddingHorizontal: 16,
-    marginTop: SPACING["9xl"],
+    marginTop: SPACING["3xl"],
   },
   cafeHeaderButtonsRight: {
     flexDirection: "row",

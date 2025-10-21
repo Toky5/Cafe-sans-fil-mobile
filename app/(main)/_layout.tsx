@@ -18,7 +18,7 @@ export default function TabLayout() {
       // If bottom inset is 0, device uses button navigation
       // If bottom inset > 0, device uses gesture navigation
       const hasButtonNavigation = insets.bottom === 0;
-      return hasButtonNavigation ? 60 : 70 + insets.bottom;
+      return hasButtonNavigation ? 60 : 55 + insets.bottom;
     }
     return undefined; // Let iOS handle it automatically
   };
@@ -90,6 +90,7 @@ export default function TabLayout() {
   return (
     <Tabs
       detachInactiveScreens={false}
+      backBehavior="history"
       screenOptions={{
         tabBarActiveTintColor: COLORS.black,
         tabBarInactiveTintColor: "#89898D",

@@ -80,6 +80,7 @@ export default function ParametreScreen() {
   const [editLastName, setEditLastName] = React.useState<string>("");
   const [editEmail, setEditEmail] = React.useState<string>("");
   const [editPassword, setEditPassword] = React.useState<string>("");
+  const [counter, setCounter] = React.useState<number>(0);
   const [editPhotoUrl, setEditPhotoUrl] = React.useState<string>("");
   const [editUsername, setEditUsername] = React.useState<string>("");
   const [editMatricule, setEditMatricule] = React.useState<string>("");
@@ -111,6 +112,7 @@ export default function ParametreScreen() {
       return undefined; // Let iOS handle it automatically
     };
 
+  
 
   const { width, height } = Dimensions.get('screen');
   const orders = [
@@ -612,6 +614,14 @@ export default function ParametreScreen() {
       return [];
     }
   }
+  const easteregg = () => {
+    setCounter(counter + 1);
+    setShowPassword(!showPassword);
+    if (counter >= 6) {
+      Alert.alert("Easter Egg!", "jalal was here :P");
+      setCounter(0);
+    }
+  };
 
   // Only fetch orders if component is mounted and user is logged in
   React.useEffect(() => {
@@ -1318,7 +1328,7 @@ const styles = StyleSheet.create({
     borderBottomColor: '#F0F0F0',
     borderTopColor: COLORS.white,
     backgroundColor: COLORS.white,
-    paddingTop: SPACING["8xl"], 
+    paddingTop: Platform.OS === 'ios' ? SPACING['8xl'] : SPACING['3xl'],
     paddingHorizontal: SPACING.md,
   },
   profileLeft: {
@@ -1419,7 +1429,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#ddd',
     padding:20,
-    marginTop: Platform.OS === 'android' ? 40 : 0,
+    marginTop: Platform.OS === 'android' ? 15 : 0,
   },
   modalTitle: {
     fontSize: 20,

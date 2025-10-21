@@ -316,20 +316,8 @@ export default function FavorisScreen() {
                 return (
                   <TouchableOpacity 
                     onPress={() => {
-                      // Navigate to article page or open modal based on platform
-                      console.log('📱 article pressed', item);
-                      console.log('📱 Article ID:', item.id, 'Type:', typeof item.id);
-                      console.log('📱 Cafe ID:', item.cafe_id, 'Type:', typeof item.cafe_id);
                       if (item.cafe_id && item.id) {
-                        if (Platform.OS === 'ios') {
-                          // iOS: Open modal
-                          console.log('📱 Opening modal for article:', item.id);
                           openArticleModal(item.id, item.cafe_id);
-                        } else {
-                          // Android: Navigate to page
-                          console.log('📱 Navigating to article:', `/cafe/${item.cafe_id}/${item.id}`);
-                          router.push(`/cafe/${item.cafe_id}/${item.id}`);
-                        }
                       }
                     }}
                     activeOpacity={0.8}

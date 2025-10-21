@@ -191,7 +191,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#ddd',
     padding:20,
-    marginTop: Platform.OS === 'android' ? 40 : 0,
+    marginTop: Platform.OS === 'android' ? 15 : 0,
   },
   modalTitle: {
     fontSize: 20,
