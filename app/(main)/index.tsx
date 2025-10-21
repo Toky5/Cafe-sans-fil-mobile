@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Redirect, router } from "expo-router";
 import * as Location from "expo-location";
-import { Activity, Star, Vegan } from "lucide-react-native";
+import { Activity, CreditCard, DollarSign, Star, Vegan } from "lucide-react-native";
 import { View, StyleSheet,StatusBar, Image, Text, FlatList, SafeAreaView, ActivityIndicator, TouchableOpacity } from "react-native";
 
 import useLocation from "@/hooks/useLocation";
@@ -61,6 +61,9 @@ export default function HomeScreen() {
   const [showOnlyOrder, setShowOnlyOrder] = useState(false);
   const [showOpen, setShowOpen] = useState(false);
   const [showClosed, setShowClosed] = useState(false);
+  const [showCash, setShowCash] = useState(false);
+  const [showDebit, setShowDebit] = useState(false);
+  const [showCredit, setShowCredit] = useState(false);
   const [location, getCurrentLocation, locationPermissionDenied] = useLocation();
   const [originalData, setOriginalData] = useState<Cafe[]>();
   const [searched, setSearched] = useState(false);
@@ -207,6 +210,26 @@ export default function HomeScreen() {
     if (showClosed) {
       filteredCafesClose = filteredCafesClose.filter(cafe => isOpenOrNot(cafe) == false);
     }
+
+    if (showCash) {
+      filteredCafesClose = filteredCafesClose.filter(cafe =>
+      Array.isArray(cafe.payment_details) &&
+      cafe.payment_details.some((p: any) => p?.method === "CASH")
+      );
+    }
+    if (showDebit) {
+      filteredCafesClose = filteredCafesClose.filter(cafe =>
+      Array.isArray(cafe.payment_details) &&
+      cafe.payment_details.some((p: any) => p?.method === "DEBIT")
+      );
+    }
+    if (showCredit) {
+      filteredCafesClose = filteredCafesClose.filter(cafe =>
+      Array.isArray(cafe.payment_details) &&
+      cafe.payment_details.some((p: any) => p?.method === "CREDIT")
+      );
+    }
+
     return filteredCafesClose;
 
   };
@@ -317,6 +340,27 @@ export default function HomeScreen() {
                 onPress={() => setShowClosed(!showClosed)}
                 showChevron={false}
                 changeColorOnPress
+              />
+              <Tooltip
+                label="Cash"
+                onPress={() => setShowCash(!showCash)}
+                showChevron={false}
+                changeColorOnPress
+                Icon={DollarSign}
+              />
+              <Tooltip
+                label="Débit"
+                onPress={() => setShowDebit(!showDebit)}
+                showChevron={false}
+                changeColorOnPress
+                Icon={CreditCard}
+              />
+              <Tooltip
+                label="Crédit"
+                onPress={() => setShowCredit(!showCredit)}
+                showChevron={false}
+                changeColorOnPress
+                Icon={CreditCard}
               />
               {/*
               <Tooltip
