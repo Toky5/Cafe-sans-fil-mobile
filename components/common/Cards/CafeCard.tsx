@@ -145,12 +145,14 @@ export default function CafeCard({
             {location}
           </Text>
         </View>
+        {/*
         <Text
           style={[TYPOGRAPHY.body.normal.base, styles.priceRangeIcon]}
           testID="icon-button"
         >
           {priceRange}
         </Text>
+        */}
       </View>
     </Pressable>
   );
