@@ -12,9 +12,10 @@
       "supportsTablet": true,
       "buildNumber": "20",
       "infoPlist": {
-        "NSLocationWhenInUseUsageDescription": "This app uses the location to find cafes near you.",
-        "NSUserNotificationsUsageDescription": "Allow Café sans-fil to send you notifications about orders, events, and updates",
-        "ITSAppUsesNonExemptEncryption": false
+        "NSLocationWhenInUseUsageDescription": "Autorisez Café sans-fil à accéder à votre position pour vous montrer les cafés à proximité !",
+        "NSUserNotificationsUsageDescription": "Autorisez les notifications pour recevoir des mises à jour sur les nouveaux cafés et offres spéciales !",
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSPhotoLibraryUsageDescription": "Autorisez l'accès à votre bibliothèque de photos pour que vous puissiez télécharger une photo de profile !"
       },
       "bundleIdentifier": "com.cadum.cafe-sans-fil",
       "appleTeamId": "XY2S94A7AL",

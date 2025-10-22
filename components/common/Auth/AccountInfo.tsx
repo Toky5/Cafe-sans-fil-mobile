@@ -36,7 +36,7 @@ export default function AccountInfo({
         console.log("User full name from storage:", storedFullName);
       } else {
         console.log("No stored full name found");
-        setUserFullName("Utilisateur");
+        setUserFullName("Connectez-vous !");
       }
 
       // Get the stored photo URL from storage

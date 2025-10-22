@@ -113,7 +113,8 @@ export default function ArticleModalContent({ articleId, cafeId, onClose }: Arti
     try {
       const token = await getToken();
       if (!token) {
-        Alert.alert('Erreur', 'Vous devez être connecté pour ajouter des favoris');
+        onClose();
+        router.push("/sign-in");
         return;
       }
 

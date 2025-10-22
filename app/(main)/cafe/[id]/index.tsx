@@ -58,6 +58,7 @@ export default function CafeScreen() {
   // café id
   const { id } = useLocalSearchParams();
   const scrollViewRef = useRef<ScrollView>(null);
+  const [canLike, setCanLike] = useState(false);
 
   // data for the café returned by the API
   // const [cafe, setCafe] = useState<Cafe | any>({ social_media:{} }); // set social media as empty array pour ne pas produire d'erreur dans l'utlisation de map après
@@ -386,7 +387,9 @@ function filterMenu(filter?: string, menuData?: any): Item[] {
         const token = await getToken();
         if (!token) {
           console.error("No access token found");
+          router.push("/sign-in");
           return;
+          
         }
         const response = await fetch(`https://cafesansfil-api-r0kj.onrender.com/api/users/@me/cafes?cafe_id=${id}`, {
           method: 'PUT',

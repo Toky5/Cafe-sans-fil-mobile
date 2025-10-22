@@ -18,16 +18,16 @@ export default function SignInScreen() {
   const [username, onChangeUsername] = React.useState('');
   const [firstName, onChangeFirstName] = React.useState('');
   const [lastName, onChangeLastName] = React.useState('');
-  const [matricule, onChangeMatricule] = React.useState('');
+  //const [matricule, onChangeMatricule] = React.useState('');
   const emailInputRef = React.useRef<TextInput>(null);
   const passwordInputRef = React.useRef<TextInput>(null);
   const passwordConfInputRef = React.useRef<TextInput>(null);
   const usernameInputRef = React.useRef<TextInput>(null);
   const firstNameInputRef = React.useRef<TextInput>(null);
   const lastNameInputRef = React.useRef<TextInput>(null);
-  const matriculeInputRef = React.useRef<TextInput>(null);
+  //const matriculeInputRef = React.useRef<TextInput>(null);
   const [isPassword, setIsPassword] = React.useState(true);
-  const [matriculeError, setMatriculeError] = React.useState(false);
+  //const [matriculeError, setMatriculeError] = React.useState(false);
   const [isLengthValid, setIsLengthValid] = React.useState(false);
   const [isUppercaseValid, setIsUppercaseValid] = React.useState(false);
   const [isNumberValid, setIsNumberValid] = React.useState(false);
@@ -43,7 +43,7 @@ export default function SignInScreen() {
       username: username,
       first_name: first_name, 
       last_name: last_name,
-      matricule: matricule.toString(),
+      //matricule: matricule.toString(),
       email: email.toLowerCase(),
       password: password,
       photo_url: "https://example.com/",
@@ -200,15 +200,17 @@ export default function SignInScreen() {
     console.log("Username:", username);
     console.log("First Name:", firstName);
     console.log("Last Name:", lastName);
-    console.log("Matricule:", matricule);
+    //console.log("Matricule:", matricule);
     console.log("Email:", email);
     console.log("Password:", password);
     
+    /*
     if (matricule !== null) {
       signup(username, firstName, lastName, matricule, email, password);
     } else {
       alert('Veuillez entrer un numéro de matricule valide.');
     }
+    */
   }
   const checkMatch = (password: string, passwordConf: string) => {
     if (password !== passwordConf) {
@@ -227,6 +229,7 @@ export default function SignInScreen() {
     setIsSpecialCharValid(/[@$!%*?&#]/.test(password));
   }
 
+  /*
   const validateMatricule = (matricule: { toString: () => string; } ) => {
     if (matricule && !/^\d{8}$/.test(matricule.toString())) {
       setMatriculeError(true);
@@ -235,6 +238,7 @@ export default function SignInScreen() {
       setMatriculeError(false);
     }
   }
+  */
 
 
 
@@ -377,7 +381,7 @@ export default function SignInScreen() {
           keyboardType="email-address"
           autoComplete="email"
           returnKeyType="next"
-          onSubmitEditing={() => matriculeInputRef.current?.focus()}
+          onSubmitEditing={() => passwordInputRef.current?.focus()}
           placeholderTextColor={"#A1A1A1"}
           onFocus={() => {
   setTimeout(() => {
@@ -390,6 +394,8 @@ export default function SignInScreen() {
   }, 100);
 }}
         />
+
+        {/** 
 
         <Text style={styles.textForm}>
               <Text >
@@ -409,16 +415,17 @@ export default function SignInScreen() {
           onSubmitEditing={() => passwordInputRef.current?.focus()}
           placeholderTextColor={"#A1A1A1"}
           onFocus={() => {
-  setTimeout(() => {
-    emailInputRef.current?.measureLayout(
-      scrollViewRef.current as any,
-      (x, y) => {
-        scrollViewRef.current?.scrollTo({ y: y - 100, animated: true });
-      }
-    );
-  }, 100);
-}}
-        />
+        setTimeout(() => {
+          emailInputRef.current?.measureLayout(
+            scrollViewRef.current as any,
+            (x, y) => {
+              scrollViewRef.current?.scrollTo({ y: y - 100, animated: true });
+            }
+          );
+        }, 100);
+      }}
+              />
+      */}
 
       <Text style={isPassword ? styles.textForm : styles.textFormR}>
             <Text >

@@ -1,6 +1,6 @@
 import Button from "@/components/common/Buttons/Button";
 import React from "react";
-import {Text, View, Image, TextInput, ScrollView, KeyboardAvoidingView, Platform, StatusBar, Pressable, TouchableOpacity, Keyboard} from "react-native";
+import {Text, View, Image, TextInput, ScrollView, KeyboardAvoidingView, Platform, StatusBar, Pressable, TouchableOpacity, Keyboard, Touchable} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {useRouter} from "expo-router";
 import { setToken, setRefreshToken, setUserFullname, setUserPhotoUrl, getInfoFromToken } from "@/utils/tokenStorage";
@@ -9,6 +9,7 @@ import {
   EyeOff,
 } from "lucide-react-native";
 import COLORS from "@/constants/Colors";
+import { Ionicons } from "@expo/vector-icons";
 
 
 
@@ -100,6 +101,9 @@ export default function SignInScreen() {
   >
       <ScrollView ref={scrollViewRef} showsVerticalScrollIndicator={false}
   keyboardShouldPersistTaps="handled" style={{  minHeight: "100%" }}>
+    <TouchableOpacity onPress={() => router.push("/")}>
+      <Ionicons name="close" size={30} color={COLORS.black} style={{marginTop: 16, marginLeft: 16}}/>
+    </TouchableOpacity>
       <Image source={require("@/logoold.png")} style={styles.logo}/>
       <View style={styles.header}>
       <Text style={styles.textHeader}>

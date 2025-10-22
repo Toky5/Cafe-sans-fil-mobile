@@ -83,7 +83,7 @@ export default function ParametreScreen() {
   const [counter, setCounter] = React.useState<number>(0);
   const [editPhotoUrl, setEditPhotoUrl] = React.useState<string>("");
   const [editUsername, setEditUsername] = React.useState<string>("");
-  const [editMatricule, setEditMatricule] = React.useState<string>("");
+  //const [editMatricule, setEditMatricule] = React.useState<string>("");
   const [isUploading, setIsUploading] = React.useState<boolean>(false);
   
   // Original values to track changes
@@ -92,7 +92,7 @@ export default function ParametreScreen() {
   const [originalEmail, setOriginalEmail] = React.useState<string>("");
   const [originalPhotoUrl, setOriginalPhotoUrl] = React.useState<string>("");
   const [originalUsername, setOriginalUsername] = React.useState<string>("");
-  const [originalMatricule, setOriginalMatricule] = React.useState<string>("");
+  //const [originalMatricule, setOriginalMatricule] = React.useState<string>("");
   
   // Preference states
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
@@ -159,14 +159,14 @@ export default function ParametreScreen() {
               setOriginalEmail(userInfo.email || "");
               setOriginalPhotoUrl(userInfo.photo_url || "");
               setOriginalUsername(userInfo.username || "");
-              setOriginalMatricule(userInfo.matricule || "");
+              //setOriginalMatricule(userInfo.matricule || "");
               
               setEditFirstName(userInfo.first_name || "");
               setEditLastName(userInfo.last_name || "");
               setEditEmail(userInfo.email || "");
               setEditPhotoUrl(userInfo.photo_url || "");
               setEditUsername(userInfo.username || "");
-              setEditMatricule(userInfo.matricule || "");
+              //setEditMatricule(userInfo.matricule || "");
             } else if (userInfo && userInfo.name) {
               // Fallback to name field if first_name/last_name aren't available
               setUserFullName(userInfo.name);
@@ -182,6 +182,7 @@ export default function ParametreScreen() {
           } else {
             console.log("No access token found");
             setUserFullName("Utilisateur");
+            navigation.push("/sign-in");
           }
         
         } catch (error) {
@@ -243,11 +244,14 @@ export default function ParametreScreen() {
                 setEditUsername(userInfo.username);
                 setOriginalUsername(userInfo.username);
               }
+
+              /*
               
               if (userInfo.matricule) {
                 setEditMatricule(userInfo.matricule);
                 setOriginalMatricule(userInfo.matricule);
               }
+              */
             }
           }
         } catch (error) {
@@ -408,9 +412,11 @@ export default function ParametreScreen() {
         updates.email = editEmail.trim();
       }
       
+      /*
       if (editMatricule !== originalMatricule && editMatricule.trim() !== "") {
         updates.matricule = editMatricule.trim();
       }
+      */
       
       if (editPassword.trim() !== "") {
         updates.password = editPassword.trim();
@@ -486,10 +492,12 @@ export default function ParametreScreen() {
         setEditUsername(updatedUserInfo.username);
       }
       
+      /*
       if (updatedUserInfo.matricule) {
         setOriginalMatricule(updatedUserInfo.matricule);
         setEditMatricule(updatedUserInfo.matricule);
       }
+      */
 
       // Clear password field
       setEditPassword("");
@@ -901,7 +909,7 @@ export default function ParametreScreen() {
                     />
                   </View>
 
-                  {/* Matricule Input */}
+                  {/* Matricule Input 
                   <View style={styles.inputGroup}>
                     <View style={styles.inputLabelContainer}>
                       <User size={18} color="#666" />
@@ -915,6 +923,7 @@ export default function ParametreScreen() {
                       onChangeText={setEditMatricule}
                     />
                   </View>
+                  */}
 
                   {/* Password Input */}
                   <View style={styles.inputGroup}>

@@ -1,14 +1,30 @@
-import React, { act } from "react";
-import { Link, router } from "expo-router";
+import React, { act, useEffect } from "react";
+import { Link, router, useRouter } from "expo-router";
 import { View, Text, StyleSheet, Image, StatusBar } from "react-native";
 import OnboardingLayout from "@/components/layouts/OnboardingLayout";
 import TYPOGRAPHY from "@/constants/Typography";
 import COLORS from "@/constants/Colors";
 import SPACING from "@/constants/Spacing";
 import Button from "@/components/common/Buttons/Button";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 
 export default function FirstOnboardingScreen() {
+
+  const router = useRouter();
+  useEffect(() => {
+    const checkIfOnboarded = async () => {
+      const hasOnboarded = await AsyncStorage.getItem('hasOnboarded');
+      if (hasOnboarded) {
+        router.replace('/'); // Redirect to home if already onboarded
+      }
+      else{
+        await AsyncStorage.setItem('hasOnboarded', 'true');
+      }
+    }
+    checkIfOnboarded();
+  }, []);
+
   return (
     <View style={styles.screenContainer}>
        <StatusBar />

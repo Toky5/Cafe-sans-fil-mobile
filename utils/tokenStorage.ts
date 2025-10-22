@@ -259,7 +259,8 @@ export const clearTokens = async () => {
       AsyncStorage.removeItem(STAYING_KEY),
       AsyncStorage.removeItem(REFRESHING_KEY),
       AsyncStorage.removeItem('user_fullname'),
-      AsyncStorage.removeItem('user_photo_url')
+      AsyncStorage.removeItem('user_photo_url'),
+      AsyncStorage.removeItem('hasOnboarded')
     ]);
   } catch (error) {
     console.error('Error clearing tokens:', error);

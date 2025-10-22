@@ -82,10 +82,6 @@ export default function TabLayout() {
     );
   }
 
-
-  if (!isSignedIn) {
-    return <Redirect href="/first-onboarding" />;
-  }
   
   return (
     <Tabs

@@ -1,5 +1,5 @@
 import { View, Text, FlatList, StatusBar, Image, Platform, TouchableOpacity, Modal, SafeAreaView } from 'react-native';
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback, use } from 'react';
 import { useRouter } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
 import ScrollableLayout from '@/components/layouts/ScrollableLayout';
@@ -17,7 +17,7 @@ import COLORS from '@/constants/Colors';
 
 export default function FavorisScreen() {
   const router = useRouter();
-  
+  const [doihavetoken, setDoihavetoken] = React.useState<boolean>(false);
   // Cafe favorites: array of cafe IDs (strings)
   // Example: ["cafe1", "cafe2", "cafe3"]
   const [cafeFavoris, setCafeFavoris] = React.useState<Array<any>>([]);
@@ -114,8 +114,11 @@ export default function FavorisScreen() {
           const token = await getToken();
           if (!token) {
             console.log('No token available, skipping favorites refresh');
+            router.push('/sign-in');
             return;
           }
+
+          setDoihavetoken(true);
 
           const response = await fetch('https://cafesansfil-api-r0kj.onrender.com/api/users/@me', {
             method: 'GET',
