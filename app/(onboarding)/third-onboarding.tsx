@@ -1,13 +1,30 @@
-import React, { act } from "react";
-import { Link, router } from "expo-router";
+import React, { act, useEffect } from "react";
+import { Link, router, useRouter } from "expo-router";
 import { View, Text, StyleSheet, Image } from "react-native";
 import OnboardingLayout from "@/components/layouts/OnboardingLayout";
 import TYPOGRAPHY from "@/constants/Typography";
 import COLORS from "@/constants/Colors";
 import SPACING from "@/constants/Spacing";
 import Button from "@/components/common/Buttons/Button";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function ThirdOnboardingScreen() {
+  const router = useRouter();
+  useEffect(() => {
+      const checkIfOnboarded = async () => {
+        const hasOnboarded = await AsyncStorage.getItem('hasOnboarded');
+        console.log("Has onboarded: de third", hasOnboarded);
+        if (hasOnboarded !== null) {
+          console.log("Redirecting to home from onboarding");
+          router.replace('/'); // Redirect to home if already onboarded
+        }
+        else{
+          console.log("Setting hasOnboarded to true");
+          await AsyncStorage.setItem('hasOnboarded', 'true');
+        }
+      }
+      checkIfOnboarded();
+    }, []);
   return (
     <View style={styles.screenContainer}>
       <View style={styles.currentPage}>
@@ -31,7 +48,7 @@ export default function ThirdOnboardingScreen() {
             Filtres Personnalisés
           </Text>
           <Text style={[TYPOGRAPHY.body.large.base, styles.description]}>
-            Filtrez par prix, besoins alimentaires pour des recherches rapides
+            Filtrez par prix, moyen de paiement, ouverture pour une expérience rapide et sur mesure
             et sur mesure.
           </Text>
         </View>

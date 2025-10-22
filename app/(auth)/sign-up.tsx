@@ -36,7 +36,7 @@ export default function SignInScreen() {
   const [isVisibleConfirm, setIsVisibleConfirm] = React.useState(true);
 
 
-  const signup = async (username: string, first_name: string, last_name: string, matricule: string ,email : string , password : string) => {
+  const signup = async (username: string, first_name: string, last_name: string ,email : string , password : string) => {
     const url = 'https://cafesansfil-api-r0kj.onrender.com/api/auth/register';
 
     const formBody = {
@@ -204,13 +204,10 @@ export default function SignInScreen() {
     console.log("Email:", email);
     console.log("Password:", password);
     
-    /*
-    if (matricule !== null) {
-      signup(username, firstName, lastName, matricule, email, password);
-    } else {
-      alert('Veuillez entrer un numéro de matricule valide.');
-    }
-    */
+    
+    signup(username, firstName, lastName, email, password);
+    
+    
   }
   const checkMatch = (password: string, passwordConf: string) => {
     if (password !== passwordConf) {

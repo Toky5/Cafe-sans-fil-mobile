@@ -1,5 +1,5 @@
 import Button from "@/components/common/Buttons/Button";
-import React from "react";
+import React, { use, useEffect } from "react";
 import {Text, View, Image, TextInput, ScrollView, KeyboardAvoidingView, Platform, StatusBar, Pressable, TouchableOpacity, Keyboard, Touchable} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {useRouter} from "expo-router";
@@ -10,6 +10,7 @@ import {
 } from "lucide-react-native";
 import COLORS from "@/constants/Colors";
 import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 
 
@@ -22,6 +23,13 @@ export default function SignInScreen() {
   const passwordInputRef = React.useRef<TextInput>(null);
   const [isError,setIsError] = React.useState(false)
   const [showPassword, setShowPassword] =React.useState(false);
+
+  useEffect(() => {
+      const confirmOnboarding = async () => {
+        await AsyncStorage.setItem('hasOnboarded', 'true');
+      }
+      confirmOnboarding();
+    }, []);
 
   const login = async (email : string , password : string) => {
     const url = 'https://cafesansfil-api-r0kj.onrender.com/api/auth/login';

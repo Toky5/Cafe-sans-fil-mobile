@@ -8,11 +8,13 @@ import { getInfoFromToken, getToken, getRefreshToken, clearTokens, updateToken }
 import { useEffect, useState } from "react";
 import COLORS from "@/constants/Colors";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function TabLayout() {
   const [isSignedIn, setIsSignedIn] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const insets = useSafeAreaInsets();
+  
   const getTabBarHeight = () => {
     if (Platform.OS === 'android') {
       // If bottom inset is 0, device uses button navigation
@@ -48,6 +50,14 @@ export default function TabLayout() {
               // Refresh failed, updateToken already cleared all data
               console.log("Token refresh failed, redirecting to onboarding");
               setIsSignedIn(false);
+              const hasOnboarded = await AsyncStorage.getItem('hasOnboarded');
+              console.log("Has onboarded: de layout", hasOnboarded);
+              if (hasOnboarded !== null) {
+                router.replace('/'); // Redirect to home if already onboarded
+              }
+              else{
+                router.replace('/first-onboarding'); // Redirect to onboarding if not onboarded
+              }
             }
           }
         } else {
@@ -82,6 +92,8 @@ export default function TabLayout() {
     );
   }
 
+
+ 
   
   return (
     <Tabs

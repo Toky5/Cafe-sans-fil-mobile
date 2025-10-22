@@ -28,6 +28,7 @@ import FilterModalLayout from "@/components/layouts/FilterModalLayout";
 
 import COLORS from "@/constants/Colors";
 import { Cafe } from "@/constants/types/GET_cafe";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 /**
  * Home screen of the app. It allows the user to search for cafes, filter them,
@@ -74,6 +75,18 @@ export default function HomeScreen() {
   } | null>(null);
   // Execute a callback when the app comes to the foreground
   useOnForegroundBack(getCurrentLocation);
+
+  useEffect(() => {
+    const checkIfOnboarded = async () => {
+      const hasOnboarded = await AsyncStorage.getItem('hasOnboarded');
+      console.log("Has onboarded: de home", hasOnboarded);
+      if (hasOnboarded === null) {
+        console.log("Redirecting to onboarding from home");
+        router.replace('/first-onboarding'); // Redirect to onboarding if not onboarded
+      }
+    }
+    checkIfOnboarded();
+  }, []);
 
   useEffect(() => {
     // Only fetch cafes if location is available OR permission was denied

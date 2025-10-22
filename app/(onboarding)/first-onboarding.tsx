@@ -13,17 +13,13 @@ export default function FirstOnboardingScreen() {
 
   const router = useRouter();
   useEffect(() => {
-    const checkIfOnboarded = async () => {
+    async function checkIfOnboarded() {
       const hasOnboarded = await AsyncStorage.getItem('hasOnboarded');
-      if (hasOnboarded) {
-        router.replace('/'); // Redirect to home if already onboarded
-      }
-      else{
-        await AsyncStorage.setItem('hasOnboarded', 'true');
-      }
+      console.log("Has onboarded: de first", hasOnboarded);
     }
     checkIfOnboarded();
   }, []);
+  
 
   return (
     <View style={styles.screenContainer}>
