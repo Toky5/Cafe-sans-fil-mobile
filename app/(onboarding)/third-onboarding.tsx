@@ -35,21 +35,21 @@ export default function ThirdOnboardingScreen() {
 
       <View style={styles.contentContainer}>
         <Image
-          source={require("@/assets/images/onboarding/thirdscreen.png")}
+          source={require("@/assets/images/onboarding/cafe_sans_fil_image3.png")}
           style={{
             alignSelf: "center",
-            width: 310,
-            height: 260,
+            width: 300,
+            height: 240,
             objectFit: "scale-down",
           }}
         ></Image>
         <View style={styles.descriptionContainer}>
           <Text style={[TYPOGRAPHY.heading.medium.bold, styles.heading]}>
-            Filtres Personnalisés
+            Événements et promotions
           </Text>
           <Text style={[TYPOGRAPHY.body.large.base, styles.description]}>
-            Filtrez par prix, moyen de paiement, ouverture pour une expérience rapide et sur mesure
-            et sur mesure.
+            Restez informé des événements spéciaux, des ateliers et des
+            promotions exclusives dans les cafés à proximité.
           </Text>
         </View>
       </View>

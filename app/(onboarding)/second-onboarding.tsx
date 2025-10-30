@@ -22,7 +22,7 @@ export default function SecondOnboardingScreen() {
           style={{
             alignSelf: "center",
             width: 350,
-            height: 280,
+            height: 282,
           }}
         ></Image>
         <View style={styles.descriptionContainer}>
