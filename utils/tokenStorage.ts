@@ -1,13 +1,15 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as SecureStore from 'expo-secure-store';
 
 const STAYING_KEY = 'access_token';
 const REFRESHING_KEY = 'refresh_token';
+const USER_FULLNAME_KEY = 'user_fullname';
+const USER_PHOTO_URL_KEY = 'user_photo_url';
 
 
 export const displayTokens = async () => {
   try {
-    const accessToken = await AsyncStorage.getItem(STAYING_KEY);
-    const refreshToken = await AsyncStorage.getItem(REFRESHING_KEY);
+    const accessToken = await SecureStore.getItemAsync(STAYING_KEY);
+    const refreshToken = await SecureStore.getItemAsync(REFRESHING_KEY);
     console.log('Access Token:', accessToken);
     console.log('Refresh Token:', refreshToken);
   } catch (error) {
@@ -17,7 +19,7 @@ export const displayTokens = async () => {
 
 export const setUserFullname = async (name: string) => {
   try {
-    await AsyncStorage.setItem('user_fullname', name);
+    await SecureStore.setItemAsync(USER_FULLNAME_KEY, name);
   } catch (error) {
     console.error('Error storing user full name:', error);
     throw error;
@@ -26,7 +28,7 @@ export const setUserFullname = async (name: string) => {
 
 export const getUserFullname = async () => {
   try {
-    const name = await AsyncStorage.getItem('user_fullname');
+    const name = await SecureStore.getItemAsync(USER_FULLNAME_KEY);
     return name;
   } catch (error) {
     console.error('Error retrieving user full name:', error);
@@ -36,7 +38,7 @@ export const getUserFullname = async () => {
 
 export const setUserPhotoUrl = async (photoUrl: string) => {
   try {
-    await AsyncStorage.setItem('user_photo_url', photoUrl);
+    await SecureStore.setItemAsync(USER_PHOTO_URL_KEY, photoUrl);
   } catch (error) {
     console.error('Error storing user photo URL:', error);
     throw error;
@@ -45,7 +47,7 @@ export const setUserPhotoUrl = async (photoUrl: string) => {
 
 export const getUserPhotoUrl = async () => {
   try {
-    const photoUrl = await AsyncStorage.getItem('user_photo_url');
+    const photoUrl = await SecureStore.getItemAsync(USER_PHOTO_URL_KEY);
     return photoUrl;
   } catch (error) {
     console.error('Error retrieving user photo URL:', error);
@@ -55,9 +57,9 @@ export const getUserPhotoUrl = async () => {
 
 // Store access token
 export const setToken = async (token: string) => {
-    console.log('Storing token:', token);
+  console.log('Storing token:', token);
   try {
-    await AsyncStorage.setItem(STAYING_KEY, token);
+    await SecureStore.setItemAsync(STAYING_KEY, token);
   } catch (error) {
     console.error('Error storing token:', error);
     throw error;
@@ -67,7 +69,7 @@ export const setToken = async (token: string) => {
 // Store refresh token
 export const setRefreshToken = async (refreshToken: string) => {
   try {
-    await AsyncStorage.setItem(REFRESHING_KEY, refreshToken);
+    await SecureStore.setItemAsync(REFRESHING_KEY, refreshToken);
   } catch (error) {
     console.error('Error storing refresh token:', error);
     throw error;
@@ -92,16 +94,16 @@ export const updateToken = async (refreshToken: string) => {
     }
 
     const data = await response.json();
-    
+
     // Assuming the API returns a new access token
     if (data.access_token || data.accessToken || data.token) {
       const newToken = data.access_token || data.accessToken || data.token;
-      const newRefreshToken = data.refresh_token || data.refreshToken 
+      const newRefreshToken = data.refresh_token || data.refreshToken
       await setToken(newToken);
       await setRefreshToken(newRefreshToken); // Store the same refresh token
       return newToken;
     }
-    
+
     throw new Error('No access token received from refresh endpoint');
   } catch (error) {
     console.error('Error updating token:', error);
@@ -116,21 +118,21 @@ export const getInfoFromToken = async (token: string) => {
     const response = await fetch('https://cafesansfil-api-r0kj.onrender.com/api/users/@me', {
       method: 'GET',
       headers: {
-      'accept': 'application/json',
-      'Authorization': `Bearer ${token}`
+        'accept': 'application/json',
+        'Authorization': `Bearer ${token}`
       }
     });
-    
+
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-    
+
     const userInfo = await response.json();
     return userInfo;
-    } catch (error) {
+  } catch (error) {
     return false
-    
-    }
+
+  }
 }
 
 
@@ -143,7 +145,7 @@ export const deleteAccount = async (token: string) => {
   }
 
   const id = userInfo.id;
-  try{
+  try {
     const response = await fetch(`https://cafesansfil-api-r0kj.onrender.com/api/users/@me`, {
       method: 'DELETE',
       headers: {
@@ -153,7 +155,7 @@ export const deleteAccount = async (token: string) => {
     });
 
     console.log("Response from delete account: ", response);
-    
+
     if (response.ok) {
       console.log("Account deleted successfully");
       await clearTokens();
@@ -180,7 +182,7 @@ export const deleteAccount = async (token: string) => {
 // Get access token
 export const getToken = async () => {
   try {
-    const token = await AsyncStorage.getItem(STAYING_KEY);
+    const token = await SecureStore.getItemAsync(STAYING_KEY);
     return token;
   } catch (error) {
     console.error('Error retrieving token:', error);
@@ -191,7 +193,7 @@ export const getToken = async () => {
 // Get refresh token
 export const getRefreshToken = async () => {
   try {
-    const refreshToken = await AsyncStorage.getItem(REFRESHING_KEY);
+    const refreshToken = await SecureStore.getItemAsync(REFRESHING_KEY);
     return refreshToken;
   } catch (error) {
     console.error('Error retrieving refresh token:', error);
@@ -203,8 +205,8 @@ export const getRefreshToken = async () => {
 export const setTokens = async (accessToken: string, refreshToken: string) => {
   try {
     await Promise.all([
-      AsyncStorage.setItem(STAYING_KEY, accessToken),
-      AsyncStorage.setItem(REFRESHING_KEY, refreshToken)
+      SecureStore.setItemAsync(STAYING_KEY, accessToken),
+      SecureStore.setItemAsync(REFRESHING_KEY, refreshToken)
     ]);
   } catch (error) {
     console.error('Error storing tokens:', error);
@@ -216,8 +218,8 @@ export const setTokens = async (accessToken: string, refreshToken: string) => {
 export const getTokens = async () => {
   try {
     const [accessToken, refreshToken] = await Promise.all([
-      AsyncStorage.getItem(STAYING_KEY),
-      AsyncStorage.getItem(REFRESHING_KEY)
+      SecureStore.getItemAsync(STAYING_KEY),
+      SecureStore.getItemAsync(REFRESHING_KEY)
     ]);
     return {
       accessToken,
@@ -235,7 +237,7 @@ export const getTokens = async () => {
 // Remove access token
 export const removeToken = async () => {
   try {
-    await AsyncStorage.removeItem(STAYING_KEY);
+    await SecureStore.deleteItemAsync(STAYING_KEY);
   } catch (error) {
     console.error('Error removing token:', error);
     throw error;
@@ -245,7 +247,7 @@ export const removeToken = async () => {
 // Remove refresh token
 export const removeRefreshToken = async () => {
   try {
-    await AsyncStorage.removeItem(REFRESHING_KEY);
+    await SecureStore.deleteItemAsync(REFRESHING_KEY);
   } catch (error) {
     console.error('Error removing refresh token:', error);
     throw error;
@@ -256,12 +258,12 @@ export const removeRefreshToken = async () => {
 export const clearTokens = async () => {
   try {
     await Promise.all([
-      AsyncStorage.removeItem(STAYING_KEY),
-      AsyncStorage.removeItem(REFRESHING_KEY),
-      AsyncStorage.removeItem('user_fullname'),
-      AsyncStorage.removeItem('user_photo_url'),
-      AsyncStorage.removeItem('hasOnboarded')
+      SecureStore.deleteItemAsync(STAYING_KEY),
+      SecureStore.deleteItemAsync(REFRESHING_KEY),
+      SecureStore.deleteItemAsync(USER_FULLNAME_KEY),
+      SecureStore.deleteItemAsync(USER_PHOTO_URL_KEY)
     ]);
+    // Note: hasOnboarded remains in AsyncStorage as it's not sensitive data
   } catch (error) {
     console.error('Error clearing tokens:', error);
     throw error;
@@ -273,7 +275,7 @@ export const clearTokens = async () => {
 // Check if user is authenticated
 export const isAuthenticated = async () => {
   try {
-    const token = await AsyncStorage.getItem(STAYING_KEY);
+    const token = await SecureStore.getItemAsync(STAYING_KEY);
     return token !== null;
   } catch (error) {
     console.error('Error checking authentication:', error);
