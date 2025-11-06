@@ -10,7 +10,7 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "buildNumber": "22",
+      "buildNumber": "23",
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "Autorisez Café sans-fil à accéder à votre position pour vous montrer les cafés à proximité !",
         "NSUserNotificationsUsageDescription": "Autorisez les notifications pour recevoir des mises à jour sur les nouveaux cafés et offres spéciales !",
@@ -19,7 +19,7 @@
       },
       "bundleIdentifier": "com.cadum.cafe-sans-fil",
       "appleTeamId": "XY2S94A7AL",
-      "entitlements" : {
+      "entitlements": {
         "aps-environment": "production"
       }
     },
@@ -29,7 +29,7 @@
         "backgroundColor": "#fbfaf7"
       },
       "package": "com.cadum.cafesansfil",
-      "versionCode": 22,
+      "versionCode": 23,
       "config": {
         "googleMaps": {
           "apiKey": "AIzaSyBLPZng6Gr0UCGxWrovmdbBaVmptRQEUHs"
