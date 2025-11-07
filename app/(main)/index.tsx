@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Redirect, router } from "expo-router";
 import * as Location from "expo-location";
 import { Activity, CreditCard, DollarSign, Star, Vegan } from "lucide-react-native";
-import { View, StyleSheet,StatusBar, Image, Text, FlatList, SafeAreaView, ActivityIndicator, TouchableOpacity, Platform } from "react-native";
+import { View, StyleSheet, StatusBar, Image, Text, FlatList, SafeAreaView, ActivityIndicator, TouchableOpacity, Platform } from "react-native";
 
 import useLocation from "@/hooks/useLocation";
 import useOnForegroundBack from "@/hooks/useOnForegroundBack";
@@ -101,11 +101,11 @@ export default function HomeScreen() {
       .then((response) => response.json())
       .then((json) => {
         setOriginalData(json.items);
-        
+
         // Only set data and closest if we don't have a selected location
         if (!selectedLocation) {
           setData(json.items);
-          
+
           // Only sort by distance if location permission was granted
           if (!locationPermissionDenied) {
             const sortedCafes = sortByDistance(location as Location.LocationObject, json.items);
@@ -129,7 +129,7 @@ export default function HomeScreen() {
     if (selectedLocation && originalData && location) {
       console.log("Selected location changed, re-sorting cafes");
       const sortedCafes = sortByDistance(
-        location as Location.LocationObject, 
+        location as Location.LocationObject,
         originalData,
         selectedLocation.coords
       );
@@ -175,7 +175,7 @@ export default function HomeScreen() {
     // Immediately update closest cafes with the new coordinates
     if (originalData && location) {
       const sortedCafes = sortByDistance(
-        location as Location.LocationObject, 
+        location as Location.LocationObject,
         originalData,
         coords
       );
@@ -183,7 +183,7 @@ export default function HomeScreen() {
     }
   };
 
-  
+
 
   function sortByPavillon(cafes: Cafe[]): Cafe[][] {
     if (!cafes || cafes.length === 0) {
@@ -226,30 +226,30 @@ export default function HomeScreen() {
 
     if (showCash) {
       filteredCafesClose = filteredCafesClose.filter(cafe =>
-      Array.isArray(cafe.payment_details) &&
-      cafe.payment_details.some((p: any) => p?.method === "CASH")
+        Array.isArray(cafe.payment_details) &&
+        cafe.payment_details.some((p: any) => p?.method === "CASH")
       );
     }
     if (showDebit) {
       filteredCafesClose = filteredCafesClose.filter(cafe =>
-      Array.isArray(cafe.payment_details) &&
-      cafe.payment_details.some((p: any) => p?.method === "DEBIT")
+        Array.isArray(cafe.payment_details) &&
+        cafe.payment_details.some((p: any) => p?.method === "DEBIT")
       );
     }
     if (showCredit) {
       filteredCafesClose = filteredCafesClose.filter(cafe =>
-      Array.isArray(cafe.payment_details) &&
-      cafe.payment_details.some((p: any) => p?.method === "CREDIT")
+        Array.isArray(cafe.payment_details) &&
+        cafe.payment_details.some((p: any) => p?.method === "CREDIT")
       );
     }
 
     return filteredCafesClose;
 
   };
-  const isOpenOrNot = (cafe) =>{
+  const isOpenOrNot = (cafe) => {
     const currentDate = new Date();
     const currentDay = currentDate.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
-    const currentTime = currentDate.toTimeString().slice(0,5); // "HH:MM"
+    const currentTime = currentDate.toTimeString().slice(0, 5); // "HH:MM"
     let openStatus = false;
     if (cafe && cafe.opening_hours) {
       const todayHours = cafe.opening_hours.find((day) => day.day.toLowerCase() === currentDay);
@@ -313,25 +313,25 @@ export default function HomeScreen() {
   }
   else {
     return (
-      
+
       <SafeAreaView>
-        <StatusBar   barStyle={Platform.OS === "android" ? "dark-content" : undefined}/>
+        <StatusBar barStyle={Platform.OS === "android" ? "dark-content" : undefined} />
         <ScrollableLayout>
           <>
             {/* User Location and Search */}
-            
+
             <View style={styles.locationAndSearchContainer}>
               {location && !locationPermissionDenied && (
-              <SelectLocalisation
-                currentLocalisation={selectedLocation ? selectedLocation.name : (closest && closest.length > 0) ? closest[0].location.pavillon : ""}
-                location={location as Location.LocationObject}
-                onLocationChange={handleLocationChange}
-              />
+                <SelectLocalisation
+                  currentLocalisation={selectedLocation ? selectedLocation.name : (closest && closest.length > 0) ? closest[0].location.pavillon : ""}
+                  location={location as Location.LocationObject}
+                  onLocationChange={handleLocationChange}
+                />
               )}
 
               <Search onSearch={handleSearch} />
             </View>
-            
+
 
             {/* TODO: IMPLEMENT FILTERS USING TOOLTIPS */}
             {/* Quick Search Section with Tooltips */}
@@ -383,22 +383,22 @@ export default function HomeScreen() {
                 changeColorOnPress
               />
               */}
-              
+
             </CardScrollableLayout>
             {filterCafes(data).length === 0 && (
               <Text style={{ textAlign: 'center', marginTop: SPACING["lg"], color: COLORS.subtuleDark }}>
-              Aucun café trouvé.
+                Aucun café trouvé.
               </Text>
             )}
 
             {filterCafes(data).length > 0 && (
               <Text
-              style={{
-                marginVertical: SPACING["sm"],
-                marginHorizontal: SPACING["sm"],
-                ...TYPOGRAPHY.heading.small.bold
-              }}>
-              {!searched ? "Tous les cafés" : `Résultats (${data.length})`}
+                style={{
+                  marginVertical: SPACING["sm"],
+                  marginHorizontal: SPACING["sm"],
+                  ...TYPOGRAPHY.heading.small.bold
+                }}>
+                {!searched ? "Tous les cafés" : `Résultats (${data.length})`}
               </Text>
             )}
             <FlatList data={filterCafes(data)} renderItem={({ item }) =>
@@ -470,14 +470,14 @@ export default function HomeScreen() {
                         }}>
                         {pavillonName}
                       </Text>
-                      
+
                       <FlatList
                         data={pavillonGroup}
                         renderItem={({ item }) => (
                           <CafeCard
                             name={item.name}
                             image={item.banner_url}
-                            location={'L' + item.location.local.substring(1) || ""}
+                            location={item.location.local}
                             priceRange="$$"
                             //rating={4.8}
                             status={isOpenOrNot(item)}
@@ -491,7 +491,7 @@ export default function HomeScreen() {
                         style={{
                           paddingHorizontal: SPACING["sm"],
                           paddingBottom: SPACING["md"],
-                          
+
                         }}
                       />
                     </View>
@@ -499,11 +499,11 @@ export default function HomeScreen() {
                 })}
               </View>
             )}
-            
+
             {/* Cafés groupés par pavillon */}
             {data && closest && !searched && (
               <View style={{ marginTop: SPACING["xl"] }}>
-                
+
 
                 {sortByPavillon(filterCafes(closest)).map((pavillonGroup, index) => {
                   if (pavillonGroup.length === 0) return null;
@@ -527,7 +527,7 @@ export default function HomeScreen() {
                           <CafeCard
                             name={item.name}
                             image={item.banner_url}
-                            location={'L' + item.location.local.substring(1) || ""}
+                            location={item.location.local}
                             priceRange="$$"
                             //rating={4.8}
                             status={isOpenOrNot(item)}
@@ -552,8 +552,9 @@ export default function HomeScreen() {
           </>
         </ScrollableLayout>
       </SafeAreaView>
-    );}
+    );
   }
+}
 
 const styles = StyleSheet.create({
   locationAndSearchContainer: {
