@@ -75,4 +75,5 @@ Le développement de cette application mobile est le fruit du travail des membre
 - [Trung Nguyen](https://github.com/likeskymore) 
 - [Udeme-Obong Itoro Samuel](https://github.com/udeme-sml)
 - [Louis Edouard Lafontant](https://github.com/lelafontant)
+- [L'équipe Café Sans-fil web](https://ceduni.github.io/cafe-sans-fil/)
 
