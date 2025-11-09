@@ -24,23 +24,23 @@ export default function FavorisScreen() {
   const [cafesData, setCafesData] = React.useState<Array<any>>([]);
   const [ListeCafes, setListeCafes] = React.useState<{ items: Array<any> }>({ items: [] });
   const [isCafesLoading, setIsCafesLoading] = React.useState<boolean>(true);
-  
+
   // Article favorites: array of [article_id, cafe_id] pairs
   // Example: [["article1", "cafe1"], ["article2", "cafe2"]]
   const [articlesFavoris, setArticlesFavoris] = React.useState<Array<any>>([]);
   const [articlesData, setArticlesData] = React.useState<Array<any>>([]);
   const [isArticlesLoading, setIsArticlesLoading] = React.useState<boolean>(false);
-  
+
   // Modal state for article details
   const [isArticleModalVisible, setIsArticleModalVisible] = React.useState(false);
   const [selectedArticleId, setSelectedArticleId] = React.useState<string | null>(null);
   const [selectedCafeId, setSelectedCafeId] = React.useState<string | null>(null);
-  
+
   const formatPrice = (price: string) => {
     if (price.charAt(price.length - 2) == ".") {
       return price + "0";
     }
-    else{
+    else {
       return price
     }
   }
@@ -136,11 +136,11 @@ export default function FavorisScreen() {
           const data = await response.json();
           const newFavorites = data.cafe_favs || [];
           const newArticlesFavorites = data.articles_favs || [];
-          
+
           // Compare the new favorites with current ones
           const currentCafesSorted = [...cafeFavoris].sort().join(',');
           const newCafesSorted = [...newFavorites].sort().join(',');
-          
+
           // For articles_favs, convert nested arrays to strings for comparison
           // articles_favs is [[article_id, cafe_id], [article_id, cafe_id], ...]
           const currentArticlesSorted = [...articlesFavoris]
@@ -151,10 +151,10 @@ export default function FavorisScreen() {
             .map(pair => Array.isArray(pair) ? pair.join(':') : pair)
             .sort()
             .join(',');
-          
+
           const cafesChanged = currentCafesSorted !== newCafesSorted;
           const articlesChanged = currentArticlesSorted !== newArticlesSorted;
-          
+
           // If nothing changed, skip everything
           if (!cafesChanged && !articlesChanged) {
             console.log('✅ No changes - skipping all data fetches');
@@ -176,7 +176,7 @@ export default function FavorisScreen() {
           // Update state
           setCafeFavoris(newFavorites);
           setArticlesFavoris(newArticlesFavorites);
-          
+
           // Fetch cafe data if cafe favorites changed
           if (cafesChanged) {
             if (newFavorites.length > 0) {
@@ -191,7 +191,7 @@ export default function FavorisScreen() {
               setIsCafesLoading(false);
             }
           }
-          
+
           // Fetch article data if article favorites changed
           if (articlesChanged) {
             if (newArticlesFavorites.length > 0) {
@@ -226,49 +226,71 @@ export default function FavorisScreen() {
     setSelectedCafeId(cafeId);
     setIsArticleModalVisible(true);
   };
-  
+
   const closeArticleModal = () => {
     setIsArticleModalVisible(false);
     setSelectedArticleId(null);
     setSelectedCafeId(null);
   };
+  const isOpenOrNot = (cafe) => {
+    const currentDate = new Date();
+    const currentDay = currentDate.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
+    const currentTime = currentDate.toTimeString().slice(0, 5); // "HH:MM"
+    let openStatus = false;
+    if (cafe && cafe.opening_hours) {
+      const todayHours = cafe.opening_hours.find((day) => day.day.toLowerCase() === currentDay);
+      console.log("today hours: ", todayHours);
+      if (todayHours) {
+        for (let block of todayHours.blocks) {
+          if (currentTime >= block.start && currentTime <= block.end) {
+            openStatus = true;
+            break;
+          }
+        }
+      }
+    }
+    console.log("lol", cafe.opening_hours);
+    console.log("open status de ", openStatus, currentDay, currentTime);
+    return openStatus;
+
+  }
 
   return (
     <>
-    <StatusBar />
-    <HeaderLayout />
+      <StatusBar />
+      <HeaderLayout />
       <ScrollableLayout>
         <View>
-          <Text  
+          <Text
             style={{
-              marginVertical: SPACING["xl"], 
-              marginHorizontal: SPACING["md"], 
+              marginVertical: SPACING["xl"],
+              marginHorizontal: SPACING["md"],
               ...TYPOGRAPHY.heading.small.bold
             }}
-            >Vos cafés favoris</Text>
+          >Vos cafés favoris</Text>
         </View>
 
 
-        
+
 
         {cafeFavoris.length === 0 ? (
           <View style={{ marginHorizontal: SPACING["md"], paddingVertical: SPACING["xl"] }}>
-              <Text style={{ ...TYPOGRAPHY.body.normal.base, color: '#666', textAlign: 'center' }}>
-                Aucun café favori pour le moment.
-              </Text>
-            </View>
+            <Text style={{ ...TYPOGRAPHY.body.normal.base, color: '#666', textAlign: 'center' }}>
+              Aucun café favori pour le moment.
+            </Text>
+          </View>
         ) : !isCafesLoading && cafesData.length > 0 && (
-           <FlatList
+          <FlatList
             data={cafesData}
             renderItem={({ item: cafe }) => (
-              <CafeCard 
+              <CafeCard
                 name={cafe.name}
                 image={cafe.banner_url}
                 location={cafe.location.pavillon}
                 priceRange="$$"
                 rating={4.5}
-                status={cafe.is_open}
-                id={cafe.id} 
+                status={isOpenOrNot(cafe)}
+                id={cafe.id}
               />
             )}
             keyExtractor={(item) => item.id}
@@ -282,15 +304,15 @@ export default function FavorisScreen() {
           />
         )}
 
-         <View style={{ marginBottom: SPACING["xl"] }}>
-          <Text 
+        <View style={{ marginBottom: SPACING["xl"] }}>
+          <Text
             style={{
-              marginVertical: SPACING["xl"], 
-              marginHorizontal: SPACING["md"], 
+              marginVertical: SPACING["xl"],
+              marginHorizontal: SPACING["md"],
               ...TYPOGRAPHY.heading.small.bold
             }}
           >Vos articles favoris</Text>
-          
+
           {articlesFavoris.length === 0 ? (
             <View style={{ marginHorizontal: SPACING["md"], paddingVertical: SPACING["xl"] }}>
               <Text style={{ ...TYPOGRAPHY.body.normal.base, color: '#666', textAlign: 'center' }}>
@@ -317,10 +339,10 @@ export default function FavorisScreen() {
                 }
 
                 return (
-                  <TouchableOpacity 
+                  <TouchableOpacity
                     onPress={() => {
                       if (item.cafe_id && item.id) {
-                          openArticleModal(item.id, item.cafe_id);
+                        openArticleModal(item.id, item.cafe_id);
                       }
                     }}
                     activeOpacity={0.8}
@@ -339,100 +361,100 @@ export default function FavorisScreen() {
                         shadowRadius: 8,
                       }
                     }}>
-                    {/* Article Image */}
-                    {item.image_url ? (
-                      <Image 
-                        source={{ uri: item.image_url }}
-                        style={{
+                      {/* Article Image */}
+                      {item.image_url ? (
+                        <Image
+                          source={{ uri: item.image_url }}
+                          style={{
+                            width: '100%',
+                            height: 160,
+                            backgroundColor: '#F5F5F5'
+                          }}
+                          resizeMode="cover"
+                        />
+                      ) : (
+                        <View style={{
                           width: '100%',
                           height: 160,
-                          backgroundColor: '#F5F5F5'
-                        }}
-                        resizeMode="cover"
-                      />
-                    ) : (
-                      <View style={{
-                        width: '100%',
-                        height: 160,
-                        backgroundColor: '#F5F5F5',
-                        justifyContent: 'center',
-                        alignItems: 'center'
-                      }}>
-                        <Text style={{ color: '#CCC', fontSize: 40 }}>☕</Text>
-                      </View>
-                    )}
-
-                    {/* Article Info */}
-                    <View style={{ padding: SPACING["md"] }}>
-                      {/* Name and Price Row */}
-                      <View style={{ 
-                        flexDirection: 'row', 
-                        justifyContent: 'space-between', 
-                        alignItems: 'flex-start',
-                        marginBottom: SPACING["xs"],
-                      }}>
-                        <Text 
-                          style={{ 
-                            ...TYPOGRAPHY.body.large.semiBold, 
-                            flex: 1,
-                            marginRight: SPACING["sm"]
-                          }}
-                          numberOfLines={2}
-                        >
-                          {item.name || 'Sans nom'}
-                        </Text>
-                        <View style={{
-                          paddingHorizontal: SPACING["sm"],
-                          paddingVertical: 4,
-                          borderRadius: 8,
+                          backgroundColor: '#F5F5F5',
+                          justifyContent: 'center',
+                          alignItems: 'center'
                         }}>
-                          <Text style={{ 
-                            ...TYPOGRAPHY.body.normal.semiBold, 
-                            color: COLORS.black,
-                            fontSize: 14
+                          <Text style={{ color: '#CCC', fontSize: 40 }}>☕</Text>
+                        </View>
+                      )}
+
+                      {/* Article Info */}
+                      <View style={{ padding: SPACING["md"] }}>
+                        {/* Name and Price Row */}
+                        <View style={{
+                          flexDirection: 'row',
+                          justifyContent: 'space-between',
+                          alignItems: 'flex-start',
+                          marginBottom: SPACING["xs"],
+                        }}>
+                          <Text
+                            style={{
+                              ...TYPOGRAPHY.body.large.semiBold,
+                              flex: 1,
+                              marginRight: SPACING["sm"]
+                            }}
+                            numberOfLines={2}
+                          >
+                            {item.name || 'Sans nom'}
+                          </Text>
+                          <View style={{
+                            paddingHorizontal: SPACING["sm"],
+                            paddingVertical: 4,
+                            borderRadius: 8,
                           }}>
-                            {formatPrice(priceDisplay)}
+                            <Text style={{
+                              ...TYPOGRAPHY.body.normal.semiBold,
+                              color: COLORS.black,
+                              fontSize: 14
+                            }}>
+                              {formatPrice(priceDisplay)}
+                            </Text>
+                          </View>
+                        </View>
+
+                        {/* Description */}
+                        {item.description && (
+                          <Text
+                            style={{
+                              ...TYPOGRAPHY.body.small.base,
+                              color: '#666',
+                              lineHeight: 18,
+                              marginBottom: SPACING["sm"]
+                            }}
+                            numberOfLines={2}
+                          >
+                            {item.description}
+                          </Text>
+                        )}
+
+                        {/* Stock Status */}
+                        <View style={{
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          marginTop: SPACING["xs"]
+                        }}>
+                          <View style={{
+                            width: 8,
+                            height: 8,
+                            borderRadius: 4,
+                            backgroundColor: item.in_stock ? '#4CAF50' : '#FF5252',
+                            marginRight: SPACING["xs"]
+                          }} />
+                          <Text style={{
+                            ...TYPOGRAPHY.body.small.base,
+                            color: item.in_stock ? '#4CAF50' : '#FF5252',
+                            fontWeight: '500'
+                          }}>
+                            {item.in_stock ? 'En Stock' : 'En Rupture'}
                           </Text>
                         </View>
                       </View>
-
-                      {/* Description */}
-                      {item.description && (
-                        <Text 
-                          style={{ 
-                            ...TYPOGRAPHY.body.small.base, 
-                            color: '#666',
-                            lineHeight: 18,
-                            marginBottom: SPACING["sm"]
-                          }}
-                          numberOfLines={2}
-                        >
-                          {item.description}
-                        </Text>
-                      )}
-
-                      {/* Stock Status */}
-                      <View style={{ 
-                        flexDirection: 'row', 
-                        alignItems: 'center',
-                        marginTop: SPACING["xs"]
-                      }}>
-                        <View style={{
-                          width: 8,
-                          height: 8,
-                          borderRadius: 4,
-                          backgroundColor: item.in_stock ? '#4CAF50' : '#FF5252',
-                          marginRight: SPACING["xs"]
-                        }} />
-                        <Text style={{ 
-                          ...TYPOGRAPHY.body.small.base, 
-                          color: item.in_stock ? '#4CAF50' : '#FF5252',
-                          fontWeight: '500'
-                        }}>
-                          {item.in_stock ? 'En Stock' : 'En Rupture'}
-                        </Text>
-                      </View>
-                    </View>
                     </View>
                   </TouchableOpacity>
                 );
@@ -449,7 +471,7 @@ export default function FavorisScreen() {
           ) : null}
         </View>
       </ScrollableLayout>
-      
+
       {/* Article Detail Modal */}
       {isArticleModalVisible && (
         <Modal
@@ -461,12 +483,12 @@ export default function FavorisScreen() {
           <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.white }}>
             <View style={{ flex: 1 }}>
               {/* Modal Header */}
-              
-              
+
+
               {/* Article Content */}
               {selectedArticleId && selectedCafeId && (
-                <ArticleModalContent 
-                  articleId={selectedArticleId} 
+                <ArticleModalContent
+                  articleId={selectedArticleId}
                   cafeId={selectedCafeId}
                   onClose={closeArticleModal}
                 />
