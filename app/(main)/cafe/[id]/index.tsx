@@ -62,20 +62,20 @@ export default function CafeScreen() {
 
   // data for the café returned by the API
   // const [cafe, setCafe] = useState<Cafe | any>({ social_media:{} }); // set social media as empty array pour ne pas produire d'erreur dans l'utlisation de map après
-  
+
   // list of items to display
   const [itemList, setItemList] = useState<Item[]>();
   const [filteredItemList, setFilteredItemList] = useState<Item[]>();
   const [isSearchActive, setIsSearchActive] = useState(false);
 
   const [cafe, setCafe] = useState<Cafe>(); // set social media as empty object
-  
+
   const [data, setData] = useState<allCafe | any>([]);
-  
+
   // Modal state for article details
   const [isArticleModalVisible, setIsArticleModalVisible] = useState(false);
   const [selectedArticleId, setSelectedArticleId] = useState<string | null>(null);
-  
+
   // Shuffle array function
   const shuffleArray = (array: any[]) => {
     const shuffled = [...array];
@@ -85,27 +85,27 @@ export default function CafeScreen() {
     }
     return shuffled;
   };
-  
+
   useEffect(() => {
-      setIsLoading(true);
-      fetch("https://cafesansfil-api-r0kj.onrender.com/api/cafes")
-        .then((response) => response.json())
-        .then((json) => {
-          // Filter out the current cafe and shuffle the rest
-          const filteredCafes = json.items.filter((item: any) => item.id !== id);
-          const shuffledCafes = shuffleArray(filteredCafes);
-          setData(shuffledCafes);
-        })
-        .catch((error) => console.error(error))
-        .finally(() => setIsLoading(false));
-    }, [id]);
-  
+    setIsLoading(true);
+    fetch("https://cafesansfil-api-r0kj.onrender.com/api/cafes")
+      .then((response) => response.json())
+      .then((json) => {
+        // Filter out the current cafe and shuffle the rest
+        const filteredCafes = json.items.filter((item: any) => item.id !== id);
+        const shuffledCafes = shuffleArray(filteredCafes);
+        setData(shuffledCafes);
+      })
+      .catch((error) => console.error(error))
+      .finally(() => setIsLoading(false));
+  }, [id]);
+
   // Have an openable link
   const openLink = (url: string) => {
     Linking.openURL(url).catch(err => console.error("Failed to open URL:", err));
   };
 
-  
+
 
   // function qui donne la plateform et le lien
   // const getSocialMediaLinks = (socialMediaObjet) => {
@@ -116,17 +116,17 @@ export default function CafeScreen() {
   //     link: link,
   //   }) );
   // };
-  
+
 
   // Getting icons depending on platform names
-  const getIcon = (platform : any) => {
+  const getIcon = (platform: any) => {
     const icons = {
       x: Twitter,
       instagram: Instagram,
       facebook: Facebook,
     };
     return icons[platform] || HelpCircle;
-  }; 
+  };
 
   // fetch cafe data
   useEffect(() => {
@@ -157,7 +157,7 @@ export default function CafeScreen() {
     fetchCafe();
 
     const fetchProfile = async () => {
-      try{
+      try {
         const token = await getToken();
         if (!token) {
           console.error("No access token found");
@@ -171,80 +171,80 @@ export default function CafeScreen() {
           }
         })
           .then(response => response.json())
-          .then(data => {if (data.cafe_favs.includes(id)){ toggleHeart(true)} else {toggleHeart(false)}; console.log("Data user: ", data)})
+          .then(data => { if (data.cafe_favs.includes(id)) { toggleHeart(true) } else { toggleHeart(false) }; console.log("Data user: ", data) })
           .catch(error => console.error('Error fetching user data:', error));
       }
-      catch(error){
+      catch (error) {
         console.error("Error fetching user data:", error);
       }
     };
     fetchProfile();
   }, [id]);
-  
+
   const [activeFilter, setActiveFilter] = useState("Tous");
   const formatPrice = (price: string) => {
-  if (price.charAt(price.length - 2) == ".") {
-    return price + "0";
+    if (price.charAt(price.length - 2) == ".") {
+      return price + "0";
+    }
+    else {
+      return price
+    }
   }
-  else{
-    return price
-  }
-}
 
   // filter the menu based on argument filter
-function filterMenu(filter?: string, menuData?: any): Item[] {
-  let menu = menuData ? menuData : ((cafe && cafe.menu) ? cafe.menu.categories : []);
-  let itemList: Item[] = [];
+  function filterMenu(filter?: string, menuData?: any): Item[] {
+    let menu = menuData ? menuData : ((cafe && cafe.menu) ? cafe.menu.categories : []);
+    let itemList: Item[] = [];
 
-  // Clear search when using category filters
-  setIsSearchActive(false);
-  setFilteredItemList(undefined);
-  setSearchText("");
+    // Clear search when using category filters
+    setIsSearchActive(false);
+    setFilteredItemList(undefined);
+    setSearchText("");
 
-  // if no filter --> all items to be displayed
-  if (filter) {
-    setActiveFilter(filter)
-    for (let i = 0; i < menu.length; i++) {
-      // search for the filter
-      if (menu[i].name == filter) {
-        itemList = menu[i].items;
-        break;
+    // if no filter --> all items to be displayed
+    if (filter) {
+      setActiveFilter(filter)
+      for (let i = 0; i < menu.length; i++) {
+        // search for the filter
+        if (menu[i].name == filter) {
+          itemList = menu[i].items;
+          break;
+        }
+      }
+    } else {
+      setActiveFilter("Tous");
+      // loop through each individual category...
+      for (let i = 0; i < menu.length; i++) {
+        let itemsInCat: Item[] = menu[i].items;
+        // loop through each item for that category...
+        for (let j = 0; j < itemsInCat.length; j++) {
+          // push the item to the list
+          let item = itemsInCat[j];
+          itemList.push(item);
+        }
       }
     }
-  } else {
-    setActiveFilter("Tous");
-    // loop through each individual category...
-    for (let i = 0; i < menu.length; i++) {
-      let itemsInCat: Item[] = menu[i].items;
-      // loop through each item for that category...
-      for (let j = 0; j < itemsInCat.length; j++) {
-        // push the item to the list
-        let item = itemsInCat[j];
-        itemList.push(item);
-      }
-    }
+    return itemList;
   }
-  return itemList;
-}
   // Tableau des média sociaux des cafés : convertie le json {plateform: link} à un tableau [plateform, link]
   const socialMediaTab = cafe?.social_media ? Object.entries(cafe.social_media).map(([plateform, link]) =>
-    ({plateform, link})) : [] ;
+    ({ plateform, link })) : [];
 
   // Méthode pour traduire en français
   const translationPaymentMethod = (method) => {
     const methodTranslated = {
-      CREDIT : "Crédit",
-      DEBIT : "Débit",
-      CASH : "Cash",
+      CREDIT: "Crédit",
+      DEBIT: "Débit",
+      CASH: "Cash",
     };
     return methodTranslated.method || method;
   };
 
 
-  const isOpenOrNot = (cafe) =>{
+  const isOpenOrNot = (cafe) => {
     const currentDate = new Date();
     const currentDay = currentDate.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
-    const currentTime = currentDate.toTimeString().slice(0,5); // "HH:MM"
+    const currentTime = currentDate.toTimeString().slice(0, 5); // "HH:MM"
     let openStatus = false;
     if (cafe && cafe.opening_hours) {
       const todayHours = cafe.opening_hours.find((day) => day.day.toLowerCase() === currentDay);
@@ -264,9 +264,9 @@ function filterMenu(filter?: string, menuData?: any): Item[] {
 
   }
 
-  const openLocation = (location : any) => {
+  const openLocation = (location: any) => {
     console.log("Location: ", location);
-    
+
     // Extract latitude and longitude from the location array
     const latitude = location[1];
     const longitude = location[0];
@@ -280,7 +280,7 @@ function filterMenu(filter?: string, menuData?: any): Item[] {
     // Use Alert to present app choices to the user
     if (Platform.OS === 'ios') {
       // For iOS we can use ActionSheetIOS
-      
+
       // First check which apps are installed before showing options
       Promise.all([
         Linking.canOpenURL(appleMapsUrl),
@@ -289,61 +289,61 @@ function filterMenu(filter?: string, menuData?: any): Item[] {
       ]).then(([appleSupported, googleSupported, wazeSupported]) => {
         // Build options array with only installed apps
         const options = ['Annuler'];
-        const availableApps : any[] = [];
-        
+        const availableApps: any[] = [];
+
         if (appleSupported) {
           options.push('Apple Plans');
           availableApps.push('apple');
         }
-        
+
         if (googleSupported) {
           options.push('Google Maps');
           availableApps.push('google');
         }
-        
+
         if (wazeSupported) {
           options.push('Waze');
           availableApps.push('waze');
         }
-        
+
         // Only show ActionSheet if there's at least one map app available
         if (availableApps.length > 0) {
           ActionSheetIOS.showActionSheetWithOptions(
-        {
-          options,
-          cancelButtonIndex: 0,
-        },
-        (buttonIndex : number) => {
-          if (buttonIndex === 0) return; // Cancel
-          
-          const selectedApp = availableApps[buttonIndex - 1];
-          
-          if (selectedApp === 'apple') {
-            Linking.openURL(appleMapsUrl).catch(err => 
-          console.error("Failed to open Apple Maps:", err));
-          } else if (selectedApp === 'google') {
-            Linking.openURL(googleMapsUrl).catch(err => 
-          console.error("Failed to open Google Maps:", err));
-          } else if (selectedApp === 'waze') {
-            Linking.openURL(wazeUrl).catch(err => 
-          console.error("Failed to open Waze:", err));
-          }
-        }
+            {
+              options,
+              cancelButtonIndex: 0,
+            },
+            (buttonIndex: number) => {
+              if (buttonIndex === 0) return; // Cancel
+
+              const selectedApp = availableApps[buttonIndex - 1];
+
+              if (selectedApp === 'apple') {
+                Linking.openURL(appleMapsUrl).catch(err =>
+                  console.error("Failed to open Apple Maps:", err));
+              } else if (selectedApp === 'google') {
+                Linking.openURL(googleMapsUrl).catch(err =>
+                  console.error("Failed to open Google Maps:", err));
+              } else if (selectedApp === 'waze') {
+                Linking.openURL(wazeUrl).catch(err =>
+                  console.error("Failed to open Waze:", err));
+              }
+            }
           );
         } else {
           // No map apps available, open with default URL scheme
-          Linking.openURL(genericMapsUrl).catch(err => 
-        console.error("Failed to open Maps:", err));
+          Linking.openURL(genericMapsUrl).catch(err =>
+            console.error("Failed to open Maps:", err));
         }
       }).catch(err => {
         console.error("Error checking for installed map apps:", err);
         // Fallback to generic map URL
-        Linking.openURL(genericMapsUrl).catch(err => 
+        Linking.openURL(genericMapsUrl).catch(err =>
           console.error("Failed to open Maps:", err));
       });
     } else {
       // For Android use Alert
-      
+
       Alert.alert(
         'Choisir une application',
         'Quelle application souhaitez-vous utiliser pour afficher cet itinéraire?',
@@ -376,175 +376,177 @@ function filterMenu(filter?: string, menuData?: any): Item[] {
   };
 
   // Tableau? des détails de payements
-  const paymentDetails = cafe?.payment_details ? cafe.payment_details.map(({method, minimum}) => ({
-    method : translationPaymentMethod(method), minimum })) : [];
+  const paymentDetails = cafe?.payment_details ? cafe.payment_details.map(({ method, minimum }) => ({
+    method: translationPaymentMethod(method), minimum
+  })) : [];
 
 
-    const [heart, toggleHeart] = useState(false);
+  const [heart, toggleHeart] = useState(false);
 
-    const addToFavoris = async (id) => {
-      try{
-        const token = await getToken();
-        if (!token) {
-          console.error("No access token found");
-          router.push("/sign-in");
-          return;
-          
-        }
-        const response = await fetch(`https://cafesansfil-api-r0kj.onrender.com/api/users/@me/cafes?cafe_id=${id}`, {
-          method: 'PUT',
-          headers: {
-            'accept': 'application/json',
-            'Authorization': `Bearer ${token}`
-          }
-        });
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-        console.log("Added to favoris:", data);
-        // Update local state or provide user feedback as needed
-        toggleHeart(true);
-        
+  const addToFavoris = async (id) => {
+    try {
+      const token = await getToken();
+      if (!token) {
+        console.error("No access token found");
+        router.push("/sign-in");
+        return;
+
       }
-      catch(error){
-        console.error("Error adding to favoris:", error);
-    }
+      const response = await fetch(`https://cafesansfil-api-r0kj.onrender.com/api/users/@me/cafes?cafe_id=${id}`, {
+        method: 'PUT',
+        headers: {
+          'accept': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      console.log("Added to favoris:", data);
+      // Update local state or provide user feedback as needed
+      toggleHeart(true);
 
     }
-
-    const removeFromFavoris = async (id) => {
-      try{
-        const token = await getToken();
-        if (!token) {
-          console.error("No access token found");
-          return;
-        }
-        const response = await fetch(`https://cafesansfil-api-r0kj.onrender.com/api/users/@me/cafes?cafe_id=${id}`, {
-          method: 'DELETE',
-          headers: {
-            'accept': 'application/json',
-            'Authorization': `Bearer ${token}`
-          }
-        });
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-        console.log("Removed from favoris:", data);
-        // Update local state or provide user feedback as needed
-        toggleHeart(false);
-      }
-      catch(error){
-        console.error("Error removing from favoris:", error);
-      }
+    catch (error) {
+      console.error("Error adding to favoris:", error);
     }
-    
-    // Article modal handlers
-    const openArticleModal = (articleId: string) => {
-      setSelectedArticleId(articleId);
-      setIsArticleModalVisible(true);
-    };
-    
-    const closeArticleModal = () => {
-      setIsArticleModalVisible(false);
-      setSelectedArticleId(null);
-    };
-    
-    // Search bar animation states
-    const [isSearchExpanded, setIsSearchExpanded] = useState(false);
-    const [searchText, setSearchText] = useState("");
-    const searchWidth = useState(new Animated.Value(0))[0];
-    const { width: screenWidth } = Dimensions.get('window');
-    
-    // Header background animation based on scroll
-    const [isScrolledPastImage, setIsScrolledPastImage] = useState(false);
-    const headerBackgroundOpacity = useState(new Animated.Value(0))[0];
-    const IMAGE_HEIGHT = 350; // Should match cafeBackgroundImage height
-    
-    const toggleSearch = () => {
-      const isExpanding = !isSearchExpanded;
-      setIsSearchExpanded(isExpanding);
-      
-      // Calculate search width based on available space
-      let targetWidth = 0;
-      if (isExpanding) {
-        targetWidth = screenWidth - 20;
-      }
-      
-      Animated.timing(searchWidth, {
-        toValue: targetWidth,
-        duration: 300,
-        useNativeDriver: false,
-      }).start();
-      
-      if (!isExpanding) {
-        setSearchText(""); // Clear search text when closing
-        setFilteredItemList(undefined); // Clear filtered results
-        setIsSearchActive(false); // Deactivate search
-        setActiveFilter("Tous"); // Reset filter to "Tous"
-      }
-    };
 
-    // Handle search text changes
-    const handleSearchChange = (text: string) => {
-      setSearchText(text);
-      
-      if (!text.trim()) {
-        // If search is empty, clear filtered results
-        setFilteredItemList(undefined);
-        setIsSearchActive(false);
+  }
+
+  const removeFromFavoris = async (id) => {
+    try {
+      const token = await getToken();
+      if (!token) {
+        console.error("No access token found");
         return;
       }
-
-      // Scroll to menu section when user starts typing
-      if (!isSearchActive && scrollViewRef.current) {
-        setIsSearchActive(true);
-        // Scroll to menu section (adjust offset as needed based on your layout)
-        scrollViewRef.current.scrollTo({ y: 600, animated: true });
-      }
-
-      // Get all menu items from all categories
-      const allItems: Item[] = [];
-      cafe?.menu.categories.forEach(category => {
-        allItems.push(...category.items);
+      const response = await fetch(`https://cafesansfil-api-r0kj.onrender.com/api/users/@me/cafes?cafe_id=${id}`, {
+        method: 'DELETE',
+        headers: {
+          'accept': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
       });
-
-      // Filter items based on search text
-      const filtered = allItems.filter(item => 
-        item.name.toLowerCase().includes(text.toLowerCase()) ||
-        item.description?.toLowerCase().includes(text.toLowerCase())
-      );
-
-      setFilteredItemList(filtered);
-      setActiveFilter(""); // Clear active filter when searching
-    };
-
-    // Handle scroll to change header background
-    const handleScroll = (event: any) => {
-      const scrollY = event.nativeEvent.contentOffset.y;
-      const shouldShowBackground = scrollY > IMAGE_HEIGHT - 100; // Start transition 100px before image ends
-      
-      if (shouldShowBackground !== isScrolledPastImage) {
-        setIsScrolledPastImage(shouldShowBackground);
-        
-        Animated.timing(headerBackgroundOpacity, {
-          toValue: shouldShowBackground ? 1 : 0,
-          duration: 200,
-          useNativeDriver: false,
-        }).start();
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
-    };
-    
+      const data = await response.json();
+      console.log("Removed from favoris:", data);
+      // Update local state or provide user feedback as needed
+      toggleHeart(false);
+    }
+    catch (error) {
+      console.error("Error removing from favoris:", error);
+    }
+  }
 
-  if(isLoading){
-    return(
+  // Article modal handlers
+  const openArticleModal = (articleId: string) => {
+    setSelectedArticleId(articleId);
+    setIsArticleModalVisible(true);
+  };
+
+  const closeArticleModal = () => {
+    setIsArticleModalVisible(false);
+    setSelectedArticleId(null);
+  };
+
+  // Search bar animation states
+  const [isSearchExpanded, setIsSearchExpanded] = useState(false);
+  const [searchText, setSearchText] = useState("");
+  const searchWidth = useState(new Animated.Value(0))[0];
+  const { width: screenWidth } = Dimensions.get('window');
+
+  // Header background animation based on scroll
+  const [isScrolledPastImage, setIsScrolledPastImage] = useState(false);
+  const headerBackgroundOpacity = useState(new Animated.Value(0))[0];
+  const IMAGE_HEIGHT = 350; // Should match cafeBackgroundImage height
+
+  const toggleSearch = () => {
+    const isExpanding = !isSearchExpanded;
+    setIsSearchExpanded(isExpanding);
+
+    // Calculate search width based on available space
+    let targetWidth = 0;
+    if (isExpanding) {
+      targetWidth = screenWidth - 20;
+    }
+
+    Animated.timing(searchWidth, {
+      toValue: targetWidth,
+      duration: 300,
+      useNativeDriver: false,
+    }).start();
+
+    if (!isExpanding) {
+      setSearchText(""); // Clear search text when closing
+      setFilteredItemList(undefined); // Clear filtered results
+      setIsSearchActive(false); // Deactivate search
+      setActiveFilter("Tous"); // Reset filter to "Tous"
+    }
+  };
+
+  // Handle search text changes
+  const handleSearchChange = (text: string) => {
+    setSearchText(text);
+
+    if (!text.trim()) {
+      // If search is empty, clear filtered results
+      setFilteredItemList(undefined);
+      setIsSearchActive(false);
+      return;
+    }
+
+    // Scroll to menu section when user starts typing
+    if (!isSearchActive && scrollViewRef.current) {
+      setIsSearchActive(true);
+      // Scroll to menu section (adjust offset as needed based on your layout)
+      scrollViewRef.current.scrollTo({ y: 600, animated: true });
+    }
+
+    // Get all menu items from all categories
+    const allItems: Item[] = [];
+    cafe?.menu.categories.forEach(category => {
+      allItems.push(...category.items);
+    });
+
+    // Filter items based on search text
+    const filtered = allItems.filter(item =>
+      item.name.toLowerCase().includes(text.toLowerCase()) ||
+      item.description?.toLowerCase().includes(text.toLowerCase())
+    );
+
+    setFilteredItemList(filtered);
+    setActiveFilter(""); // Clear active filter when searching
+  };
+
+  // Handle scroll to change header background
+  const handleScroll = (event: any) => {
+    const scrollY = event.nativeEvent.contentOffset.y;
+    const shouldShowBackground = scrollY > IMAGE_HEIGHT - 100; // Start transition 100px before image ends
+
+    if (shouldShowBackground !== isScrolledPastImage) {
+      setIsScrolledPastImage(shouldShowBackground);
+
+      Animated.timing(headerBackgroundOpacity, {
+        toValue: shouldShowBackground ? 1 : 0,
+        duration: 200,
+        useNativeDriver: false,
+      }).start();
+    }
+  };
+
+
+  if (isLoading) {
+    return (
       <ActivityIndicator size={'large'}
-      style={{backgroundColor: COLORS.white,
-              flex: 1,
-              alignContent: 'center',
-              justifyContent: 'center'
-      }} />
+        style={{
+          backgroundColor: COLORS.white,
+          flex: 1,
+          alignContent: 'center',
+          justifyContent: 'center'
+        }} />
     )
   }
 
@@ -563,7 +565,7 @@ function filterMenu(filter?: string, menuData?: any): Item[] {
             outputRange: [0, 1],
           }),
           borderBottomColor: 'rgba(0, 0, 0, 0.1)',
-          shadowColor: COLORS.black ,
+          shadowColor: COLORS.black,
           shadowOffset: {
             width: 0,
             height: 2,
@@ -630,21 +632,21 @@ function filterMenu(filter?: string, menuData?: any): Item[] {
 
               {/* Right side - Search and Location buttons */}
               <View style={styles.cafeHeaderButtonsRight}>
-                <IconButton 
-                  Icon={Search} 
-                  style={styles.cafeHeaderIconButtons} 
+                <IconButton
+                  Icon={Search}
+                  style={styles.cafeHeaderIconButtons}
                   onPress={toggleSearch}
                 />
                 {!isScrolledPastImage && (
                   <View style={{ flexDirection: "row", gap: 8 }}>
-                    <IconButton 
-                      Icon={Locate} 
-                      style={styles.cafeHeaderIconButtons} 
-                      onPress={() => cafe?.location && openLocation(cafe.location.geometry.coordinates)} 
+                    <IconButton
+                      Icon={Locate}
+                      style={styles.cafeHeaderIconButtons}
+                      onPress={() => cafe?.location && openLocation(cafe.location.geometry.coordinates)}
                     />
                     <IconButton
                       Icon={Heart}
-                      onPress={() => { heart ? removeFromFavoris(id) : addToFavoris(id)}}
+                      onPress={() => { heart ? removeFromFavoris(id) : addToFavoris(id) }}
                       iconColor={heart ? COLORS.status.red : COLORS.black}
                       fill={heart ? "red" : "none"}
                       style={styles.cafeHeaderIconButtons}
@@ -656,279 +658,280 @@ function filterMenu(filter?: string, menuData?: any): Item[] {
           )}
         </View>
       </Animated.View>
-      
+
       {/* Scrollable Content */}
       <ScrollView
         ref={scrollViewRef}
         showsVerticalScrollIndicator={false}
         showsHorizontalScrollIndicator={false}
-        style={{backgroundColor: "#f4f4f4", flex: 1}} 
+        style={{ backgroundColor: "#f4f4f4", flex: 1 }}
         contentContainerStyle={{ paddingTop: 0 }}
         onScroll={handleScroll}
         scrollEventThrottle={16}
       >
-      <View>
-        <Image
-          style={styles.cafeBackgroundImage}
-          source={isLoading ? require("@/assets/images/placeholder/image2xl.png") : {uri: cafe?.banner_url}}
-        />
+        <View>
+          <Image
+            style={styles.cafeBackgroundImage}
+            source={isLoading ? require("@/assets/images/placeholder/image2xl.png") : { uri: cafe?.banner_url }}
+          />
 
-        <View style={styles.cafeHeaderOpenStatus}>
-          <Tooltip label={isOpenOrNot(cafe) ? "Ouvert" : "Fermé"} showChevron={false} status={isOpenOrNot(cafe) ? "green" : "red"} />
+          <View style={styles.cafeHeaderOpenStatus}>
+            <Tooltip label={isOpenOrNot(cafe) ? "Ouvert" : "Fermé"} showChevron={false} status={isOpenOrNot(cafe) ? "green" : "red"} />
+          </View>
         </View>
-      </View>
 
-      <View>
-        <Text style={[TYPOGRAPHY.heading.medium.bold, styles.cafeName]}>
-          {isLoading? "..." : cafe?.name}
-        </Text>
-        <Text style={[TYPOGRAPHY.body.large.base, styles.cafeDescription]}>
-          {isLoading? "..." : cafe?.description}
-        </Text>
+        <View>
+          <Text style={[TYPOGRAPHY.heading.medium.bold, styles.cafeName]}>
+            {isLoading ? "..." : cafe?.name}
+          </Text>
+          <Text style={[TYPOGRAPHY.body.large.base, styles.cafeDescription]}>
+            {isLoading ? "..." : cafe?.description}
+          </Text>
 
-        {/*Média sociaux*/}
+          {/*Média sociaux*/}
           <View style={{
             flexDirection: "row",
             flexWrap: "wrap",
             alignItems: "center",
             justifyContent: "center",
             marginTop: 20,
-            gap: 10,}}>
+            gap: 10,
+          }}>
 
-              {socialMediaTab.map(({plateform, link}) => ( link ? (
+            {socialMediaTab.map(({ plateform, link }) => (link ? (
 
-                <View key={plateform}>
-                  <Tooltip
+              <View key={plateform}>
+                <Tooltip
                   label={plateform.charAt(0).toUpperCase() + plateform.slice(1)}
                   onPress={() => openLink(link)}
                   Icon={getIcon(plateform)}
-                  showChevron={false} color='white'/>
-                </View>
+                  showChevron={false} color='white' />
+              </View>
 
-              ) : null ))}
+            ) : null))}
           </View>
 
-        {/* Section paiement */}
+          {/* Section paiement */}
           <Text
             style={[
               TYPOGRAPHY.body.large.semiBold,
               { color: COLORS.subtuleDark, textAlign: "center" },
-              { marginTop: 20},
+              { marginTop: 20 },
             ]}
           >
             Paiement
           </Text>
           <View
-          style={{
-            flexDirection: "row",
-            flexWrap: "wrap",
-            alignItems: "center",
-            justifyContent: "center",
-            marginTop: 20,
-            gap: 10,
-          }}
-        >
-          {paymentDetails.map(({method, minimum}) => ( minimum ? (
-            <View key={method}>
-              <Tooltip
-                key={`${method}-${minimum}`}
-                label={`${method} : $${minimum}+`}
-                showChevron={false }
-                color={COLORS.white}
-                description={`Minimum: ${minimum}`}
-                Icon={CreditCard}
-                /> 
-            </View>
-                ) : 
-                (
+            style={{
+              flexDirection: "row",
+              flexWrap: "wrap",
+              alignItems: "center",
+              justifyContent: "center",
+              marginTop: 20,
+              gap: 10,
+            }}
+          >
+            {paymentDetails.map(({ method, minimum }) => (minimum ? (
               <View key={method}>
                 <Tooltip
-                key={method} 
-                  label={method}
+                  key={`${method}-${minimum}`}
+                  label={`${method} : $${minimum}+`}
                   showChevron={false}
                   color={COLORS.white}
-                  Icon={DollarSign}/>
-              </View>    
+                  description={`Minimum: ${minimum}`}
+                  Icon={CreditCard}
+                />
+              </View>
+            ) :
+              (
+                <View key={method}>
+                  <Tooltip
+                    key={method}
+                    label={method}
+                    showChevron={false}
+                    color={COLORS.white}
+                    Icon={DollarSign} />
+                </View>
               )
-            //<Text>{method} MIN: {minimum}</Text> ) : <Text>{method}</Text> */ }
-          ))}
+              //<Text>{method} MIN: {minimum}</Text> ) : <Text>{method}</Text> */ }
+            ))}
+          </View>
+
+        </View>
+        {/* Horaires du café */}
+        <View style={styles.hoursSection}>
+          <Text style={styles.sectionTitle}>Horaires d'ouverture</Text>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.hoursScrollContent}
+          >
+            {(() => {
+              // Map English days to French
+              const dayMapping: { [key: string]: string } = {
+                'monday': 'lundi',
+                'tuesday': 'mardi',
+                'wednesday': 'mercredi',
+                'thursday': 'jeudi',
+                'friday': 'vendredi',
+                'saturday': 'samedi',
+                'sunday': 'dimanche'
+              };
+
+              // Get today's day in French
+              const todayFrench = new Date().toLocaleDateString('fr-FR', { weekday: 'long' }).toLowerCase();
+
+              // Find today's index in the opening_hours array
+              const hours = cafe?.opening_hours || [];
+              const todayIndex = hours.findIndex(item => {
+                const itemDayFrench = dayMapping[item.day.toLowerCase()] || item.day.toLowerCase();
+                return itemDayFrench === todayFrench;
+              });
+
+              // Reorder array to start from today
+              const reorderedHours = todayIndex >= 0
+                ? [...hours.slice(todayIndex), ...hours.slice(0, todayIndex)]
+                : hours;
+
+              return reorderedHours.map((item, index) => {
+                const isToday = index === 0 && todayIndex >= 0;
+                const itemDayFrench = dayMapping[item.day.toLowerCase()] || item.day.toLowerCase();
+
+                return (
+                  <View
+                    key={item.day}
+                    style={[
+                      styles.modernDayCard,
+                      isToday && styles.modernDayCardToday
+                    ]}
+                  >
+                    <View style={styles.dayHeader}>
+                      <Text style={[
+                        styles.modernDayName,
+                        isToday && styles.modernDayNameToday
+                      ]}>
+                        {isToday ? "Aujourd'hui" : itemDayFrench.charAt(0).toUpperCase() + itemDayFrench.slice(1)}
+                      </Text>
+                    </View>
+                    <View style={styles.modernTimeBlocks}>
+                      {item.blocks.length > 0 ? (
+                        item.blocks.map((block, blockIndex) => (
+                          <View key={blockIndex} style={styles.modernTimeBlock}>
+                            <Text style={[
+                              styles.modernTimeText,
+                              isToday && styles.modernTimeTextToday
+                            ]}>
+                              {block.start}
+                            </Text>
+                            <Text style={[styles.timeSeparator, isToday && styles.timeSeparatorToday]}>-</Text>
+                            <Text style={[
+                              styles.modernTimeText,
+                              isToday && styles.modernTimeTextToday
+                            ]}>
+                              {block.end}
+                            </Text>
+                          </View>
+                        ))
+                      ) : (
+                        <View style={styles.closedContainer}>
+                          <Text style={[styles.modernClosedText, isToday && styles.modernClosedTextToday]}>Fermé</Text>
+                        </View>
+                      )}
+                    </View>
+                  </View>
+                );
+              });
+            })()}
+          </ScrollView>
         </View>
 
-      </View>
-      {/* Horaires du café */}
-<View style={styles.hoursSection}>
-  <Text style={styles.sectionTitle}>Horaires d'ouverture</Text>
-  <ScrollView 
-    horizontal
-    showsHorizontalScrollIndicator={false}
-    contentContainerStyle={styles.hoursScrollContent}
-  >
-    {(() => {
-      // Map English days to French
-      const dayMapping: { [key: string]: string } = {
-        'monday': 'lundi',
-        'tuesday': 'mardi',
-        'wednesday': 'mercredi',
-        'thursday': 'jeudi',
-        'friday': 'vendredi',
-        'saturday': 'samedi',
-        'sunday': 'dimanche'
-      };
+        {/* Menu Section */}
+        <View style={styles.menuSection}>
+          <Text style={styles.sectionTitle}>Notre Menu</Text>
 
-      // Get today's day in French
-      const todayFrench = new Date().toLocaleDateString('fr-FR', { weekday: 'long' }).toLowerCase();
-      
-      // Find today's index in the opening_hours array
-      const hours = cafe?.opening_hours || [];
-      const todayIndex = hours.findIndex(item => {
-        const itemDayFrench = dayMapping[item.day.toLowerCase()] || item.day.toLowerCase();
-        return itemDayFrench === todayFrench;
-      });
-
-      // Reorder array to start from today
-      const reorderedHours = todayIndex >= 0 
-        ? [...hours.slice(todayIndex), ...hours.slice(0, todayIndex)]
-        : hours;
-
-      return reorderedHours.map((item, index) => {
-        const isToday = index === 0 && todayIndex >= 0;
-        const itemDayFrench = dayMapping[item.day.toLowerCase()] || item.day.toLowerCase();
-        
-        return (
-          <View 
-            key={item.day} 
-            style={[
-              styles.modernDayCard,
-              isToday && styles.modernDayCardToday
-            ]}
+          {/* Catégories */}
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.modernFilterScrollContainer}
+            style={styles.modernFilterScrollView}
           >
-            <View style={styles.dayHeader}>
-              <Text style={[
-                styles.modernDayName,
-                isToday && styles.modernDayNameToday
-              ]}>
-                {isToday ? "Aujourd'hui" : itemDayFrench.charAt(0).toUpperCase() + itemDayFrench.slice(1)}
-              </Text>
-            </View>
-            <View style={styles.modernTimeBlocks}>
-              {item.blocks.length > 0 ? (
-                item.blocks.map((block, blockIndex) => (
-                  <View key={blockIndex} style={styles.modernTimeBlock}>
-                    <Text style={[
-                      styles.modernTimeText,
-                      isToday && styles.modernTimeTextToday
-                    ]}>
-                      {block.start}
-                    </Text>
-                    <Text style={[styles.timeSeparator, isToday && styles.timeSeparatorToday]}>-</Text>
-                    <Text style={[
-                      styles.modernTimeText,
-                      isToday && styles.modernTimeTextToday
-                    ]}>
-                      {block.end}
-                    </Text>
-                  </View>
-                ))
-              ) : (
-                <View style={styles.closedContainer}>
-                  <Text style={[styles.modernClosedText, isToday && styles.modernClosedTextToday]}>Fermé</Text>
-                </View>
-              )}
-            </View>
-          </View>
-        );
-      });
-    })()}
-  </ScrollView>
-</View>
-
-      {/* Menu Section */}
-      <View style={styles.menuSection}>
-        <Text style={styles.sectionTitle}>Notre Menu</Text>
-        
-        {/* Catégories */}
-        <ScrollView 
-          horizontal 
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.modernFilterScrollContainer}
-          style={styles.modernFilterScrollView}
-        >
-          {/* "Tous" filter */}
-          <TouchableOpacity 
-            style={[
-              styles.modernFilterChip,
-              activeFilter === "Tous" && styles.modernFilterChipActive
-            ]}
-            onPress={() => setItemList(filterMenu())}
-          >
-            <Text style={[
-              styles.modernFilterChipText,
-              activeFilter === "Tous" && styles.modernFilterChipTextActive
-            ]}>
-              Tous
-            </Text>
-          </TouchableOpacity>
-
-          {/* Category filters */}
-          {cafe?.menu.categories.map((item: Category) => (
-            <TouchableOpacity 
-              key={item.id}
+            {/* "Tous" filter */}
+            <TouchableOpacity
               style={[
                 styles.modernFilterChip,
-                activeFilter === item.name && styles.modernFilterChipActive
+                activeFilter === "Tous" && styles.modernFilterChipActive
               ]}
-              onPress={() => setItemList(filterMenu(item.name))}
+              onPress={() => setItemList(filterMenu())}
             >
               <Text style={[
                 styles.modernFilterChipText,
-                activeFilter === item.name && styles.modernFilterChipTextActive
+                activeFilter === "Tous" && styles.modernFilterChipTextActive
               ]}>
-                {item.name}
+                Tous
               </Text>
             </TouchableOpacity>
-          ))}
-        </ScrollView>
 
-        {/* Menu Items Grid */}
-        <View style={styles.menuGrid}>
-          {(() => {
-            // Use filtered list if search is active, otherwise use regular itemList
-            const displayItems = isSearchActive ? filteredItemList : itemList;
-            
-            return displayItems && displayItems.length > 0 ? (
-              displayItems.map((item) => (
-                <ArticleCard
-                  key={item.id}
-                  cafeSlug={cafe?.slug}
-                  slug={item.id}
-                  name={item.name} 
-                  price={"$" + item.price} 
-                  status={item.in_stock ? "En Stock" : "En Rupture"}
-                  image={item.image_url}
-                  calories={item.description}
-                  size="large"
-
-                  onPress={() => openArticleModal(item.id)}
-                />
-              ))
-            ) : (
-              <View style={styles.emptyMenuContainer}>
-                <Text style={styles.emptyMenuText}>
-                  {isSearchActive ? `Aucun résultat pour "${searchText}"` : "Aucun article disponible"}
+            {/* Category filters */}
+            {cafe?.menu.categories.map((item: Category) => (
+              <TouchableOpacity
+                key={item.id}
+                style={[
+                  styles.modernFilterChip,
+                  activeFilter === item.name && styles.modernFilterChipActive
+                ]}
+                onPress={() => setItemList(filterMenu(item.name))}
+              >
+                <Text style={[
+                  styles.modernFilterChipText,
+                  activeFilter === item.name && styles.modernFilterChipTextActive
+                ]}>
+                  {item.name}
                 </Text>
-              </View>
-            );
-          })()}
-        </View>
-      </View>      
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
 
-      {/* Cafés similaires */}
-      <Text 
-        style={{
-          marginVertical: SPACING["xl"], 
-          marginHorizontal: SPACING["md"], 
-          ...TYPOGRAPHY.heading.small.bold
-        }}>
+          {/* Menu Items Grid */}
+          <View style={styles.menuGrid}>
+            {(() => {
+              // Use filtered list if search is active, otherwise use regular itemList
+              const displayItems = isSearchActive ? filteredItemList : itemList;
+
+              return displayItems && displayItems.length > 0 ? (
+                displayItems.map((item) => (
+                  <ArticleCard
+                    key={item.id}
+                    cafeSlug={cafe?.slug}
+                    slug={item.id}
+                    name={item.name}
+                    price={"$" + item.price}
+                    status={item.in_stock ? "En Stock" : "En Rupture"}
+                    image={item.image_url}
+                    calories={item.description}
+                    size="large"
+
+                    onPress={() => openArticleModal(item.id)}
+                  />
+                ))
+              ) : (
+                <View style={styles.emptyMenuContainer}>
+                  <Text style={styles.emptyMenuText}>
+                    {isSearchActive ? `Aucun résultat pour "${searchText}"` : "Aucun article disponible"}
+                  </Text>
+                </View>
+              );
+            })()}
+          </View>
+        </View>
+
+        {/* Cafés similaires */}
+        <Text
+          style={{
+            marginVertical: SPACING["xl"],
+            marginHorizontal: SPACING["md"],
+            ...TYPOGRAPHY.heading.small.bold
+          }}>
           Autres cafés similaires
         </Text>
         <FlatList
@@ -940,7 +943,7 @@ function filterMenu(filter?: string, menuData?: any): Item[] {
               location={item.location.pavillon}
               priceRange="$$"
               rating={4.5}
-              status={item.is_open}
+              status={isOpenOrNot(item)}
               id={item.id}
             />
           )}
@@ -953,36 +956,36 @@ function filterMenu(filter?: string, menuData?: any): Item[] {
             paddingBottom: SPACING["md"],
           }}
         />
-        
+
         {/* TODO: IMPLÉMENTER LA FLATLIST */}
 
-    </ScrollView>
-    
-    {/* Article Detail Modal */}
-    {isArticleModalVisible && (
-      <Modal
-        visible={isArticleModalVisible}
-        animationType="slide"
-        presentationStyle="pageSheet"
-        onRequestClose={closeArticleModal}
-      >
-        <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.white }}>
-          <View style={{ flex: 1 }}>
-            {/* Modal Header */}
-            
-            
-            {/* Modal Content */}
-            {selectedArticleId && id && (
-              <ArticleModalContent 
-                articleId={selectedArticleId} 
-                cafeId={String(id)}
-                onClose={closeArticleModal}
-              />
-            )}
-          </View>
-        </SafeAreaView>
-      </Modal>
-    )}
+      </ScrollView>
+
+      {/* Article Detail Modal */}
+      {isArticleModalVisible && (
+        <Modal
+          visible={isArticleModalVisible}
+          animationType="slide"
+          presentationStyle="pageSheet"
+          onRequestClose={closeArticleModal}
+        >
+          <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.white }}>
+            <View style={{ flex: 1 }}>
+              {/* Modal Header */}
+
+
+              {/* Modal Content */}
+              {selectedArticleId && id && (
+                <ArticleModalContent
+                  articleId={selectedArticleId}
+                  cafeId={String(id)}
+                  onClose={closeArticleModal}
+                />
+              )}
+            </View>
+          </SafeAreaView>
+        </Modal>
+      )}
     </SafeAreaView>
   );
 }
@@ -996,7 +999,7 @@ const styles = StyleSheet.create({
     zIndex: 1000,
     paddingTop: Platform.OS === 'ios' ? "16%" : 30,
     paddingBottom: 12,
-    
+
   },
   cafeBackgroundImage: {
     width: "100%",  // Fill width
@@ -1030,7 +1033,7 @@ const styles = StyleSheet.create({
     backgroundColor: "transparent",
   },
   cafeHeaderButtonsRight: {
-    
+
     flexDirection: "row",
     gap: 8,
     alignItems: "center",
@@ -1100,8 +1103,8 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   modernDayCardToday: {
-    backgroundColor: COLORS.black ,
-    borderColor: COLORS.black ,
+    backgroundColor: COLORS.black,
+    borderColor: COLORS.black,
   },
   dayHeader: {
     marginBottom: 8,
@@ -1136,7 +1139,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
   },
   timeSeparatorToday: {
-    color:COLORS.white,
+    color: COLORS.white,
   },
   closedContainer: {
     paddingVertical: 4,
@@ -1170,7 +1173,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffffff',
   },
   modernFilterChipActive: {
-    backgroundColor: COLORS.black ,
+    backgroundColor: COLORS.black,
   },
   modernFilterChipText: {
     ...TYPOGRAPHY.body.normal.semiBold,
