@@ -181,6 +181,27 @@ export default function CafeScreen() {
     fetchProfile();
   }, [id]);
 
+  const [highlightedItems, setHighlightedItems] = useState<Item[]>([]);
+  const getHighlightedItems = () => {
+    const highlighted: Item[] = [];
+    if (cafe && cafe.menu && cafe.menu.categories) {
+      cafe.menu.categories.forEach(category => {
+        category.items.forEach(item => {
+          console.log("Item highlight status:", item);
+          if (item.is_highlighted) {
+            highlighted.push(item);
+          }
+        });
+      });
+    }
+    setHighlightedItems(highlighted);
+  };
+
+  useEffect(() => {
+    getHighlightedItems();
+  }, [cafe]);
+
+
   const [activeFilter, setActiveFilter] = useState("Tous");
   const formatPrice = (price: string) => {
     if (price.charAt(price.length - 2) == ".") {
@@ -250,26 +271,28 @@ export default function CafeScreen() {
 
 
   const isOpenOrNot = (cafe) => {
+    // Safety check: return false if cafe or opening_hours is not available
+    if (!cafe || !cafe.opening_hours || !Array.isArray(cafe.opening_hours)) {
+      return false;
+    }
+
     const currentDate = new Date();
     const currentDay = currentDate.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
     const currentTime = currentDate.toTimeString().slice(0, 5); // "HH:MM"
     let openStatus = false;
-    if (cafe && cafe.opening_hours) {
-      const todayHours = cafe.opening_hours.find((day) => day.day.toLowerCase() === currentDay);
-      console.log("today hours: ", todayHours);
-      if (todayHours) {
-        for (let block of todayHours.blocks) {
-          if (currentTime >= block.start && currentTime <= block.end) {
-            openStatus = true;
-            break;
-          }
+
+    const todayHours = cafe.opening_hours.find((day) => day.day.toLowerCase() === currentDay);
+
+    if (todayHours && todayHours.blocks && Array.isArray(todayHours.blocks)) {
+      for (let block of todayHours.blocks) {
+        if (currentTime >= block.start && currentTime <= block.end) {
+          openStatus = true;
+          break;
         }
       }
     }
-    console.log("lol", cafe.opening_hours);
-    console.log("open status de ", openStatus, currentDay, currentTime);
-    return openStatus;
 
+    return openStatus;
   }
 
   const openLocation = (location: any) => {
@@ -683,9 +706,11 @@ export default function CafeScreen() {
             source={isLoading ? require("@/assets/images/placeholder/image2xl.png") : { uri: cafe?.banner_url }}
           />
 
-          <View style={styles.cafeHeaderOpenStatus}>
-            <Tooltip label={isOpenOrNot(cafe) ? "Ouvert" : "Fermé"} showChevron={false} status={isOpenOrNot(cafe) ? "green" : "red"} />
-          </View>
+          {cafe && (
+            <View style={styles.cafeHeaderOpenStatus}>
+              <Tooltip label={isOpenOrNot(cafe) ? "Ouvert" : "Fermé"} showChevron={false} status={isOpenOrNot(cafe) ? "green" : "red"} />
+            </View>
+          )}
         </View>
 
         <View>
@@ -786,28 +811,35 @@ export default function CafeScreen() {
                 'sunday': 'dimanche'
               };
 
+              // All days of the week in order (Monday to Sunday)
+              const allDaysEnglish = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+
               // Get today's day in French
               const todayFrench = new Date().toLocaleDateString('fr-FR', { weekday: 'long' }).toLowerCase();
 
-              // Find today's index in the opening_hours array
+              // Get hours from cafe data
               const hours = cafe?.opening_hours || [];
-              const todayIndex = hours.findIndex(item => {
-                const itemDayFrench = dayMapping[item.day.toLowerCase()] || item.day.toLowerCase();
-                return itemDayFrench === todayFrench;
-              });
 
-              // Reorder array to start from today
-              const reorderedHours = todayIndex >= 0
-                ? [...hours.slice(todayIndex), ...hours.slice(0, todayIndex)]
-                : hours;
+              // Find today's index in the week (0 = Monday, 6 = Sunday)
+              const todayDayOfWeek = new Date().getDay(); // 0 = Sunday, 1 = Monday, etc.
+              const todayIndexInWeek = todayDayOfWeek === 0 ? 6 : todayDayOfWeek - 1; // Convert to Monday = 0
 
-              return reorderedHours.map((item, index) => {
-                const isToday = index === 0 && todayIndex >= 0;
-                const itemDayFrench = dayMapping[item.day.toLowerCase()] || item.day.toLowerCase();
+              // Reorder days to start from today
+              const reorderedDaysEnglish = [
+                ...allDaysEnglish.slice(todayIndexInWeek),
+                ...allDaysEnglish.slice(0, todayIndexInWeek)
+              ];
+
+              return reorderedDaysEnglish.map((dayEnglish, index) => {
+                const isToday = index === 0;
+                const dayFrench = dayMapping[dayEnglish];
+
+                // Find hours for this day from the API data
+                const dayData = hours.find(item => item.day.toLowerCase() === dayEnglish);
 
                 return (
                   <View
-                    key={item.day}
+                    key={dayEnglish}
                     style={[
                       styles.modernDayCard,
                       isToday && styles.modernDayCardToday
@@ -818,12 +850,12 @@ export default function CafeScreen() {
                         styles.modernDayName,
                         isToday && styles.modernDayNameToday
                       ]}>
-                        {isToday ? "Aujourd'hui" : itemDayFrench.charAt(0).toUpperCase() + itemDayFrench.slice(1)}
+                        {isToday ? "Aujourd'hui" : dayFrench.charAt(0).toUpperCase() + dayFrench.slice(1)}
                       </Text>
                     </View>
                     <View style={styles.modernTimeBlocks}>
-                      {item.blocks.length > 0 ? (
-                        item.blocks.map((block, blockIndex) => (
+                      {dayData && dayData.blocks && dayData.blocks.length > 0 ? (
+                        dayData.blocks.map((block, blockIndex) => (
                           <View key={blockIndex} style={styles.modernTimeBlock}>
                             <Text style={[
                               styles.modernTimeText,
@@ -853,9 +885,40 @@ export default function CafeScreen() {
           </ScrollView>
         </View>
 
+        {/* Items en highlight
+        il va y avoir un boolean ishighlighted normalement, du coup la
+        juste prendre qlq item au hasard */}
+        {highlightedItems && highlightedItems.length > 0 && (
+          <View style={styles.highlightedSection}>
+            <Text style={styles.sectionTitle}>Articles en vedette</Text>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.highlightedScrollContent}
+            >
+
+              {highlightedItems.slice(0, 5).map((item) => (
+                <ArticleCard
+                  key={item.id}
+                  cafeSlug={cafe?.slug}
+                  slug={item.id}
+                  name={item.name}
+                  price={"$" + addZeroIfPriceDoesntHaveTwoDecimals(item.price)}
+                  status={item.in_stock ? "En Stock" : "En Rupture"}
+                  image={item.image_url}
+                  calories={item.description}
+                  size="medium"
+                  onPress={() => openArticleModal(item.id)}
+                />
+              ))}
+
+            </ScrollView>
+          </View>
+        )}
+
         {/* Menu Section */}
         <View style={styles.menuSection}>
-          <Text style={styles.sectionTitle}>Notre Menu</Text>
+          <Text style={styles.sectionTitle}>{activeFilter == "Tous" ? "Notre Menu" : activeFilter}</Text>
 
           {/* Catégories */}
           <ScrollView
@@ -1201,6 +1264,23 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   emptyMenuText: {
+    ...TYPOGRAPHY.body.normal.base,
+    color: COLORS.subtuleDark,
+  },
+  highlightedSection: {
+    marginTop: 24,
+    paddingLeft: 16,
+  },
+  highlightedScrollContent: {
+    gap: 12,
+    paddingRight: 16,
+  },
+  emptyHighlightedContainer: {
+    width: '100%',
+    paddingVertical: 40,
+    alignItems: 'center',
+  },
+  emptyHighlightedText: {
     ...TYPOGRAPHY.body.normal.base,
     color: COLORS.subtuleDark,
   },
