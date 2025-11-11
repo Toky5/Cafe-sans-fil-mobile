@@ -897,7 +897,7 @@ export default function CafeScreen() {
               contentContainerStyle={styles.highlightedScrollContent}
             >
 
-              {highlightedItems.slice(0, 5).map((item) => (
+              {highlightedItems.map((item) => (
                 <ArticleCard
                   key={item.id}
                   cafeSlug={cafe?.slug}
@@ -1158,7 +1158,7 @@ const styles = StyleSheet.create({
   // Modern Hours Styles
   hoursSection: {
     marginTop: 24,
-    paddingHorizontal: 16,
+    paddingLeft: 16,
   },
   hoursScrollContent: {
     paddingRight: 16,
@@ -1226,7 +1226,7 @@ const styles = StyleSheet.create({
   // Modern Menu Styles
   menuSection: {
     marginTop: 24,
-    paddingHorizontal: 16,
+    paddingLeft: 16,
     marginBottom: 24,
   },
   modernFilterScrollView: {
@@ -1257,6 +1257,7 @@ const styles = StyleSheet.create({
   },
   menuGrid: {
     gap: 12,
+    paddingRight: 16,
   },
   emptyMenuContainer: {
     width: '100%',
