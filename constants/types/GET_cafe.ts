@@ -9,48 +9,48 @@ export type Cafe = {
     banner_url: string;
     photo_urls: string[];
     affiliation: {
-    university: string;
-    faculty: string;
+        university: string;
+        faculty: string;
     };
     is_open: boolean;
     status_message: string;
     opening_hours: OpeningHours[];
     location: {
-    pavillon: string;
-    local: string;
-    floor: string;
-    geometry: {
-        type: string;
-        coordinates: number[];
-    };
+        pavillon: string;
+        local: string;
+        floor: string;
+        geometry: {
+            type: string;
+            coordinates: number[];
+        };
     };
     contact: {
-    email: string;
-    phone_number: string;
-    website: string;
+        email: string;
+        phone_number: string;
+        website: string;
     };
     social_media: {
-    facebook: string;
-    instagram: string;
-    x: string;
+        facebook: string;
+        instagram: string;
+        x: string;
     };
     payment_details: any[];
     owner: {
-    id: string;
-    username: string;
-    email: string;
-    matricule: string;
-    first_name: string;
-    last_name: string;
-    photo_url: string;
+        id: string;
+        username: string;
+        email: string;
+        matricule: string;
+        first_name: string;
+        last_name: string;
+        photo_url: string;
     },
     staff: {
-    admins: any[];
-    volunteers: any[];
+        admins: any[];
+        volunteers: any[];
     },
     menu: {
-    layout: string;
-    categories: Category[];
+        layout: string;
+        categories: Category[];
     }
 }
 
@@ -62,6 +62,7 @@ export type Category = {
 };
 
 export type Item = {
+    is_highlighted: boolean;
     id: string;
     name: string;
     description: string;
@@ -86,8 +87,8 @@ type Interaction = {
 };
 
 type OpeningHours = {
-    day : string;
-    blocks : DayBlock[];
+    day: string;
+    blocks: DayBlock[];
 }
 
 type DayBlock = {
