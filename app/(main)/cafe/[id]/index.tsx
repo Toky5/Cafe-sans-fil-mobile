@@ -190,6 +190,14 @@ export default function CafeScreen() {
       return price
     }
   }
+  const addZeroIfPriceDoesntHaveTwoDecimals = (price: string) => {
+    if (price.indexOf('.') === -1) {
+      return price + '.00';
+    } else if (price.split('.')[1].length === 1) {
+      return price + '0';
+    }
+    return price;
+  };
 
   // filter the menu based on argument filter
   function filterMenu(filter?: string, menuData?: any): Item[] {
@@ -905,7 +913,7 @@ export default function CafeScreen() {
                     cafeSlug={cafe?.slug}
                     slug={item.id}
                     name={item.name}
-                    price={"$" + item.price}
+                    price={"$" + addZeroIfPriceDoesntHaveTwoDecimals(item.price)}
                     status={item.in_stock ? "En Stock" : "En Rupture"}
                     image={item.image_url}
                     calories={item.description}
