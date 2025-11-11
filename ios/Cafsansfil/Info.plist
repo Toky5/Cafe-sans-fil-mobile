@@ -33,7 +33,7 @@
       </dict>
     </array>
     <key>CFBundleVersion</key>
-    <string>1</string>
+    <string>24</string>
     <key>ITSAppUsesNonExemptEncryption</key>
     <false/>
     <key>LSMinimumSystemVersion</key>
@@ -56,17 +56,17 @@
     <key>NSLocationAlwaysUsageDescription</key>
     <string>Allow $(PRODUCT_NAME) to access your location</string>
     <key>NSLocationWhenInUseUsageDescription</key>
-    <string>This app uses the location to find cafes near you.</string>
+    <string>Autorisez Café sans-fil à accéder à votre position pour vous montrer les cafés à proximité !</string>
     <key>NSMicrophoneUsageDescription</key>
     <string>Allow $(PRODUCT_NAME) to access your microphone</string>
     <key>NSPhotoLibraryUsageDescription</key>
-    <string>Allow $(PRODUCT_NAME) to access your photos</string>
+    <string>Autorisez l'accès à votre bibliothèque de photos pour que vous puissiez télécharger une photo de profile !</string>
     <key>NSUserActivityTypes</key>
     <array>
       <string>$(PRODUCT_BUNDLE_IDENTIFIER).expo.index_route</string>
     </array>
     <key>NSUserNotificationsUsageDescription</key>
-    <string>Allow Café sans-fil to send you notifications about orders, events, and updates</string>
+    <string>Autorisez les notifications pour recevoir des mises à jour sur les nouveaux cafés et offres spéciales !</string>
     <key>RCTNewArchEnabled</key>
     <true/>
     <key>UILaunchStoryboardName</key>
