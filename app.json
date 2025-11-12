@@ -2,7 +2,7 @@
   "expo": {
     "name": "Café sans-fil",
     "slug": "cafe-sans-fil",
-    "version": "1.1.0",
+    "version": "1.1.1",
     "orientation": "portrait",
     "icon": "logo.png",
     "scheme": "myapp",
@@ -10,7 +10,7 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "buildNumber": "24",
+      "buildNumber": "25",
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "Autorisez Café sans-fil à accéder à votre position pour vous montrer les cafés à proximité !",
         "NSUserNotificationsUsageDescription": "Autorisez les notifications pour recevoir des mises à jour sur les nouveaux cafés et offres spéciales !",
@@ -29,7 +29,7 @@
         "backgroundColor": "#fbfaf7"
       },
       "package": "com.cadum.cafesansfil",
-      "versionCode": 24,
+      "versionCode": 25,
       "config": {
         "googleMaps": {
           "apiKey": "AIzaSyBLPZng6Gr0UCGxWrovmdbBaVmptRQEUHs"
