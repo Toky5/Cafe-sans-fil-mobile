@@ -19,11 +19,11 @@ export default function FirstOnboardingScreen() {
     }
     checkIfOnboarded();
   }, []);
-  
+
 
   return (
     <View style={styles.screenContainer}>
-       <StatusBar />
+      <StatusBar />
       <View style={styles.currentPage}>
         <View style={[styles.currentPageItem, styles.activePageItem]}></View>
         <View style={styles.currentPageItem}></View>
@@ -37,7 +37,7 @@ export default function FirstOnboardingScreen() {
             alignSelf: "center",
             width: 300,
             height: 260,
-            
+
           }}
         ></Image>
         <View style={styles.descriptionContainer}>

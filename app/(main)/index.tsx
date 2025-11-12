@@ -82,7 +82,7 @@ export default function HomeScreen() {
       console.log("Has onboarded: de home", hasOnboarded);
       if (hasOnboarded === null) {
         console.log("Redirecting to onboarding from home");
-        router.replace('/first-onboarding'); // Redirect to onboarding if not onboarded
+        router.replace('/(onboarding)'); // Redirect to onboarding if not onboarded
       }
     }
     checkIfOnboarded();

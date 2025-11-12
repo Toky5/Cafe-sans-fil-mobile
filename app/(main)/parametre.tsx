@@ -517,7 +517,7 @@ export default function ParametreScreen() {
     await clearTokens();
     console.log('Logged out - cleared all tokens and user data');
     setAccountModalVisible(false);
-    navigation.push("/first-onboarding");
+    navigation.push("/(onboarding)");
   };
 
   const deletethisaccount = async () => {
@@ -556,7 +556,7 @@ export default function ParametreScreen() {
                 setAccountModalVisible(false);
 
                 // Navigate to onboarding
-                navigation.push("/first-onboarding");
+                navigation.push("/(onboarding)");
 
                 alert("Votre compte a été supprimé avec succès.");
               } else {
