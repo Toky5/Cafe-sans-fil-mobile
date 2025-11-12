@@ -48,7 +48,7 @@ export default function ArticleModalContent({ articleId, cafeId, onClose }: Arti
         }
 
         const response = await fetch(
-          `https://cafesansfil-api-r0kj.onrender.com/api/cafes/${cafeId}/menu/items/${articleId}`
+          `https://api.cafesansfil.ca/v1/cafes/${cafeId}/menu/items/${articleId}`
         );
 
         if (!response.ok) {
@@ -75,7 +75,7 @@ export default function ArticleModalContent({ articleId, cafeId, onClose }: Arti
         const token = await getToken();
         if (!token) return;
 
-        const response = await fetch('https://cafesansfil-api-r0kj.onrender.com/api/users/@me', {
+        const response = await fetch('https://api.cafesansfil.ca/v1/users/@me', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -128,7 +128,7 @@ export default function ArticleModalContent({ articleId, cafeId, onClose }: Arti
 
       const method = isCurrentlyFavorited ? 'DELETE' : 'PUT';
 
-      const response = await fetch('https://cafesansfil-api-r0kj.onrender.com/api/users/@me/articles', {
+      const response = await fetch('https://api.cafesansfil.ca/v1/users/@me/articles', {
         method: method,
         headers: {
           'Content-Type': 'application/json',
@@ -198,7 +198,7 @@ export default function ArticleModalContent({ articleId, cafeId, onClose }: Arti
             source={menuItem.image_url ? { uri: menuItem.image_url } : require("@/assets/images/placeholder/image2xl.png")}
           />
 
-        
+
           <View style={styles.closeButton}>
             <IconButton
               Icon={X}
@@ -206,7 +206,7 @@ export default function ArticleModalContent({ articleId, cafeId, onClose }: Arti
               style={{ backgroundColor: COLORS.white }}
             />
           </View>
-        
+
           <View style={styles.heartButton}>
             <IconButton
               Icon={Heart}
@@ -276,14 +276,14 @@ export default function ArticleModalContent({ articleId, cafeId, onClose }: Arti
             </View>
           )}
 
-          
+
         </View>
       </ScrollView>
 
       {/* Fixed Bottom Button */}
       <View style={styles.bottomButton}>
         <Button
-          onPress={()=> Alert.alert("Pas encore implémenté", "La fonctionnalité de commande en ligne n'est pas encore disponible.")}
+          onPress={() => Alert.alert("Pas encore implémenté", "La fonctionnalité de commande en ligne n'est pas encore disponible.")}
           style={{
             backgroundColor: menuItem.in_stock ? COLORS.black : '#6f6f6fff',
             paddingVertical: 16,

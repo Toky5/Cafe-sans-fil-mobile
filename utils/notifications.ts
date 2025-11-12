@@ -75,17 +75,17 @@ export async function registerForPushNotificationsAsync(): Promise<string | null
 
     // Get the Expo Push Token
     const projectId = Constants?.expoConfig?.extra?.eas?.projectId ?? Constants?.easConfig?.projectId;
-    
+
     if (!projectId) {
       console.error('Aucune notification: No Project ID found');
       return null;
     }
-    
+
     const tokenData = await Notifications.getExpoPushTokenAsync({
       projectId: projectId,
     });
     token = tokenData.data;
-    
+
     console.log('Expo Push Token:', token);
 
     // Android-specific channel configuration
@@ -114,10 +114,10 @@ export async function sendPushTokenToBackend(token: string): Promise<boolean> {
   try {
     // Get the user's auth token
     const authToken = await getToken();
-    
+
     // The token already includes the format ExponentPushToken[...]
     // We need to include it in the URL path
-    const response = await fetch(`https://cafesansfil-api-r0kj.onrender.com/api/notifications/register/${token}`, {
+    const response = await fetch(`https://api.cafesansfil.ca/v1/notifications/register/${token}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -142,11 +142,11 @@ export async function sendPushTokenToBackend(token: string): Promise<boolean> {
  * Fetch notifications from backend
  * @returns Array of notifications or empty array
  */
-export async function fetchNotificationsFromBackend(): Promise<Array<{id: string, title: string, body: string}>> {
+export async function fetchNotificationsFromBackend(): Promise<Array<{ id: string, title: string, body: string }>> {
   try {
     const authToken = await getToken();
-    
-    const response = await fetch('https://cafesansfil-api-r0kj.onrender.com/api/notifications', {
+
+    const response = await fetch('https://api.cafesansfil.ca/v1/notifications', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -189,10 +189,10 @@ export async function initializePushNotifications(): Promise<string | null> {
   initializationPromise = (async () => {
     try {
       const token = await registerForPushNotificationsAsync();
-      
+
       if (token) {
         cachedToken = token; // Cache in memory only
-        
+
         // Send token to backend
         await sendPushTokenToBackend(token);
       }
@@ -237,10 +237,10 @@ export async function forceRefreshToken(): Promise<string | null> {
   // Clear cached tokens
   cachedToken = null;
   cachedDeviceToken = null;
-  
+
   // Clear initialization promise
   initializationPromise = null;
-  
+
   // Re-initialize
   return initializePushNotifications();
 }
@@ -261,6 +261,6 @@ export async function getDevicePushToken(): Promise<string | null> {
 export async function getAllPushTokens(): Promise<{ expoToken: string | null; deviceToken: string | null }> {
   const expoToken = await getExpoPushToken();
   const deviceToken = await getDevicePushToken();
-  
+
   return { expoToken, deviceToken };
 }

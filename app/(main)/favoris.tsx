@@ -47,7 +47,7 @@ export default function FavorisScreen() {
 
   const getCafeById = async (id: string) => {
     try {
-      const response = await fetch(`https://cafesansfil-api-r0kj.onrender.com/api/cafes/${id}`, {
+      const response = await fetch(`https://api.cafesansfil.ca/v1/cafes/${id}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -66,7 +66,7 @@ export default function FavorisScreen() {
 
   const getArticleById = async (articleId: string, cafeid: string) => {
     try {
-      const response = await fetch(`https://cafesansfil-api-r0kj.onrender.com/api/cafes/${cafeid}/menu/items/${articleId}`, {
+      const response = await fetch(`https://api.cafesansfil.ca/v1/cafes/${cafeid}/menu/items/${articleId}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -87,7 +87,7 @@ export default function FavorisScreen() {
   useEffect(() => {
     const fetchUserData = async () => {
       const token = await getToken();
-      fetch('https://cafesansfil-api-r0kj.onrender.com/api/users/@me', {
+      fetch('https://api.cafesansfil.ca/v1/users/@me', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -120,7 +120,7 @@ export default function FavorisScreen() {
 
           setDoihavetoken(true);
 
-          const response = await fetch('https://cafesansfil-api-r0kj.onrender.com/api/users/@me', {
+          const response = await fetch('https://api.cafesansfil.ca/v1/users/@me', {
             method: 'GET',
             headers: {
               'Content-Type': 'application/json',

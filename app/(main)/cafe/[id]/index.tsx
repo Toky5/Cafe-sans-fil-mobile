@@ -88,7 +88,7 @@ export default function CafeScreen() {
 
   useEffect(() => {
     setIsLoading(true);
-    fetch("https://cafesansfil-api-r0kj.onrender.com/api/cafes")
+    fetch("https://api.cafesansfil.ca/v1/cafes")
       .then((response) => response.json())
       .then((json) => {
         // Filter out the current cafe and shuffle the rest
@@ -137,7 +137,7 @@ export default function CafeScreen() {
 
       try {
         const response = await fetch(
-          `https://cafesansfil-api-r0kj.onrender.com/api/cafes/${id}`
+          `https://api.cafesansfil.ca/v1/cafes/${id}`
         );
         const json = await response.json();
         console.log("Social media: ", json.social_media);
@@ -163,7 +163,7 @@ export default function CafeScreen() {
           console.error("No access token found");
           return;
         }
-        fetch(`https://cafesansfil-api-r0kj.onrender.com/api/users/@me`, {
+        fetch(`https://api.cafesansfil.ca/v1/users/@me`, {
           method: 'GET',
           headers: {
             'accept': 'application/json',
@@ -423,7 +423,7 @@ export default function CafeScreen() {
         return;
 
       }
-      const response = await fetch(`https://cafesansfil-api-r0kj.onrender.com/api/users/@me/cafes?cafe_id=${id}`, {
+      const response = await fetch(`https://api.cafesansfil.ca/v1/users/@me/cafes?cafe_id=${id}`, {
         method: 'PUT',
         headers: {
           'accept': 'application/json',
@@ -452,7 +452,7 @@ export default function CafeScreen() {
         console.error("No access token found");
         return;
       }
-      const response = await fetch(`https://cafesansfil-api-r0kj.onrender.com/api/users/@me/cafes?cafe_id=${id}`, {
+      const response = await fetch(`https://api.cafesansfil.ca/v1/users/@me/cafes?cafe_id=${id}`, {
         method: 'DELETE',
         headers: {
           'accept': 'application/json',

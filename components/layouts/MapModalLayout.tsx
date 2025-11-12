@@ -1,4 +1,4 @@
-import { View, Text, Platform} from "react-native";
+import { View, Text, Platform } from "react-native";
 import React, { useEffect, useState } from "react";
 import * as Location from "expo-location";
 import COLORS from "@/constants/Colors";
@@ -8,23 +8,23 @@ import MapView, { Marker, Callout, PROVIDER_GOOGLE } from "react-native-maps";
 import FilterModalLayout from "./FilterModalLayout";
 
 export default function MapModalLayout({
-    handleApplyFilter,
-    handleResetFilter,
-    handleMarkerPress, // Updated to include coordinates
-    location,
-    currentLocalisation,
-    isCurrentLocalisationModified,
-    locationLoaded,
+  handleApplyFilter,
+  handleResetFilter,
+  handleMarkerPress, // Updated to include coordinates
+  location,
+  currentLocalisation,
+  isCurrentLocalisationModified,
+  locationLoaded,
 }: {
-    handleApplyFilter: () => void;
-    handleResetFilter: () => void;
-    handleMarkerPress: (pressedLocation: string, lat: number, lng: number) => void; // Updated type definition
-    location: Location.LocationObject;
-    currentLocalisation: string;
-    isCurrentLocalisationModified: boolean;
-    locationLoaded: string;
+  handleApplyFilter: () => void;
+  handleResetFilter: () => void;
+  handleMarkerPress: (pressedLocation: string, lat: number, lng: number) => void; // Updated type definition
+  location: Location.LocationObject;
+  currentLocalisation: string;
+  isCurrentLocalisationModified: boolean;
+  locationLoaded: string;
 }) {
-  
+
   interface Coordinate {
     pavillon: string;
     lat: number;
@@ -35,7 +35,7 @@ export default function MapModalLayout({
   const [pavillonCoordinates, setPavillonCoordinates] = useState<Coordinate[]>([]);
 
   useEffect(() => {
-    fetch("https://cafesansfil-api-r0kj.onrender.com/api/cafes")
+    fetch("https://api.cafesansfil.ca/v1/cafes")
       .then((response) => response.json())
       .then((json) => {
         // Process data in one go
@@ -50,14 +50,14 @@ export default function MapModalLayout({
             }
             return null;
           })
-          .filter((coordinate : any): coordinate is Coordinate => coordinate !== null);
-        
+          .filter((coordinate: any): coordinate is Coordinate => coordinate !== null);
+
         // Single state update with filtered data
         setListCoordinates(filteredCoordinates);
       })
       .catch((error) => console.error(error));
   }, []);  // ← Remove location dependency to prevent re-fetching
-  
+
 
   return (
     <FilterModalLayout
@@ -66,12 +66,12 @@ export default function MapModalLayout({
       handleResetFilter={handleResetFilter}
     >
       <MapView
-      key={`map-${listCoordinates.length}`} // Add this line to force re-render
+        key={`map-${listCoordinates.length}`} // Add this line to force re-render
         style={{
           width: "100%",
           height: 400,
           borderRadius: 20,
-          marginTop: 16,  
+          marginTop: 16,
         }}
         provider={Platform.OS === 'android' ? PROVIDER_GOOGLE : undefined}
         initialRegion={{
@@ -91,9 +91,9 @@ export default function MapModalLayout({
       >
         {listCoordinates.map((coordinate, index) =>
           coordinate && coordinate.pavillon ===
-          (isCurrentLocalisationModified
-            ? locationLoaded
-            : currentLocalisation) ? (
+            (isCurrentLocalisationModified
+              ? locationLoaded
+              : currentLocalisation) ? (
             <Marker
               key={`selected-${coordinate.pavillon}-${index}`}
               coordinate={{
@@ -136,9 +136,9 @@ export default function MapModalLayout({
                 longitude: coordinate.lng,
               }}
               title={coordinate.pavillon}
-              pinColor= "blue"
+              pinColor="blue"
               onPress={() => handleMarkerPress(
-                coordinate.pavillon, 
+                coordinate.pavillon,
                 coordinate.lat,
                 coordinate.lng
               )}

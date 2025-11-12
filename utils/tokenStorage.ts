@@ -78,7 +78,7 @@ export const setRefreshToken = async (refreshToken: string) => {
 
 export const updateToken = async (refreshToken: string) => {
   try {
-    const response = await fetch('https://cafesansfil-api-r0kj.onrender.com/api/auth/refresh', {
+    const response = await fetch('https://api.cafesansfil.ca/v1/auth/refresh', {
       method: 'POST',
       headers: {
         'accept': 'application/json',
@@ -115,7 +115,7 @@ export const updateToken = async (refreshToken: string) => {
 
 export const getInfoFromToken = async (token: string) => {
   try {
-    const response = await fetch('https://cafesansfil-api-r0kj.onrender.com/api/users/@me', {
+    const response = await fetch('https://api.cafesansfil.ca/v1/users/@me', {
       method: 'GET',
       headers: {
         'accept': 'application/json',
@@ -146,7 +146,7 @@ export const deleteAccount = async (token: string) => {
 
   const id = userInfo.id;
   try {
-    const response = await fetch(`https://cafesansfil-api-r0kj.onrender.com/api/users/@me`, {
+    const response = await fetch(`https://api.cafesansfil.ca/v1/users/@me`, {
       method: 'DELETE',
       headers: {
         'accept': 'application/json',

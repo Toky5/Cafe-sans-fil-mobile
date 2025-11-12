@@ -1,8 +1,8 @@
 import Button from "@/components/common/Buttons/Button";
 import React from "react";
-import {Text, View, Image, TextInput, ScrollView, KeyboardAvoidingView, Platform, StatusBar, Pressable, TouchableOpacity} from "react-native";
+import { Text, View, Image, TextInput, ScrollView, KeyboardAvoidingView, Platform, StatusBar, Pressable, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import {useRouter} from "expo-router";
+import { useRouter } from "expo-router";
 import { Ionicons } from '@expo/vector-icons';
 import COLORS from "@/constants/Colors";
 
@@ -17,11 +17,11 @@ export default function SignInScreen() {
 
 
 
-  const forgot = async (email : string) => {
-    const url = 'https://cafesansfil-api-r0kj.onrender.com/api/auth/forgot-password?email=' + encodeURIComponent(email);
-    
+  const forgot = async (email: string) => {
+    const url = 'https://api.cafesansfil.ca/v1/auth/forgot-password?email=' + encodeURIComponent(email);
 
-    
+
+
 
     try {
       const response = await fetch(url, {
@@ -47,66 +47,66 @@ export default function SignInScreen() {
 
   return (
     <SafeAreaView  >
-       <StatusBar />
-      <KeyboardAvoidingView 
-    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    
-  >
+      <StatusBar />
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
 
-      <ScrollView ref={scrollViewRef} showsVerticalScrollIndicator={false}
-  keyboardShouldPersistTaps="handled" style={{  minHeight: "100%" }}>
-    <TouchableOpacity 
-      style={styles.backButton} 
-      onPress={() => router.push("/sign-in")}
-    >
-      <Ionicons name="arrow-back" size={24} color={COLORS.black} />
-    </TouchableOpacity>
-      <Image source={require("@/logoold.png")} style={styles.logo}/>
-      <View style={styles.header}>
-      <Text style={styles.textHeader}>
-        Réinitialiser le mot de passe
-      </Text>
-      </View>
+      >
+
+        <ScrollView ref={scrollViewRef} showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled" style={{ minHeight: "100%" }}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.push("/sign-in")}
+          >
+            <Ionicons name="arrow-back" size={24} color={COLORS.black} />
+          </TouchableOpacity>
+          <Image source={require("@/logoold.png")} style={styles.logo} />
+          <View style={styles.header}>
+            <Text style={styles.textHeader}>
+              Réinitialiser le mot de passe
+            </Text>
+          </View>
 
 
 
-      <Text style={styles.textForm}>
-          <Text >
+          <Text style={styles.textForm}>
+            <Text >
               Adresse e-mail
+            </Text>
+            <Text style={{ color: "#ff0000", fontSize: 19, fontWeight: "400" }}> *</Text>
           </Text>
-          <Text style={{color: "#ff0000", fontSize: 19, fontWeight: "400"}}> *</Text>
-      </Text>
 
-      <TextInput
-          style={styles.input}
-          ref={emailInputRef}
-          onChangeText={onChangeEmail}
-          value={email}
-          placeholder="email@email.com"
-          keyboardType="email-address"
-          autoComplete="email"
-          returnKeyType="done"
-          placeholderTextColor={"#A1A1A1"}
-          onFocus={() => {
-  setTimeout(() => {
-    emailInputRef.current?.measureLayout(
-      scrollViewRef.current as any,
-      (x, y) => {
-        scrollViewRef.current?.scrollTo({ y: y - 100, animated: true });
-      }
-    );
-  }, 100);
-}}
-        />
+          <TextInput
+            style={styles.input}
+            ref={emailInputRef}
+            onChangeText={onChangeEmail}
+            value={email}
+            placeholder="email@email.com"
+            keyboardType="email-address"
+            autoComplete="email"
+            returnKeyType="done"
+            placeholderTextColor={"#A1A1A1"}
+            onFocus={() => {
+              setTimeout(() => {
+                emailInputRef.current?.measureLayout(
+                  scrollViewRef.current as any,
+                  (x, y) => {
+                    scrollViewRef.current?.scrollTo({ y: y - 100, animated: true });
+                  }
+                );
+              }, 100);
+            }}
+          />
 
-      
 
-       
 
-      <View style={styles.buttonView}>
-      <Button onPress={() => forgot(email)}>Réinitialiser le mot de passe</Button>
-      </View>
-      </ScrollView>
+
+
+          <View style={styles.buttonView}>
+            <Button onPress={() => forgot(email)}>Réinitialiser le mot de passe</Button>
+          </View>
+        </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -120,15 +120,15 @@ const styles = {
     flexGrow: 1,
   },
 
-  logo:{
+  logo: {
     width: 150,
     height: 150,
     alignSelf: "center" as const,
   },
-  header : {
+  header: {
     padding: 30,
   },
-  textHeader:{
+  textHeader: {
     fontSize: 34,
     fontWeight: "bold" as const,
     textAlign: "center" as const,
@@ -136,7 +136,7 @@ const styles = {
   textForm: {
     textAlign: "left" as const,
     paddingLeft: 30,
-    
+
   },
   input: {
     height: 40,
@@ -147,13 +147,13 @@ const styles = {
     marginTop: 10,
     marginBottom: 15,
     borderColor: "#CCCCCC",
-    
-    
-    
+
+
+
   },
-  buttonView:{
+  buttonView: {
     marginTop: -10,
-    padding:20
+    padding: 20
   }
   ,
   backButton: {

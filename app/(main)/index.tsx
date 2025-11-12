@@ -97,7 +97,7 @@ export default function HomeScreen() {
 
     console.log("Location available or permission denied, fetching cafes...");
     setIsLoading(true);
-    fetch("https://cafesansfil-api-r0kj.onrender.com/api/cafes")
+    fetch("https://api.cafesansfil.ca/v1/cafes")
       .then((response) => response.json())
       .then((json) => {
         setOriginalData(json.items);

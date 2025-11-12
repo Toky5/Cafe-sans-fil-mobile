@@ -37,7 +37,7 @@ export default function SignInScreen() {
 
 
   const signup = async (username: string, first_name: string, last_name: string, email: string, password: string) => {
-    const url = 'https://cafesansfil-api-r0kj.onrender.com/api/auth/register';
+    const url = 'https://api.cafesansfil.ca/v1/auth/register';
 
     if (!isLengthValid || !isUppercaseValid || !isNumberValid || !isSpecialCharValid || passwordConf !== password) {
       Alert.alert(
@@ -102,7 +102,7 @@ export default function SignInScreen() {
 
         // Automatically log in the user
         try {
-          const loginUrl = 'https://cafesansfil-api-r0kj.onrender.com/api/auth/login';
+          const loginUrl = 'https://api.cafesansfil.ca/v1/auth/login';
           const loginFormBody = new URLSearchParams({
             grant_type: 'password',
             username: email.toLowerCase(),

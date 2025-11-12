@@ -17,10 +17,12 @@ import {
   ThumbsUp,
 } from "lucide-react-native";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { View, Text, StyleSheet, SafeAreaView, Image, TextInput, KeyboardAvoidingView,
+import {
+  View, Text, StyleSheet, SafeAreaView, Image, TextInput, KeyboardAvoidingView,
   Platform,
-  ScrollView, FlatList, 
-  Alert} from "react-native";
+  ScrollView, FlatList,
+  Alert
+} from "react-native";
 
 import { Item } from "@/constants/types/GET_item";
 import { fetchSync, saveSecurely, saveSync } from "@/scripts/storage";
@@ -32,7 +34,7 @@ import { getToken } from "@/utils/tokenStorage";
 export default function ArticleScreen() {
 
 
-const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const { id, articleId } = useLocalSearchParams();
   console.log("Café Id", id);
@@ -43,7 +45,7 @@ const [error, setError] = useState<string | null>(null);
     if (price.charAt(price.length - 2) == ".") {
       return price + "0";
     }
-    else{
+    else {
       return price
     }
   }
@@ -53,7 +55,7 @@ const [error, setError] = useState<string | null>(null);
   const [menuItem, setMenuItem] = useState<Item | any>({});
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1); // nombre d'article à mettre dans le panier
-  const [selectedIndex, setSelectedIndex] = useState<Number |null>(null); // option button
+  const [selectedIndex, setSelectedIndex] = useState<Number | null>(null); // option button
   const [heart, toggleHeart] = useState(false); // heart toggle state
   const [userArticlesFavorites, setUserArticlesFavorites] = useState<Array<[string, string]>>([]); // [[article_id, cafe_id]]
 
@@ -62,7 +64,7 @@ const [error, setError] = useState<string | null>(null);
     useCallback(() => {
       setSelectedIndex(null);
       setQuantity(1);
-    },[])
+    }, [])
   )
 
   console.log('👀 About to define useEffect with deps:', { articleId, id });
@@ -71,12 +73,12 @@ const [error, setError] = useState<string | null>(null);
   useEffect(() => {
     console.log('🔄 useEffect RUNNING - articleId:', articleId, 'id:', id);
     console.log('🔄 Types - articleId:', typeof articleId, 'id:', typeof id);
-    
+
     if (!articleId || !id) {
       console.log('⚠️ Missing params in useEffect');
       return;
     }
-    
+
     const checkFavoriteStatus = async () => {
       try {
         const token = await getToken();
@@ -86,7 +88,7 @@ const [error, setError] = useState<string | null>(null);
         }
 
         console.log('🔄 Fetching favorites in useEffect...');
-        const response = await fetch('https://cafesansfil-api-r0kj.onrender.com/api/users/@me', {
+        const response = await fetch('https://api.cafesansfil.ca/v1/users/@me', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -98,13 +100,13 @@ const [error, setError] = useState<string | null>(null);
           const data = await response.json();
           const articlesFavs = data.articles_favs || [];
           setUserArticlesFavorites(articlesFavs);
-          
+
           const currentArticleId = String(articleId);
           const currentCafeId = String(id);
-          
+
           console.log('🔄 Comparing:', currentArticleId, currentCafeId);
           console.log('🔄 Against favorites:', articlesFavs);
-          
+
           const isFavorited = articlesFavs.some(
             ([favArticleId, favCafeId]: [string, string]) => {
               const favArticleIdStr = String(favArticleId);
@@ -114,7 +116,7 @@ const [error, setError] = useState<string | null>(null);
               return match;
             }
           );
-          
+
           console.log('🔄 useEffect check - Is favorited:', isFavorited);
           toggleHeart(isFavorited);
         } else {
@@ -131,18 +133,18 @@ const [error, setError] = useState<string | null>(null);
   // ALSO check whenever userArticlesFavorites changes (after fetch completes)
   useEffect(() => {
     if (!articleId || userArticlesFavorites.length === 0) return;
-    
+
     const currentArticleId = String(articleId);
     // Try to use cafe_id from menuItem if available, otherwise use route param
     const currentCafeId = menuItem.cafe_id ? String(menuItem.cafe_id) : String(id);
-    
+
     console.log('💚 Checking with cafe_id:', currentCafeId, '(from menuItem:', menuItem.cafe_id, ', from route:', id, ')');
-    
+
     const isFavorited = userArticlesFavorites.some(
-      ([favArticleId, favCafeId]: [string, string]) => 
+      ([favArticleId, favCafeId]: [string, string]) =>
         String(favArticleId) === currentArticleId && String(favCafeId) === currentCafeId
     );
-    
+
     console.log('💚 Favorites array updated - checking heart state:', isFavorited);
     toggleHeart(isFavorited);
   }, [userArticlesFavorites, articleId, id, menuItem.cafe_id]);
@@ -152,50 +154,50 @@ const [error, setError] = useState<string | null>(null);
     setLoading(true);
     setError(null);
     setMenuItem({});
-    
+
     scrollViewRef.current?.scrollTo({ x: 0, y: 0, animated: true });
-    
-    const fetchMenuItem = async () =>{
+
+    const fetchMenuItem = async () => {
       try {
         console.log(`test cafe slug ${id}`);
         console.log(`article slug ${articleId}`);
-        
+
         if (!id || !articleId) {
           throw new Error('Missing cafe ID or article ID');
         }
-        
-        const response = await fetch(`https://cafesansfil-api-r0kj.onrender.com/api/cafes/${id}/menu/items/${articleId}`);
-        
+
+        const response = await fetch(`https://api.cafesansfil.ca/v1/cafes/${id}/menu/items/${articleId}`);
+
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
-        
+
         const json = await response.json();
         //console.log(json.image_url);
         //console.log(typeof(id));
         setMenuItem(json);
       } catch (error) {
-          console.error('Fetch error:', error);
-          setError(error instanceof Error ? error.message : 'Failed to fetch menu item');
-      } finally{
+        console.error('Fetch error:', error);
+        setError(error instanceof Error ? error.message : 'Failed to fetch menu item');
+      } finally {
         setLoading(false);
       }
     }
-    
+
     // Add a small delay to prevent rapid API calls
     const timeoutId = setTimeout(fetchMenuItem, 100);
-    
+
     return () => clearTimeout(timeoutId);
   }, [articleId, id]);
-  
-  
+
+
   // tableau des options fetch du api
-  const options = menuItem.options ? menuItem.options.map(({type, value, fee}) => 
-    ({type, value, fee})) : []; 
+  const options = menuItem.options ? menuItem.options.map(({ type, value, fee }) =>
+    ({ type, value, fee })) : [];
 
   // Prix total 
-  const selectedFee = (selectedIndex !== null && selectedIndex >= 0 && selectedIndex < options.length) 
-  ? Number(options[selectedIndex].fee) : 0;
+  const selectedFee = (selectedIndex !== null && selectedIndex >= 0 && selectedIndex < options.length)
+    ? Number(options[selectedIndex].fee) : 0;
   const total = ((Number(menuItem.price) + Number(selectedFee)) * quantity).toFixed(2);
 
 
@@ -212,17 +214,17 @@ const [error, setError] = useState<string | null>(null);
       // Use cafe_id from menuItem data (the REAL ID), not from route which might be a slug
       const currentArticleId = String(articleId);
       const currentCafeId = menuItem.cafe_id ? String(menuItem.cafe_id) : String(id);
-      
+
       console.log('💛 Toggle favorite - Using cafe_id:', currentCafeId, 'from menuItem:', menuItem.cafe_id);
 
       const isCurrentlyFavorited = userArticlesFavorites.some(
-        ([favArticleId, favCafeId]: [string, string]) => 
+        ([favArticleId, favCafeId]: [string, string]) =>
           String(favArticleId) === currentArticleId && String(favCafeId) === currentCafeId
       );
 
       const method = isCurrentlyFavorited ? 'DELETE' : 'PUT';
 
-      const response = await fetch('https://cafesansfil-api-r0kj.onrender.com/api/users/@me/articles', {
+      const response = await fetch('https://api.cafesansfil.ca/v1/users/@me/articles', {
         method: method,
         headers: {
           'Content-Type': 'application/json',
@@ -237,11 +239,11 @@ const [error, setError] = useState<string | null>(null);
       if (response.ok) {
         // Update local state
         toggleHeart(!isCurrentlyFavorited);
-        
+
         if (isCurrentlyFavorited) {
           // Remove from favorites
-          setUserArticlesFavorites(prev => 
-            prev.filter(([favArticleId, favCafeId]) => 
+          setUserArticlesFavorites(prev =>
+            prev.filter(([favArticleId, favCafeId]) =>
               !(String(favArticleId) === currentArticleId && String(favCafeId) === currentCafeId)
             )
           );
@@ -249,7 +251,7 @@ const [error, setError] = useState<string | null>(null);
           // Add to favorites
           setUserArticlesFavorites(prev => [...prev, [currentArticleId, currentCafeId]]);
         }
-        
+
         console.log(`✅ Article ${isCurrentlyFavorited ? 'retiré des' : 'ajouté aux'} favoris`);
       } else {
         const actionText = isCurrentlyFavorited ? 'retirer des' : 'ajouter aux';
@@ -260,7 +262,7 @@ const [error, setError] = useState<string | null>(null);
       const currentArticleId = String(articleId);
       const currentCafeId = String(id);
       const actionText = userArticlesFavorites.some(
-        ([favArticleId, favCafeId]: [string, string]) => 
+        ([favArticleId, favCafeId]: [string, string]) =>
           String(favArticleId) === currentArticleId && String(favCafeId) === currentCafeId
       ) ? 'retirer des' : 'ajouter aux';
       Alert.alert('Erreur', `Impossible de ${actionText} favoris`);
@@ -268,34 +270,34 @@ const [error, setError] = useState<string | null>(null);
   };
 
   const panierID = "123jj5";
-  function addToCart(){
-    
+  function addToCart() {
+
     //get current list of items from cart
     let currCart = new Array();
-    try{
+    try {
       currCart = fetchSync(panierID);
       //console.log("here");
       //console.log(currCart);
-      if (!currCart){
+      if (!currCart) {
         currCart = new Array();
-        saveSync(panierID,currCart);
+        saveSync(panierID, currCart);
       }
       console.log("here");
       console.log(fetchSync(panierID));
-    }catch(error){
+    } catch (error) {
       currCart = new Array();
     }
 
     type panierItem = {
-      id : string;
-      quantity:number;
+      id: string;
+      quantity: number;
     };
     //check for same item
     let currQuantity = 1;
     let itemHash = hash.MD5(menuItem);
 
-    for(const item of currCart){
-      if(item.id == itemHash){
+    for (const item of currCart) {
+      if (item.id == itemHash) {
         currQuantity = currQuantity + item.quantity;
         item.quantity = currQuantity;
         break;
@@ -303,132 +305,132 @@ const [error, setError] = useState<string | null>(null);
     };
 
     //add new item
-    if(currQuantity == 1){
+    if (currQuantity == 1) {
       saveSync(itemHash, menuItem);
-      let newItem : panierItem = {
-        id:itemHash,
-        quantity:1
+      let newItem: panierItem = {
+        id: itemHash,
+        quantity: 1
       };
       currCart.push(newItem);
       //console.log("here");
       //console.log(fetchSync(panierID));
     }
-    saveSync(panierID,currCart);
-    
+    saveSync(panierID, currCart);
+
     //push to panier (might remove)
     router.push('/pannier');
-    
+
   }
 
   // fonction show option view 
-  function showOptions(){
+  function showOptions() {
     return (
       <View style={{ borderBottomWidth: 3, borderColor: COLORS.lightGray, paddingHorizontal: 16 }}>
-      <View style={{ marginBlock: 20, gap: 8 }}>
-        <Text style={[TYPOGRAPHY.heading.small.bold]}>Options {options[0].type}</Text>
-        <Text
-        style={[
-          TYPOGRAPHY.body.large.base,
-          { color: COLORS.subtuleDark, lineHeight: 21 },
-        ]}
-      > 
-        Sélectionnez les options qui vous intéressent.
-      </Text>
-      </View >
-      <View style={{ flexDirection: "row", gap: 12, marginBottom: 24 }}>
-        <FlatList data={options} renderItem={({item, index}) => (
-          
-          <Button onPress={()=> setSelectedIndex(prev => (prev === index ? null : index))} 
-          style={{ backgroundColor : selectedIndex === index ? COLORS.black : COLORS.lightGray, paddingHorizontal: 12, paddingVertical: 12, borderRadius: 10, flex: 1,}}>
-            <Text style={[TYPOGRAPHY.body.normal.semiBold, { textAlign: "center", color: selectedIndex === index ? COLORS.white : COLORS.subtuleDark, }]}>
-              {item.value}{item.fee != 0 && ` (+$${formatPrice(item.fee)})`}
-            </Text>
-          </Button> )}
-          keyExtractor={(item, index) => index.toString()}
-          horizontal
-          ItemSeparatorComponent={() => <View style={{ width: SPACING["md"] }} />} 
+        <View style={{ marginBlock: 20, gap: 8 }}>
+          <Text style={[TYPOGRAPHY.heading.small.bold]}>Options {options[0].type}</Text>
+          <Text
+            style={[
+              TYPOGRAPHY.body.large.base,
+              { color: COLORS.subtuleDark, lineHeight: 21 },
+            ]}
+          >
+            Sélectionnez les options qui vous intéressent.
+          </Text>
+        </View >
+        <View style={{ flexDirection: "row", gap: 12, marginBottom: 24 }}>
+          <FlatList data={options} renderItem={({ item, index }) => (
+
+            <Button onPress={() => setSelectedIndex(prev => (prev === index ? null : index))}
+              style={{ backgroundColor: selectedIndex === index ? COLORS.black : COLORS.lightGray, paddingHorizontal: 12, paddingVertical: 12, borderRadius: 10, flex: 1, }}>
+              <Text style={[TYPOGRAPHY.body.normal.semiBold, { textAlign: "center", color: selectedIndex === index ? COLORS.white : COLORS.subtuleDark, }]}>
+                {item.value}{item.fee != 0 && ` (+$${formatPrice(item.fee)})`}
+              </Text>
+            </Button>)}
+            keyExtractor={(item, index) => index.toString()}
+            horizontal
+            ItemSeparatorComponent={() => <View style={{ width: SPACING["md"] }} />}
           // padding
           // style={{paddingHorizontal: SPACING["sm"], paddingBottom: SPACING["md"]}}
-        />
-      </View> 
+          />
+        </View>
       </View>
-        ) 
-      }
+    )
+  }
 
   return (
     <KeyboardAvoidingView
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-    <ScrollView
-      ref={scrollViewRef}
-      showsVerticalScrollIndicator={false}
-      showsHorizontalScrollIndicator={false}
-      style={[{ backgroundColor: COLORS.white }]}>
-      <View>
-        <Image
-          style={styles.cafeBackgroundImage}
-          source={loading ? require("@/assets/images/placeholder/image2xl.png") : {uri: menuItem.image_url}}
-        />
-
-        <View style={styles.cafeHeaderButtons}>
-          <IconButton
-            Icon={ArrowLeft}
-            onPress={() => {router.back();}}
-            style={styles.cafeHeaderIconButtons}
+      <ScrollView
+        ref={scrollViewRef}
+        showsVerticalScrollIndicator={false}
+        showsHorizontalScrollIndicator={false}
+        style={[{ backgroundColor: COLORS.white }]}>
+        <View>
+          <Image
+            style={styles.cafeBackgroundImage}
+            source={loading ? require("@/assets/images/placeholder/image2xl.png") : { uri: menuItem.image_url }}
           />
-          <View style={styles.cafeHeaderButtonsRight}>
-            <IconButton 
-              Icon={Heart} 
+
+          <View style={styles.cafeHeaderButtons}>
+            <IconButton
+              Icon={ArrowLeft}
+              onPress={() => { router.back(); }}
               style={styles.cafeHeaderIconButtons}
-              iconColor={heart ? COLORS.status.red : COLORS.black}
-              fill={heart ? COLORS.status.red : "none"}
-              onPress={handleToggleFavorite}
             />
+            <View style={styles.cafeHeaderButtonsRight}>
+              <IconButton
+                Icon={Heart}
+                style={styles.cafeHeaderIconButtons}
+                iconColor={heart ? COLORS.status.red : COLORS.black}
+                fill={heart ? COLORS.status.red : "none"}
+                onPress={handleToggleFavorite}
+              />
+            </View>
           </View>
+
+          <View style={styles.cafeHeaderOpenStatus}>
+            <Tooltip label={menuItem.in_stock ? "En Stock" : "En Rupture"} showChevron={false} status={menuItem.in_stock ? "green" : "red"} />
+          </View>
+        </View>
+        <View style={{ paddingHorizontal: 16 }}>
+          {error ? (
+            <View style={{ marginTop: 28, padding: 16, backgroundColor: '#FFE6E6', borderRadius: 8, marginBottom: 20 }}>
+              <Text style={[TYPOGRAPHY.body.normal.semiBold, { color: '#D32F2F', marginBottom: 8 }]}>
+                Erreur de chargement
+              </Text>
+              <Text style={[TYPOGRAPHY.body.small.base, { color: '#D32F2F' }]}>
+                {error}
+              </Text>
+            </View>
+          ) : (
+            <>
+              <View
+                style={{
+                  flexDirection: "row",
+                  gap: 12,
+                  marginTop: 28,
+                  marginBottom: 10,
+                }}
+              >
+                <Text style={TYPOGRAPHY.heading.medium.bold}>{loading ? "Chargement..." : menuItem.name}</Text>
+
+              </View>
+              <Text
+                style={[
+                  TYPOGRAPHY.body.large.base,
+                  { color: COLORS.subtuleDark, lineHeight: 21 },
+                ]}
+              >
+                {loading ? "" : menuItem.description}
+              </Text>
+
+            </>
+          )}
         </View>
 
-        <View style={styles.cafeHeaderOpenStatus}>
-          <Tooltip label={menuItem.in_stock ? "En Stock" : "En Rupture"} showChevron={false} status={menuItem.in_stock ?  "green" : "red"} />
-        </View>
-      </View>
-      <View style={{ paddingHorizontal: 16 }}>
-        {error ? (
-          <View style={{ marginTop: 28, padding: 16, backgroundColor: '#FFE6E6', borderRadius: 8, marginBottom: 20 }}>
-            <Text style={[TYPOGRAPHY.body.normal.semiBold, { color: '#D32F2F', marginBottom: 8 }]}>
-              Erreur de chargement
-            </Text>
-            <Text style={[TYPOGRAPHY.body.small.base, { color: '#D32F2F' }]}>
-              {error}
-            </Text>
-          </View>
-        ) : (
-          <>
-            <View
-              style={{
-                flexDirection: "row",
-                gap: 12,
-                marginTop: 28,
-                marginBottom: 10,
-              }}
-            >
-              <Text style={TYPOGRAPHY.heading.medium.bold}>{loading? "Chargement...": menuItem.name}</Text>
-              
-            </View>
-            <Text
-              style={[
-                TYPOGRAPHY.body.large.base,
-                { color: COLORS.subtuleDark, lineHeight: 21 },
-              ]}
-            >
-              {loading ? "": menuItem.description}
-            </Text>
-            
-          </>
-        )}
-      </View>
-      
-{/*
+        {/*
       <View
         style={{
           flexDirection: "row",
@@ -442,8 +444,8 @@ const [error, setError] = useState<string | null>(null);
         <Tooltip label="95%" Icon={ThumbsUp} showChevron={false}></Tooltip>
         <Tooltip label="Populaire" showChevron={false} /> 
       </View> */}
-      
-{/*
+
+        {/*
       <View style={{ borderTopWidth: 3, borderBottomWidth: 3, borderColor: COLORS.lightGray, paddingHorizontal: 16 }}>
         <View style={{ marginBlock: 20 }}>
           <Text style={[TYPOGRAPHY.heading.small.bold]}>Taille de la boisson</Text>
@@ -460,12 +462,12 @@ const [error, setError] = useState<string | null>(null);
           </View>
         </View>
       </View> */}
-      {/* if options est vide don't show section */}
-      {options.length > 0 && (showOptions())}
+        {/* if options est vide don't show section */}
+        {options.length > 0 && (showOptions())}
 
-     
-      <View style={{  paddingHorizontal: 16 }}>
-         {/* a remove pour la 1.0
+
+        <View style={{ paddingHorizontal: 16 }}>
+          {/* a remove pour la 1.0
         <View style={{ marginBlock: 20, gap: 8 }}>
           <Text style={[TYPOGRAPHY.heading.small.bold]}>Instructions</Text>
           <Text
@@ -488,20 +490,20 @@ const [error, setError] = useState<string | null>(null);
           onChangeText={() => {}}
         ></TextInput>
         */}
-        
-        <View style={{ marginBottom: 44, marginTop: 32, flexDirection: "row", alignItems: "center", gap: 32}}>
-          
-          <Button onPress={() => Alert.alert("Pas encore possible", "La commande en ligne n'est pas encore disponible, mais c'est pour bientot :)")} style={{ flex: 1, width: "auto" }}>
-            Prix de l'article : ${total /* menuItem.price * quantity /* + fees */}
-          </Button>
+
+          <View style={{ marginBottom: 44, marginTop: 32, flexDirection: "row", alignItems: "center", gap: 32 }}>
+
+            <Button onPress={() => Alert.alert("Pas encore possible", "La commande en ligne n'est pas encore disponible, mais c'est pour bientot :)")} style={{ flex: 1, width: "auto" }}>
+              Prix de l'article : ${total /* menuItem.price * quantity /* + fees */}
+            </Button>
+          </View>
+
         </View>
-      
-      </View>
-      
 
-      
 
-    </ScrollView>
+
+
+      </ScrollView>
     </KeyboardAvoidingView>
   );
 }
@@ -522,7 +524,7 @@ const styles = StyleSheet.create({
   },
   cafeBackgroundImage: {
     width: "100%",  // Fill width
-    height: 250,    
+    height: 250,
   },
   cafeHeaderButtons: {
     position: "absolute",

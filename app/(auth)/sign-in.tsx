@@ -1,8 +1,8 @@
 import Button from "@/components/common/Buttons/Button";
 import React, { use, useEffect } from "react";
-import {Text, View, Image, TextInput, ScrollView, KeyboardAvoidingView, Platform, StatusBar, Pressable, TouchableOpacity, Keyboard, Touchable} from "react-native";
+import { Text, View, Image, TextInput, ScrollView, KeyboardAvoidingView, Platform, StatusBar, Pressable, TouchableOpacity, Keyboard, Touchable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import {useRouter} from "expo-router";
+import { useRouter } from "expo-router";
 import { setToken, setRefreshToken, setUserFullname, setUserPhotoUrl, getInfoFromToken } from "@/utils/tokenStorage";
 import {
   Eye,
@@ -21,18 +21,18 @@ export default function SignInScreen() {
   const [password, onChangePassword] = React.useState('');
   const emailInputRef = React.useRef<TextInput>(null);
   const passwordInputRef = React.useRef<TextInput>(null);
-  const [isError,setIsError] = React.useState(false)
-  const [showPassword, setShowPassword] =React.useState(false);
+  const [isError, setIsError] = React.useState(false)
+  const [showPassword, setShowPassword] = React.useState(false);
 
   useEffect(() => {
-      const confirmOnboarding = async () => {
-        await AsyncStorage.setItem('hasOnboarded', 'true');
-      }
-      confirmOnboarding();
-    }, []);
+    const confirmOnboarding = async () => {
+      await AsyncStorage.setItem('hasOnboarded', 'true');
+    }
+    confirmOnboarding();
+  }, []);
 
-  const login = async (email : string , password : string) => {
-    const url = 'https://cafesansfil-api-r0kj.onrender.com/api/auth/login';
+  const login = async (email: string, password: string) => {
+    const url = 'https://api.cafesansfil.ca/v1/auth/login';
 
     const formBody = new URLSearchParams({
       grant_type: 'password',
@@ -57,7 +57,7 @@ export default function SignInScreen() {
       data.access_token && await setToken(data.access_token);
       data.refresh_token && await setRefreshToken(data.refresh_token);
       console.log(data);
-      
+
       if (data.access_token && data.refresh_token) {
         // Fetch user info and store full name and photo URL
         try {
@@ -75,7 +75,7 @@ export default function SignInScreen() {
               await setUserFullname(userInfo.username);
               console.log('Stored username:', userInfo.username);
             }
-            
+
             // Store photo URL
             if (userInfo.photo_url) {
               await setUserPhotoUrl(userInfo.photo_url);
@@ -85,11 +85,11 @@ export default function SignInScreen() {
         } catch (error) {
           console.error('Error fetching user info after login:', error);
         }
-        
+
         setIsError(false)
         router.push("/");
       }
-      else if (data.detail == "Incorrect email or password"){
+      else if (data.detail == "Incorrect email or password") {
         alert("Incorrect email or password")
         setIsError(true)
 
@@ -102,126 +102,126 @@ export default function SignInScreen() {
 
   return (
     <SafeAreaView  >
-       <StatusBar />
-      <KeyboardAvoidingView 
-    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    
-  >
-      <ScrollView ref={scrollViewRef} showsVerticalScrollIndicator={false}
-  keyboardShouldPersistTaps="handled" style={{  minHeight: "100%" }}>
-    <TouchableOpacity onPress={() => router.push("/")}>
-      <Ionicons name="close" size={30} color={COLORS.black} style={{marginTop: 16, marginLeft: 16}}/>
-    </TouchableOpacity>
-      <Image source={require("@/logoold.png")} style={styles.logo}/>
-      <View style={styles.header}>
-      <Text style={styles.textHeader}>
-        Connectez-vous à votre compte
-      </Text>
-      </View>
+      <StatusBar />
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+
+      >
+        <ScrollView ref={scrollViewRef} showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled" style={{ minHeight: "100%" }}>
+          <TouchableOpacity onPress={() => router.push("/")}>
+            <Ionicons name="close" size={30} color={COLORS.black} style={{ marginTop: 16, marginLeft: 16 }} />
+          </TouchableOpacity>
+          <Image source={require("@/logoold.png")} style={styles.logo} />
+          <View style={styles.header}>
+            <Text style={styles.textHeader}>
+              Connectez-vous à votre compte
+            </Text>
+          </View>
 
 
-    <Text style={isError ? styles.textFormR : styles.textForm}>
-      <Text >
-        Adresse e-mail ou nom d'utilisateur
-      </Text>
-      <Text style={{color: "#ff0000", fontSize: 19, fontWeight: "400"}}> *</Text>
-    </Text>
-      <TextInput
-      
-          style={isError ? styles.inputR : styles.input}
-          ref={emailInputRef}
-          onChangeText={onChangeEmail}
-          value={email}
-          placeholder="email@email.com"
-          keyboardType="email-address"
-          autoComplete="email"
-          returnKeyType="next"
-          onSubmitEditing={() => passwordInputRef.current?.focus()}
-          placeholderTextColor={"#A1A1A1"}
-          onFocus={() => {
-  setTimeout(() => {
-    emailInputRef.current?.measureLayout(
-      scrollViewRef.current as any,
-      (x, y) => {
-        scrollViewRef.current?.scrollTo({ y: y - 100, animated: true });
-      }
-    );
-  }, 100);
-}}
-        />
+          <Text style={isError ? styles.textFormR : styles.textForm}>
+            <Text >
+              Adresse e-mail ou nom d'utilisateur
+            </Text>
+            <Text style={{ color: "#ff0000", fontSize: 19, fontWeight: "400" }}> *</Text>
+          </Text>
+          <TextInput
 
-      <Text style={isError ? styles.textFormR : styles.textForm}>
-      <Text >
-        Mot de passe
-      </Text>
-      <Text style={{color: "#ff0000", fontSize: 19, fontWeight: "400"}}> *</Text>
-    </Text>
+            style={isError ? styles.inputR : styles.input}
+            ref={emailInputRef}
+            onChangeText={onChangeEmail}
+            value={email}
+            placeholder="email@email.com"
+            keyboardType="email-address"
+            autoComplete="email"
+            returnKeyType="next"
+            onSubmitEditing={() => passwordInputRef.current?.focus()}
+            placeholderTextColor={"#A1A1A1"}
+            onFocus={() => {
+              setTimeout(() => {
+                emailInputRef.current?.measureLayout(
+                  scrollViewRef.current as any,
+                  (x, y) => {
+                    scrollViewRef.current?.scrollTo({ y: y - 100, animated: true });
+                  }
+                );
+              }, 100);
+            }}
+          />
 
-      <View style={isError ? styles.passwordContainerR : styles.passwordContainer}>
-        <TextInput
-          style={styles.passwordInput}
-          ref={passwordInputRef}
-          onChangeText={onChangePassword}
-          value={password}
-          placeholder="********"
-          keyboardType="default"
-          autoComplete="password"
-          returnKeyType="done"
-          placeholderTextColor={"#A1A1A1"}
-          secureTextEntry={!showPassword}
-          onFocus={() => {
-            setTimeout(() => {
-              passwordInputRef.current?.measureLayout(
-                scrollViewRef.current as any,
-                (x, y) => {
-                  scrollViewRef.current?.scrollTo({ y: y - 100, animated: true });
+          <Text style={isError ? styles.textFormR : styles.textForm}>
+            <Text >
+              Mot de passe
+            </Text>
+            <Text style={{ color: "#ff0000", fontSize: 19, fontWeight: "400" }}> *</Text>
+          </Text>
+
+          <View style={isError ? styles.passwordContainerR : styles.passwordContainer}>
+            <TextInput
+              style={styles.passwordInput}
+              ref={passwordInputRef}
+              onChangeText={onChangePassword}
+              value={password}
+              placeholder="********"
+              keyboardType="default"
+              autoComplete="password"
+              returnKeyType="done"
+              placeholderTextColor={"#A1A1A1"}
+              secureTextEntry={!showPassword}
+              onFocus={() => {
+                setTimeout(() => {
+                  passwordInputRef.current?.measureLayout(
+                    scrollViewRef.current as any,
+                    (x, y) => {
+                      scrollViewRef.current?.scrollTo({ y: y - 100, animated: true });
+                    }
+                  );
+                }, 100);
+              }}
+            />
+            <TouchableOpacity
+              style={styles.passwordToggle}
+              onPress={() => setShowPassword(!showPassword)}
+            >
+              {!showPassword ? (
+                <EyeOff size={20} color="#666" />
+              ) : (
+                <Eye size={20} color="#666" />
+              )}
+            </TouchableOpacity>
+          </View>
+
+          <View style={{ marginRight: "5%" }}>
+            <Pressable
+              onPress={() => router.push("/forgot")}
+              style={({ pressed }) => [
+                {
+                  opacity: pressed ? 0.5 : 1,
                 }
-              );
-            }, 100);
-          }}
-        />
-        <TouchableOpacity 
-          style={styles.passwordToggle}
-          onPress={() => setShowPassword(!showPassword)}
-        >
-          {!showPassword ? (
-            <EyeOff size={20} color="#666" />
-          ) : (
-            <Eye size={20} color="#666" />
-          )}
-        </TouchableOpacity>
-      </View>
-      
-      <View style={{marginRight: "5%"}}>
-        <Pressable
-          onPress={() => router.push("/forgot")}
-          style={({ pressed }) => [
-        {
-          opacity: pressed ? 0.5 : 1,
-        }
-          ]}
-        >
-          {({ pressed }) => (
-        <Text 
-          style={{
-            color: pressed ? COLORS.black : COLORS.black, 
-            textAlign: "right",
-            padding: 8,
-            fontWeight: "500"
-          }}
-        >
-          Mot de passe oublié ?
-        </Text>
-          )}
-        </Pressable>
-      </View>
+              ]}
+            >
+              {({ pressed }) => (
+                <Text
+                  style={{
+                    color: pressed ? COLORS.black : COLORS.black,
+                    textAlign: "right",
+                    padding: 8,
+                    fontWeight: "500"
+                  }}
+                >
+                  Mot de passe oublié ?
+                </Text>
+              )}
+            </Pressable>
+          </View>
 
 
-      <View style={styles.buttonView}>
-      <Button onPress={() => login(email,password)}>Se connecter</Button>
-      </View>
-      <Button style={{margin:-10}} onPress={() => router.push("/sign-up")} type="secondary">Pas de compte ?</Button>
-      </ScrollView>
+          <View style={styles.buttonView}>
+            <Button onPress={() => login(email, password)}>Se connecter</Button>
+          </View>
+          <Button style={{ margin: -10 }} onPress={() => router.push("/sign-up")} type="secondary">Pas de compte ?</Button>
+        </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -235,15 +235,15 @@ const styles = {
     flexGrow: 1,
   },
 
-  logo:{
+  logo: {
     width: 150,
     height: 150,
     alignSelf: "center" as const,
   },
-  header : {
+  header: {
     padding: 30,
   },
-  textHeader:{
+  textHeader: {
     fontSize: 34,
     fontWeight: "bold" as const,
     textAlign: "center" as const,
@@ -251,7 +251,7 @@ const styles = {
   textForm: {
     textAlign: "left" as const,
     paddingLeft: 30,
-    
+
   },
   input: {
     height: 40,
@@ -262,13 +262,13 @@ const styles = {
     marginTop: 10,
     marginBottom: 15,
     borderColor: "#CCCCCC",
-    
-    
-    
+
+
+
   },
-  buttonView:{
+  buttonView: {
     marginTop: -10,
-    padding:20
+    padding: 20
   },
   inputR: {
     height: 40,
@@ -279,12 +279,12 @@ const styles = {
     marginTop: 10,
     marginBottom: 15,
     borderColor: "#FF0000",
-    
+
   },
   textFormR: {
     textAlign: "left" as const,
     paddingLeft: 30,
-    color : "#FF0000",
+    color: "#FF0000",
   },
   passwordContainer: {
     flexDirection: 'row' as const,
@@ -322,6 +322,6 @@ const styles = {
     alignItems: 'center' as const,
     marginLeft: 5,
   },
-  
+
 }
 
