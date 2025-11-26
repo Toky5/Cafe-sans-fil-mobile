@@ -702,7 +702,8 @@ export default function ParametreScreen() {
           />
           <View style={styles.profileInfo}>
             <Text
-              style={[TYPOGRAPHY.heading.small.bold, styles.profileName]}
+              style={[TYPOGRAPHY.heading.small.bold, styles.profileName, { maxWidth: 200 }]}
+              ellipsizeMode="tail" numberOfLines={1}
             >
               {isLoading ? "Chargement..." : userFullName}
               { }
@@ -1552,6 +1553,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: COLORS.black,
     marginBottom: 4,
+    textAlign: 'center',
   },
   modalProfileEmail: {
     fontSize: 14,

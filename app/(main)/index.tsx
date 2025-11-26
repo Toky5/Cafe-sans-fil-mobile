@@ -213,6 +213,8 @@ export default function HomeScreen() {
   const filterCafes = (cafes: Cafe[]) => {
     let filteredCafesClose = cafes;
 
+    filteredCafesClose = filteredCafesClose.filter(cafe => cafe.is_open !== false);
+
     if (showOnlyOrder) {
       filteredCafesClose = filteredCafesClose.filter(cafe => cafe.features.includes("ORDER"));
     }

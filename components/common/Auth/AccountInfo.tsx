@@ -30,8 +30,9 @@ export default function AccountInfo({
     try {
       // Get the stored full name from storage
       const storedFullName = await getUserFullname();
-      
+
       if (storedFullName) {
+
         setUserFullName(storedFullName);
         console.log("User full name from storage:", storedFullName);
       } else {
@@ -41,7 +42,7 @@ export default function AccountInfo({
 
       // Get the stored photo URL from storage
       const storedPhotoUrl = await getUserPhotoUrl();
-      
+
       if (storedPhotoUrl) {
         setUserImage(storedPhotoUrl);
         console.log("User photo URL from storage:", storedPhotoUrl);
@@ -58,7 +59,7 @@ export default function AccountInfo({
           }
         }
       }
-    
+
     } catch (error) {
       console.error("Error getting user info:", error);
       setUserFullName("Utilisateur");
@@ -80,14 +81,14 @@ export default function AccountInfo({
     }, [getUserInfo])
   );
 
-  
+
 
   return (
     <View style={styles.accountContainer}>
-      <TouchableOpacity onPress={() => {navigation.push("/(main)/parametre")}}>
-        <Image 
-          source={{ uri: userImage } as any} 
-          style={styles.profilePicture} 
+      <TouchableOpacity onPress={() => { navigation.push("/(main)/parametre") }}>
+        <Image
+          source={{ uri: userImage } as any}
+          style={styles.profilePicture}
           testID="header-account-image"
         />
       </TouchableOpacity>
@@ -95,7 +96,7 @@ export default function AccountInfo({
         <Text style={[styles.welcomeText, TYPOGRAPHY.body.normal.base]}>
           {title}
         </Text>
-        <Text style={[styles.userFullName, TYPOGRAPHY.heading.small.bold]}>
+        <Text style={[styles.userFullName, TYPOGRAPHY.heading.small.bold]} ellipsizeMode="tail" numberOfLines={1}>
           {isLoading ? "Chargement..." : userFullName}
         </Text>
       </View>
@@ -119,5 +120,6 @@ const styles = StyleSheet.create({
   welcomeText: {},
   userFullName: {
     color: COLORS.black,
+    maxWidth: 200,
   },
 });
