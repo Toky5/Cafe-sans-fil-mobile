@@ -86,7 +86,7 @@ export default function AnnouncementsModalLayout({
                 <View style={styles.modalContainer}>
                     <View style={styles.modalHeader}>
                         <Text style={styles.modalTitle}>Toutes les annonces</Text>
-                        <TouchableOpacity 
+                        <TouchableOpacity
                             onPress={onClose}
                             style={{
                                 width: 32,
@@ -107,9 +107,9 @@ export default function AnnouncementsModalLayout({
                         ) : (
                             <>
                                 {announcements.map((announcement, index) => (
-                                    <AnnouncementItem 
-                                        key={`${announcement.id}-${index}`} 
-                                        announcement={announcement} 
+                                    <AnnouncementItem
+                                        key={`${announcement.id}-${index}`}
+                                        announcement={announcement}
                                     />
                                 ))}
                             </>
