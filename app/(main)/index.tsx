@@ -417,7 +417,7 @@ export default function HomeScreen() {
             )}
 
             {/* Announcements Section */}
-            {!isLoadingAnnouncements && announcements.length > 0 && (
+            {!isLoadingAnnouncements && announcements.length > 0 && !searched && (
               <View style={styles.announcementsSection}>
                 <View style={styles.announcementsSectionHeader}>
                   <Text style={styles.sectionTitle}>Annonces récentes</Text>
@@ -448,7 +448,6 @@ export default function HomeScreen() {
             {filterCafes(data).length > 0 && (
               <Text
                 style={{
-                  marginVertical: SPACING["sm"],
                   marginHorizontal: SPACING["sm"],
                   ...TYPOGRAPHY.heading.small.bold
                 }}>
