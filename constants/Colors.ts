@@ -4,10 +4,13 @@ type ColorsType = {
   black45: string;
   subtuleDark: string;
   lightGray: string;
+  primary: string;
+  primaryLight: string;
+  background: string;
   status: {
-      green: string;
-      orange: string;
-      red: string;
+    green: string;
+    orange: string;
+    red: string;
   };
   darkWhite: string;
   statusbarInactive: string;
@@ -39,6 +42,10 @@ const COLORS: ColorsType = {
   lightGray: "#F2F2F7",
 
   darkWhite: '#E0E0E0',
+
+  primary: "#007AFF",
+  primaryLight: "#E5F3FF",
+  background: "#F8F8F8",
 
   status: {
     green: "#3E9C66",

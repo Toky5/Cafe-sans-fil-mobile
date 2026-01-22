@@ -29,6 +29,9 @@ import FilterModalLayout from "@/components/layouts/FilterModalLayout";
 import COLORS from "@/constants/Colors";
 import { Cafe } from "@/constants/types/GET_cafe";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Announcement, AnnouncementsResponse } from "@/constants/types/GET_announcements";
+import AnnouncementCard from "@/components/common/Cards/AnnouncementCard";
+import AnnouncementsModalLayout from "@/components/layouts/AnnouncementsModalLayout";
 
 /**
  * Home screen of the app. It allows the user to search for cafes, filter them,
@@ -73,6 +76,10 @@ export default function HomeScreen() {
     name: string,
     coords: { latitude: number, longitude: number }
   } | null>(null);
+  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+  const [isLoadingAnnouncements, setIsLoadingAnnouncements] = useState(true);
+  const [announcementsModalVisible, setAnnouncementsModalVisible] = useState(false);
+  const { openModal, closeModal } = useModal() || {};
   // Execute a callback when the app comes to the foreground
   useOnForegroundBack(getCurrentLocation);
 
@@ -86,6 +93,22 @@ export default function HomeScreen() {
       }
     }
     checkIfOnboarded();
+  }, []);
+
+  // Fetch announcements
+  useEffect(() => {
+    setIsLoadingAnnouncements(true);
+    fetch("https://api.cafesansfil.ca/v1/announcements/")
+      .then((response) => response.json())
+      .then((json: AnnouncementsResponse) => {
+
+
+        setAnnouncements(json.items);
+
+        console.log("Fetched announcements:", json.items);
+      })
+      .catch((error) => console.error("Error fetching announcements:", error))
+      .finally(() => setIsLoadingAnnouncements(false));
   }, []);
 
   useEffect(() => {
@@ -393,6 +416,35 @@ export default function HomeScreen() {
               </Text>
             )}
 
+            {/* Announcements Section */}
+            {!isLoadingAnnouncements && announcements.length > 0 && (
+              <View style={styles.announcementsSection}>
+                <View style={styles.announcementsSectionHeader}>
+                  <Text style={styles.sectionTitle}>Annonces récentes</Text>
+                  <TouchableOpacity
+                    onPress={() => setAnnouncementsModalVisible(true)}
+                  >
+                    <Text style={styles.viewAllButton}>Voir tout</Text>
+                  </TouchableOpacity>
+                </View>
+                <FlatList
+                  data={announcements.slice(0, 3)}
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  keyExtractor={(item) => item.id}
+                  renderItem={({ item }) => (
+                    <View style={{ width: 320 }}>
+                      <AnnouncementCard announcement={item} compact />
+                    </View>
+                  )}
+                  ItemSeparatorComponent={() => <View style={{ width: SPACING["sm"] }} />}
+                  contentContainerStyle={{
+                    paddingHorizontal: SPACING["sm"],
+                  }}
+                />
+              </View>
+            )}
+
             {filterCafes(data).length > 0 && (
               <Text
                 style={{
@@ -553,6 +605,13 @@ export default function HomeScreen() {
 
           </>
         </ScrollableLayout>
+
+        {/* Announcements Modal */}
+        <AnnouncementsModalLayout
+          visible={announcementsModalVisible}
+          announcements={announcements}
+          onClose={() => setAnnouncementsModalVisible(false)}
+        />
       </SafeAreaView>
     );
   }
@@ -592,5 +651,23 @@ const styles = StyleSheet.create({
   resetLocationText: {
     ...TYPOGRAPHY.body.small.base,
     color: COLORS.black,
+  },
+  announcementsSection: {
+    marginTop: SPACING["lg"],
+    marginBottom: SPACING["md"],
+  },
+  announcementsSectionHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: SPACING["sm"],
+    marginBottom: SPACING["sm"],
+  },
+  sectionTitle: {
+    ...TYPOGRAPHY.heading.small.bold,
+  },
+  viewAllButton: {
+    ...TYPOGRAPHY.body.normal.medium,
+    color: COLORS.primary,
   },
 });

@@ -49,6 +49,8 @@ import { Cafe, Category, Item } from "@/constants/types/GET_cafe";
 import { allCafe } from '@/constants/types/GET_list_cafe';
 import ScrollableLayout from '@/components/layouts/ScrollableLayout';
 import { getToken } from '@/utils/tokenStorage';
+import { Announcement, AnnouncementsResponse } from "@/constants/types/GET_announcements";
+import AnnouncementCard from "@/components/common/Cards/AnnouncementCard";
 const { Platform } = require('react-native');
 const ActionSheetIOS = require('react-native').ActionSheetIOS;
 const { Alert } = require('react-native');
@@ -75,6 +77,8 @@ export default function CafeScreen() {
   // Modal state for article details
   const [isArticleModalVisible, setIsArticleModalVisible] = useState(false);
   const [selectedArticleId, setSelectedArticleId] = useState<string | null>(null);
+  const [cafeAnnouncements, setCafeAnnouncements] = useState<Announcement[]>([]);
+  const [isLoadingAnnouncements, setIsLoadingAnnouncements] = useState(true);
 
   // Shuffle array function
   const shuffleArray = (array: any[]) => {
@@ -179,6 +183,25 @@ export default function CafeScreen() {
       }
     };
     fetchProfile();
+  }, [id]);
+
+  // Fetch cafe-specific announcements
+  useEffect(() => {
+    if (!id) return;
+
+    setIsLoadingAnnouncements(true);
+    fetch(`https://api.cafesansfil.ca/v1/announcements/`)
+      .then((response) => response.json())
+      .then((json: AnnouncementsResponse) => {
+        // Filter announcements for this specific cafe
+        const cafeSpecificAnnouncements = json.items.filter(
+          announcement => announcement.cafe_id === id
+        );
+
+        setCafeAnnouncements(cafeSpecificAnnouncements);
+      })
+      .catch((error) => console.error("Error fetching cafe announcements:", error))
+      .finally(() => setIsLoadingAnnouncements(false));
   }, [id]);
 
   const [highlightedItems, setHighlightedItems] = useState<Item[]>([]);
@@ -885,6 +908,26 @@ export default function CafeScreen() {
           </ScrollView>
         </View>
 
+        {/* Announcements Section */}
+        {!isLoadingAnnouncements && cafeAnnouncements.length > 0 && (
+          <View style={styles.announcementsSection}>
+            <Text style={styles.sectionTitle}>Annonces</Text>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.announcementsContainer}
+            >
+              {cafeAnnouncements.map((announcement) => (
+                <View key={announcement.id} style={{ width: 320, marginRight: 12 }}>
+                  <AnnouncementCard
+                    announcement={announcement}
+                  />
+                </View>
+              ))}
+            </ScrollView>
+          </View>
+        )}
+
         {/* Items en highlight
         il va y avoir un boolean ishighlighted normalement, du coup la
         juste prendre qlq item au hasard */}
@@ -1284,5 +1327,14 @@ const styles = StyleSheet.create({
   emptyHighlightedText: {
     ...TYPOGRAPHY.body.normal.base,
     color: COLORS.subtuleDark,
+  },
+  announcementsSection: {
+    marginTop: 24,
+    paddingLeft: 16,
+    backgroundColor: '#f4f4f4',
+  },
+  announcementsContainer: {
+    gap: 12,
+    paddingRight: 16,
   },
 });
