@@ -54,6 +54,15 @@ function AnnouncementItem({ announcement }: AnnouncementItemProps) {
                 <Text style={styles.announcementTitle}>{announcement.title}</Text>
                 <Text style={styles.announcementDate}>{formattedDate}</Text>
                 <Text style={styles.announcementContent}>{announcement.content}</Text>
+                {announcement.tags && announcement.tags.length > 0 && (
+                    <View style={styles.tagsContainer}>
+                        {announcement.tags.map((tag, index) => (
+                            <View key={index} style={styles.tag}>
+                                <Text style={styles.tagText}>{tag}</Text>
+                            </View>
+                        ))}
+                    </View>
+                )}
                 {cafeName && (
                     <View style={styles.cafeInfo}>
                         <Coffee size={14} color="#666" />
@@ -182,6 +191,24 @@ const styles = StyleSheet.create({
         color: '#666',
         marginBottom: 8,
         lineHeight: 20,
+    },
+    tagsContainer: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: 6,
+        marginTop: 8,
+        marginBottom: 4,
+    },
+    tag: {
+        backgroundColor: COLORS.primaryLight,
+        paddingHorizontal: 10,
+        paddingVertical: 4,
+        borderRadius: 12,
+    },
+    tagText: {
+        fontSize: 11,
+        color: COLORS.primary,
+        fontWeight: '500',
     },
     cafeInfo: {
         flexDirection: 'row',

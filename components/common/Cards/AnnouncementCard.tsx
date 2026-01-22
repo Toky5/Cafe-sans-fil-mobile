@@ -61,6 +61,16 @@ export default function AnnouncementCard({
                 {announcement.content}
             </Text>
 
+            {announcement.tags && announcement.tags.length > 0 && (
+                <View style={styles.tagsContainer}>
+                    {announcement.tags.map((tag, index) => (
+                        <View key={index} style={styles.tag}>
+                            <Text style={styles.tagText}>{tag}</Text>
+                        </View>
+                    ))}
+                </View>
+            )}
+
             {cafeName && (
                 <View style={styles.cafeContainer}>
                     <Coffee size={16} color={COLORS.subtuleDark} />
@@ -112,6 +122,23 @@ const styles = StyleSheet.create({
         color: COLORS.black,
         lineHeight: 20,
         marginBottom: SPACING.sm,
+    },
+    tagsContainer: {
+        flexDirection: "row",
+        flexWrap: "wrap",
+        gap: SPACING.xs,
+        marginBottom: SPACING.xs,
+    },
+    tag: {
+        backgroundColor: COLORS.primaryLight,
+        paddingHorizontal: SPACING.sm,
+        paddingVertical: 4,
+        borderRadius: 12,
+    },
+    tagText: {
+        ...TYPOGRAPHY.body.small.base,
+        color: COLORS.primary,
+        fontSize: 11,
     },
     cafeContainer: {
         flexDirection: "row",
