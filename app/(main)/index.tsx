@@ -417,7 +417,7 @@ export default function HomeScreen() {
             )}
 
             {/* Announcements Section */}
-            {!isLoadingAnnouncements && announcements.length > 0 && !searched && (
+            {!isLoadingAnnouncements && announcements.length > 0 && !searched && filterCafes(data).length !== 0 && (
               <View style={styles.announcementsSection}>
                 <View style={styles.announcementsSectionHeader}>
                   <Text style={styles.sectionTitle}>Annonces récentes</Text>
